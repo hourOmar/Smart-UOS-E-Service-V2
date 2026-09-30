@@ -88,17 +88,12 @@ function LoginPage() {
               height={134}
             />
             <span className="login__brand-rule" aria-hidden="true" />
-            <p className="login__product">Smart UoS E-Service</p>
+            <h1 id="login-title" className="login__product">
+              Smart UoS E-Service
+            </h1>
           </header>
 
           <section aria-labelledby="login-title">
-            <div className="login__intro">
-              <h1 id="login-title" className="login__title">
-                Welcome back
-              </h1>
-              <p className="login__lede">Sign in to continue</p>
-            </div>
-
             <form
               className="login__form"
               onSubmit={handleLogin}
@@ -109,6 +104,7 @@ function LoginPage() {
                 <input
                   id="email"
                   type="email"
+                  placeholder="University Email"
                   autoComplete="username"
                   inputMode="email"
                   spellCheck={false}
@@ -124,6 +120,7 @@ function LoginPage() {
                 <input
                   id="password"
                   type="password"
+                  placeholder="Password"
                   autoComplete="current-password"
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
