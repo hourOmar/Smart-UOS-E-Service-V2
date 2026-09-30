@@ -1,0 +1,348 @@
+@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap');
+
+/* Login: a stone slab crowned by the Main Building's green-tile cornice. */
+
+.login {
+  --stone: #fbfaf7;
+  --paper: #ffffff;
+  --ink: #111c19;
+  --ink-muted: #4d5b56;
+  --line: #d6dbd7;
+  --line-strong: #8a9792;
+  --cornice: #2f4f48;
+  --mint: #00c389;
+  --green: #0a6448;
+  --green-hover: #08553d;
+  --green-press: #06412e;
+  --danger: #a3222b;
+  --danger-wash: #fbeeee;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(400px, 36vw, 540px);
+  overflow-y: auto;
+  background: var(--stone);
+  color: var(--ink);
+  color-scheme: light;
+  font-family: 'Public Sans', system-ui, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: 0;
+  text-align: left;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.login ::selection {
+  background: rgb(0 195 137 / 0.28);
+  color: var(--ink);
+}
+
+/* Photograph */
+
+.login__photo {
+  position: relative;
+  min-height: 100%;
+  overflow: hidden;
+  background: #cddcea;
+}
+
+.login__photo img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 62%;
+}
+
+/* Slab */
+
+.login__slab {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+  background: var(--stone);
+  box-shadow: -24px 0 56px -28px rgb(17 28 25 / 0.45);
+}
+
+.login__cornice {
+  position: relative;
+  flex: none;
+  height: 16px;
+  background-color: var(--cornice);
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgb(255 255 255 / 0.09) 0 1px,
+    transparent 1px 8px
+  );
+  transform-origin: right center;
+  animation: login-cornice 1100ms var(--ease-out) both;
+}
+
+.login__cornice::after {
+  content: '';
+  position: absolute;
+  inset: 100% 0 auto;
+  height: 3px;
+  background: var(--mint);
+}
+
+.login__inner {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  padding: clamp(32px, 3.4vw, 52px) clamp(32px, 4.2vw, 68px) clamp(32px, 4vw, 56px);
+}
+
+.login__brand {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.login__logo {
+  display: block;
+  width: auto;
+  height: 58px;
+}
+
+.login__brand-rule {
+  align-self: stretch;
+  width: 1px;
+  margin-block: 6px;
+  background: var(--line);
+}
+
+.login__product {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink);
+}
+
+.login__main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  max-width: 380px;
+  padding-block: 56px 32px;
+}
+
+.login .login__title {
+  margin: 0;
+  font-family: inherit;
+  font-size: clamp(36px, 3.1vw, 46px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.028em;
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.login__lede {
+  margin: 12px 0 0;
+  font-size: 16px;
+  color: var(--ink-muted);
+}
+
+/* Form */
+
+.login__form {
+  display: grid;
+  gap: 22px;
+  margin-top: 40px;
+}
+
+.login__field {
+  display: grid;
+  gap: 8px;
+}
+
+.login__field label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.login__field input {
+  width: 100%;
+  height: 50px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 2px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  caret-color: var(--green);
+  transition:
+    border-color 160ms var(--ease-out),
+    box-shadow 160ms var(--ease-out);
+}
+
+.login__field input:hover {
+  border-color: var(--ink-muted);
+}
+
+.login__field input:focus {
+  outline: none;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgb(0 195 137 / 0.32);
+}
+
+.login__field input:-webkit-autofill {
+  -webkit-text-fill-color: var(--ink);
+  box-shadow: 0 0 0 100px var(--paper) inset;
+}
+
+.login__field input:-webkit-autofill:focus {
+  box-shadow:
+    0 0 0 100px var(--paper) inset,
+    0 0 0 3px rgb(0 195 137 / 0.32);
+}
+
+.login__error {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 2px;
+  background: var(--danger-wash);
+  color: var(--danger);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.login__error svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 1px;
+}
+
+.login__submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 52px;
+  margin-top: 6px;
+  border: 0;
+  border-radius: 2px;
+  background: var(--green);
+  color: #ffffff;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 160ms var(--ease-out),
+    transform 120ms var(--ease-out);
+}
+
+.login__submit:hover {
+  background: var(--green-hover);
+}
+
+.login__submit:active {
+  background: var(--green-press);
+  transform: translateY(1px);
+}
+
+.login__submit:focus-visible {
+  outline: 3px solid var(--mint);
+  outline-offset: 3px;
+}
+
+.login__submit:disabled {
+  background: var(--cornice);
+  cursor: progress;
+  transform: none;
+}
+
+.login__spinner {
+  width: 18px;
+  height: 18px;
+  animation: login-spin 800ms linear infinite;
+}
+
+@keyframes login-cornice {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes login-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Smaller screens: the photo becomes a strip, the cornice becomes the seam. */
+
+@media (max-width: 880px) {
+  .login {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: clamp(200px, 36svh, 360px) auto;
+  }
+
+  .login__photo img {
+    object-position: 50% 55%;
+  }
+
+  .login__slab {
+    min-height: auto;
+    box-shadow: 0 -16px 40px -24px rgb(17 28 25 / 0.5);
+  }
+
+  .login__cornice {
+    transform-origin: center;
+  }
+
+  .login__inner {
+    max-width: 480px;
+    margin-inline: auto;
+    padding: 28px 24px 40px;
+  }
+
+  .login__logo {
+    height: 48px;
+  }
+
+  .login__main {
+    max-width: none;
+    padding-block: 36px 0;
+  }
+
+  .login__form {
+    margin-top: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login__cornice {
+    animation: none;
+  }
+
+  .login__spinner {
+    animation-duration: 1600ms;
+  }
+
+  .login__field input,
+  .login__submit {
+    transition: none;
+  }
+}
