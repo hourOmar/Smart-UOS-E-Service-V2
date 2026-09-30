@@ -1,166 +1,178 @@
-@import url('https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700&family=Marcellus&display=swap');
 
-/* Login: a stone slab crowned by the Main Building's green-tile cornice. */
+/* Login: the campus fills the page; sign-in is one pane of green-tinted glass. */
 
 .login {
-  --stone: #fbfaf7;
-  --paper: #ffffff;
-  --ink: #111c19;
-  --ink-muted: #4d5b56;
-  --line: #d6dbd7;
-  --line-strong: #8a9792;
-  --cornice: #2f4f48;
+  --glass: rgb(12 32 27 / 0.5);
+  --glass-solid: rgb(12 32 27 / 0.92);
+  --glass-edge: rgb(255 255 255 / 0.1);
+  --glass-edge-lit: rgb(255 255 255 / 0.26);
+  --rule: rgb(255 255 255 / 0.14);
+  --field: rgb(255 255 255 / 0.05);
+  --field-focus: rgb(255 255 255 / 0.08);
+  --field-edge: rgb(255 255 255 / 0.2);
+  --field-edge-hover: rgb(255 255 255 / 0.34);
+  --autofill: #1a2f2a;
+  --text: #ffffff;
+  --text-soft: rgb(255 255 255 / 0.88);
+  --text-muted: rgb(255 255 255 / 0.82);
   --mint: #00c389;
-  --green: #0a6448;
-  --green-hover: #08553d;
-  --green-press: #06412e;
-  --danger: #a3222b;
-  --danger-wash: #fbeeee;
+  --mint-hover: #1ad29c;
+  --mint-press: #00a877;
+  --on-mint: #03261b;
+  --danger-text: #ffc4c4;
+  --danger-wash: rgb(255 107 107 / 0.14);
+  --danger-edge: rgb(255 140 140 / 0.34);
+  --shade: rgb(6 18 15);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 
   position: fixed;
   inset: 0;
   z-index: 0;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) clamp(400px, 36vw, 540px);
   overflow-y: auto;
-  background: var(--stone);
-  color: var(--ink);
-  color-scheme: light;
-  font-family: 'Public Sans', system-ui, 'Segoe UI', sans-serif;
+  background: #0d1f1b;
+  color: var(--text);
+  color-scheme: dark;
+  font-family: 'Albert Sans', system-ui, 'Segoe UI', sans-serif;
   font-size: 16px;
   line-height: 1.5;
   letter-spacing: 0;
   text-align: left;
-  scrollbar-color: var(--line-strong) transparent;
+  scrollbar-color: rgb(255 255 255 / 0.3) transparent;
 }
 
 .login ::selection {
-  background: rgb(0 195 137 / 0.28);
-  color: var(--ink);
+  background: rgb(0 195 137 / 0.42);
+  color: var(--text);
 }
 
 /* Photograph */
 
+.login__backdrop {
+  display: none;
+}
+
 .login__photo {
-  position: relative;
-  min-height: 100%;
+  position: fixed;
+  inset: 0;
   overflow: hidden;
   background: #cddcea;
 }
 
 .login__photo img {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 62%;
+  /* Building left of centre; the pane takes the right wing. */
+  object-position: 100% 60%;
+  animation: login-settle 1800ms var(--ease-out) both;
 }
 
-/* Slab */
-
-.login__slab {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 100svh;
-  background: var(--stone);
-  box-shadow: -24px 0 56px -28px rgb(17 28 25 / 0.45);
-}
-
-.login__cornice {
-  position: relative;
-  flex: none;
-  height: 16px;
-  background-color: var(--cornice);
-  background-image: repeating-linear-gradient(
-    90deg,
-    rgb(255 255 255 / 0.09) 0 1px,
-    transparent 1px 8px
-  );
-  transform-origin: right center;
-  animation: login-cornice 1100ms var(--ease-out) both;
-}
-
-.login__cornice::after {
+/* Selective shade: only behind the pane and along the ground line. */
+.login__photo::after {
   content: '';
   position: absolute;
-  inset: 100% 0 auto;
-  height: 3px;
-  background: var(--mint);
+  inset: 0;
+  background:
+    linear-gradient(90deg, rgb(6 18 15 / 0) 55%, rgb(6 18 15 / 0.34) 100%),
+    linear-gradient(0deg, rgb(6 18 15 / 0.22) 0%, rgb(6 18 15 / 0) 24%);
+  pointer-events: none;
 }
 
-.login__inner {
+/* Stage and pane */
+
+/* The pane's base rests on the building's ground line (the top of the
+   steps sits ~89% down the photo while the image is height-bound). */
+.login__stage {
+  position: relative;
   display: flex;
-  flex: 1;
-  flex-direction: column;
-  width: 100%;
+  align-items: flex-end;
+  justify-content: flex-end;
+  min-height: 100svh;
   box-sizing: border-box;
-  padding: clamp(32px, 3.4vw, 52px) clamp(32px, 4.2vw, 68px) clamp(32px, 4vw, 56px);
+  padding: 40px clamp(24px, 4.5vw, 88px) max(40px, 11svh);
 }
 
+.login__panel {
+  position: relative;
+  width: clamp(396px, 29vw, 460px);
+  box-sizing: border-box;
+  padding: 44px;
+  border: 1px solid var(--glass-edge);
+  border-top-color: var(--glass-edge-lit);
+  border-radius: 4px;
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4) brightness(0.62);
+  backdrop-filter: blur(28px) saturate(1.4) brightness(0.62);
+  box-shadow: 0 24px 60px -30px rgb(0 0 0 / 0.5);
+  animation: login-rise 800ms var(--ease-out) 120ms both;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .login__panel {
+    background: var(--glass-solid);
+  }
+}
+
+/* Letterhead: identity, then a full-width rule before the greeting. */
 .login__brand {
   display: flex;
   align-items: center;
   gap: 18px;
+  padding-bottom: 28px;
+  border-bottom: 1px solid var(--rule);
 }
 
 .login__logo {
   display: block;
   width: auto;
-  height: 58px;
+  height: 66px;
 }
 
 .login__brand-rule {
   align-self: stretch;
   width: 1px;
-  margin-block: 6px;
-  background: var(--line);
+  margin-block: 8px;
+  background: rgb(255 255 255 / 0.24);
 }
 
 .login__product {
   margin: 0;
-  font-size: 15px;
+  font-size: clamp(16px, 1.25vw, 18px);
   font-weight: 600;
-  line-height: 1.3;
-  color: var(--ink);
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+  white-space: nowrap;
+  color: var(--text);
 }
 
-.login__main {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  justify-content: center;
-  width: 100%;
-  max-width: 380px;
-  padding-block: 56px 32px;
+.login__intro {
+  margin-top: 32px;
 }
 
 .login .login__title {
   margin: 0;
-  font-family: inherit;
-  font-size: clamp(36px, 3.1vw, 46px);
-  font-weight: 700;
+  font-family: 'Marcellus', Georgia, serif;
+  font-size: clamp(38px, 2.9vw, 46px);
+  font-weight: 400;
   line-height: 1.05;
-  letter-spacing: -0.028em;
-  color: var(--ink);
+  letter-spacing: -0.005em;
+  color: var(--text);
   text-wrap: balance;
 }
 
 .login__lede {
-  margin: 12px 0 0;
+  margin: 10px 0 0;
   font-size: 16px;
-  color: var(--ink-muted);
+  color: var(--text-muted);
 }
 
 /* Form */
 
 .login__form {
   display: grid;
-  gap: 22px;
-  margin-top: 40px;
+  gap: 18px;
+  margin-top: 32px;
 }
 
 .login__field {
@@ -170,46 +182,48 @@
 
 .login__field label {
   font-size: 14px;
-  font-weight: 600;
-  color: var(--ink);
+  font-weight: 500;
+  color: var(--text-soft);
 }
 
 .login__field input {
   width: 100%;
-  height: 50px;
+  height: 48px;
   box-sizing: border-box;
   padding: 0 14px;
-  border: 1px solid var(--line-strong);
-  border-radius: 2px;
-  background: var(--paper);
-  color: var(--ink);
+  border: 1px solid var(--field-edge);
+  border-radius: 3px;
+  background: var(--field);
+  color: var(--text);
   font: inherit;
   font-size: 16px;
-  caret-color: var(--green);
+  caret-color: var(--mint);
   transition:
     border-color 160ms var(--ease-out),
+    background-color 160ms var(--ease-out),
     box-shadow 160ms var(--ease-out);
 }
 
 .login__field input:hover {
-  border-color: var(--ink-muted);
+  border-color: var(--field-edge-hover);
 }
 
 .login__field input:focus {
   outline: none;
-  border-color: var(--green);
-  box-shadow: 0 0 0 3px rgb(0 195 137 / 0.32);
+  border-color: var(--mint);
+  background: var(--field-focus);
+  box-shadow: 0 0 0 2px rgb(0 195 137 / 0.24);
 }
 
 .login__field input:-webkit-autofill {
-  -webkit-text-fill-color: var(--ink);
-  box-shadow: 0 0 0 100px var(--paper) inset;
+  -webkit-text-fill-color: var(--text);
+  box-shadow: 0 0 0 100px var(--autofill) inset;
 }
 
 .login__field input:-webkit-autofill:focus {
   box-shadow:
-    0 0 0 100px var(--paper) inset,
-    0 0 0 3px rgb(0 195 137 / 0.32);
+    0 0 0 100px var(--autofill) inset,
+    0 0 0 2px rgb(0 195 137 / 0.24);
 }
 
 .login__error {
@@ -218,9 +232,10 @@
   gap: 10px;
   margin: 0;
   padding: 12px 14px;
-  border-radius: 2px;
+  border: 1px solid var(--danger-edge);
+  border-radius: 3px;
   background: var(--danger-wash);
-  color: var(--danger);
+  color: var(--danger-text);
   font-size: 14px;
   line-height: 1.45;
 }
@@ -238,12 +253,12 @@
   justify-content: center;
   gap: 10px;
   width: 100%;
-  height: 52px;
-  margin-top: 6px;
+  height: 50px;
+  margin-top: 10px;
   border: 0;
-  border-radius: 2px;
-  background: var(--green);
-  color: #ffffff;
+  border-radius: 3px;
+  background: var(--mint);
+  color: var(--on-mint);
   font: inherit;
   font-size: 16px;
   font-weight: 600;
@@ -254,21 +269,21 @@
 }
 
 .login__submit:hover {
-  background: var(--green-hover);
+  background: var(--mint-hover);
 }
 
 .login__submit:active {
-  background: var(--green-press);
+  background: var(--mint-press);
   transform: translateY(1px);
 }
 
 .login__submit:focus-visible {
-  outline: 3px solid var(--mint);
+  outline: 2px solid var(--text);
   outline-offset: 3px;
 }
 
 .login__submit:disabled {
-  background: var(--cornice);
+  background: rgb(0 195 137 / 0.6);
   cursor: progress;
   transform: none;
 }
@@ -279,9 +294,15 @@
   animation: login-spin 800ms linear infinite;
 }
 
-@keyframes login-cornice {
+@keyframes login-settle {
   from {
-    transform: scaleX(0);
+    transform: scale(1.04);
+  }
+}
+
+@keyframes login-rise {
+  from {
+    transform: translateY(16px);
   }
 }
 
@@ -291,49 +312,102 @@
   }
 }
 
-/* Smaller screens: the photo becomes a strip, the cornice becomes the seam. */
+/* Tablet and mobile: the sharp facade holds the top of the page and
+   dissolves into a blurred, darkened continuation of itself. */
 
-@media (max-width: 880px) {
+@media (max-width: 900px) {
   .login {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: clamp(200px, 36svh, 360px) auto;
+    --photo-height: 52svh;
+  }
+
+  .login__backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background-position: 50% 70%;
+    background-size: cover;
+    filter: blur(28px) brightness(0.42) saturate(1.2);
+    transform: scale(1.15);
+  }
+
+  .login__photo {
+    position: absolute;
+    inset: 0 0 auto;
+    height: var(--photo-height);
+    background: transparent;
+    -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
+    mask-image: linear-gradient(180deg, #000 70%, transparent 100%);
   }
 
   .login__photo img {
-    object-position: 50% 55%;
+    object-position: 50% 45%;
   }
 
-  .login__slab {
-    min-height: auto;
-    box-shadow: 0 -16px 40px -24px rgb(17 28 25 / 0.5);
+  .login__photo::after {
+    background: none;
   }
 
-  .login__cornice {
-    transform-origin: center;
+  .login__stage {
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: calc(var(--photo-height) - 64px) 16px 32px;
   }
 
-  .login__inner {
+  .login__panel {
+    width: 100%;
     max-width: 480px;
-    margin-inline: auto;
-    padding: 28px 24px 40px;
+    padding: 32px 28px 30px;
+  }
+
+  .login__brand {
+    padding-bottom: 24px;
   }
 
   .login__logo {
-    height: 48px;
+    height: 58px;
   }
 
-  .login__main {
-    max-width: none;
-    padding-block: 36px 0;
+  .login__product {
+    font-size: 17px;
   }
 
-  .login__form {
-    margin-top: 32px;
+  .login__intro {
+    margin-top: 28px;
+  }
+}
+
+@media (max-width: 560px) {
+  .login {
+    --photo-height: 46svh;
+  }
+}
+
+@media (max-width: 420px) {
+  .login__panel {
+    padding: 28px 20px 24px;
+  }
+
+  .login .login__title {
+    font-size: 36px;
+  }
+
+  .login__brand {
+    gap: 14px;
+  }
+
+  .login__logo {
+    height: 52px;
+  }
+
+  .login__product {
+    font-size: 16px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .login__cornice {
+  .login__photo img,
+  .login__panel {
     animation: none;
   }
 

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../services/supabase'
 import loginBackground from '../assets/login-background.jpg'
-import logo from '../assets/logo.png'
+import logo from '../assets/logo-on-dark.png'
 import './LoginPage.css'
 
 function LoginPage() {
@@ -62,6 +62,12 @@ function LoginPage() {
 
   return (
     <div className="login">
+      <div
+        className="login__backdrop"
+        style={{ backgroundImage: `url(${loginBackground})` }}
+        aria-hidden="true"
+      />
+
       <div className="login__photo">
         <img
           src={loginBackground}
@@ -71,10 +77,8 @@ function LoginPage() {
         />
       </div>
 
-      <main className="login__slab">
-        <div className="login__cornice" aria-hidden="true" />
-
-        <div className="login__inner">
+      <main className="login__stage">
+        <div className="login__panel">
           <header className="login__brand">
             <img
               className="login__logo"
@@ -87,11 +91,13 @@ function LoginPage() {
             <p className="login__product">Smart UoS E-Service</p>
           </header>
 
-          <section className="login__main" aria-labelledby="login-title">
-            <h1 id="login-title" className="login__title">
-              Welcome back
-            </h1>
-            <p className="login__lede">Sign in to continue</p>
+          <section aria-labelledby="login-title">
+            <div className="login__intro">
+              <h1 id="login-title" className="login__title">
+                Welcome back
+              </h1>
+              <p className="login__lede">Sign in to continue</p>
+            </div>
 
             <form
               className="login__form"
