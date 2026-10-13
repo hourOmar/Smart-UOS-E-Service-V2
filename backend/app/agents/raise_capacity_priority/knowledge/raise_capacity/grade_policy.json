@@ -1,0 +1,4 @@
+{
+  "passing_grades": ["A", "B+", "B", "C+", "C", "D+", "D"],
+  "failing_grades": ["F", "WF", "FA"]
+}

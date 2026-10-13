@@ -1,0 +1,21 @@
+/* My Profile: two read-only panels side by side, stacked on narrow
+   screens. Page, panel and field styles come from
+   components/requests/Requests.css. */
+
+.profile-panels {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 20px;
+}
+
+.profile-panels > .req-panel {
+  flex: 1 1 340px;
+  min-width: 0;
+}
+
+/* Values not recorded in the database. */
+.req-fields__item dd.profile-missing {
+  font-weight: 400;
+  color: var(--proto-muted);
+}

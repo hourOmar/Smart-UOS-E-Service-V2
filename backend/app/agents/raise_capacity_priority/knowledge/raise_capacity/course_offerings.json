@@ -1,0 +1,71 @@
+{
+  "university_compulsory_courses": [
+    { "course_id": "0201102", "course_name": "Arabic Language", "offered": { "fall": true, "spring": true, "summer": true } },
+    { "course_id": "0202112", "course_name": "English for Academic Purposes", "offered": { "fall": true, "spring": true, "summer": true } },
+    { "course_id": "1401100", "course_name": "Introduction to IT (English)", "offered": { "fall": true, "spring": true, "summer": true } },
+    { "course_id": "0101100", "course_name": "Islamic Culture", "offered": { "fall": true, "spring": true, "summer": true } },
+    { "course_id": "0302200", "course_name": "Fundamentals of Innovation and Entrepreneurship", "offered": { "fall": true, "spring": true, "summer": true } },
+    { "course_id": "0204102", "course_name": "UAE Society", "offered": { "fall": true, "spring": true, "summer": true } }
+  ],
+  "college_compulsory_courses": [
+    { "course_id": "1430110", "course_name": "Physics I for Sciences", "offered": { "fall": true, "spring": true, "summer": true } },
+    { "course_id": "1430116", "course_name": "Physics I Lab", "offered": { "fall": true, "spring": true, "summer": true } },
+    { "course_id": "1420101", "course_name": "General Chemistry I", "offered": { "fall": true, "spring": true, "summer": true } },
+    { "course_id": "1420102", "course_name": "General Chemistry I Lab", "offered": { "fall": true, "spring": true, "summer": true } },
+    { "course_id": "1440131", "course_name": "Calculus I", "offered": { "fall": true, "spring": true, "summer": true } }
+  ],
+  "major_compulsory_courses": [
+    { "course_id": "1501116", "course_name": "Programming I", "offered": { "fall": true, "spring": true, "summer": true } },
+    { "course_id": "1501211", "course_name": "Programming II", "offered": { "fall": true, "spring": true, "summer": true } },
+    { "course_id": "1501215", "course_name": "Data Structures", "offered": { "fall": true, "spring": true, "summer": true } },
+    { "course_id": "1501246", "course_name": "Obj. Oriented Design with Java", "offered": { "fall": false, "spring": true, "summer": false } },
+    { "course_id": "1501252", "course_name": "Comp. Org. & Assembly Language", "offered": { "fall": false, "spring": true, "summer": false } },
+    { "course_id": "1501263", "course_name": "Intro. to Database Management System", "offered": { "fall": true, "spring": true, "summer": true } },
+    { "course_id": "1501279", "course_name": "Discrete Structures", "offered": { "fall": true, "spring": true, "summer": false } },
+    { "course_id": "1501319", "course_name": "Prog. Languages & Paradigms", "offered": { "fall": false, "spring": true, "summer": false } },
+    { "course_id": "1501322", "course_name": "Prof. Soc. & Ethical Issues in CS", "offered": { "fall": true, "spring": false, "summer": false } },
+    { "course_id": "1501352", "course_name": "Operating Systems", "offered": { "fall": true, "spring": true, "summer": false } },
+    { "course_id": "1501330", "course_name": "Intro. to Artificial Intelligence", "offered": { "fall": true, "spring": false, "summer": false } },
+    { "course_id": "1501366", "course_name": "Software Engineering", "offered": { "fall": true, "spring": true, "summer": false } },
+    { "course_id": "1501250", "course_name": "Networking Fundamentals", "offered": { "fall": false, "spring": true, "summer": false } },
+    { "course_id": "1501371", "course_name": "Design & Analysis of Algorithms", "offered": { "fall": true, "spring": true, "summer": false } },
+    { "course_id": "1501372", "course_name": "Formal Lang. & Automata Theory", "offered": { "fall": false, "spring": true, "summer": false } },
+    { "course_id": "1501394", "course_name": "Junior Project in CS", "offered": { "fall": true, "spring": true, "summer": false } },
+    { "course_id": "1501397", "course_name": "CO-OP Summer Training", "offered": { "fall": true, "spring": true, "summer": true } },
+    { "course_id": "1501494", "course_name": "Senior Project in CS", "offered": { "fall": true, "spring": true, "summer": false } },
+    { "course_id": "1501459", "course_name": "Information Security", "offered": { "fall": true, "spring": false, "summer": false } },
+    { "course_id": "1501454", "course_name": "Cloud Computing", "offered": { "fall": true, "spring": false, "summer": false } }
+  ],
+  "support_compulsory_courses": [
+    { "course_id": "1440132", "course_name": "Calculus II", "offered": { "fall": true, "spring": true, "summer": true } },
+    { "course_id": "1440211", "course_name": "Linear Algebra", "offered": { "fall": true, "spring": true, "summer": true } },
+    { "course_id": "1440281", "course_name": "Intro. to Prob. and Statistics", "offered": { "fall": true, "spring": true, "summer": true } },
+    { "course_id": "0202213", "course_name": "Critical Reading and Writing", "offered": { "fall": true, "spring": true, "summer": true } }
+  ],
+  "major_elective_courses": {
+    "note": "Every CS student must take 12 credit hours of elective courses from this list.",
+    "courses": [
+      { "course_id": "1501341", "course_name": "Web Programming", "offered": { "fall": true, "spring": false, "summer": false } },
+      { "course_id": "1501342", "course_name": "2D/3D Computer Animation", "offered": { "fall": true, "spring": false, "summer": false } },
+      { "course_id": "1501343", "course_name": "Interactive 3D Design", "offered": { "fall": false, "spring": true, "summer": false } },
+      { "course_id": "1501344", "course_name": "2D Character Design", "offered": { "fall": true, "spring": false, "summer": false } },
+      { "course_id": "1501355", "course_name": "Computer Architecture", "offered": { "fall": false, "spring": false, "summer": false } },
+      { "course_id": "1501365", "course_name": "Advanced Database System", "offered": { "fall": true, "spring": false, "summer": false } },
+      { "course_id": "1501370", "course_name": "Numerical Methods", "offered": { "fall": true, "spring": false, "summer": false } },
+      { "course_id": "1501433", "course_name": "Intro. to Computer Vision & Image Processing", "offered": { "fall": false, "spring": false, "summer": false } },
+      { "course_id": "1501440", "course_name": "Intro. to Computer Graphics", "offered": { "fall": false, "spring": false, "summer": false } },
+      { "course_id": "1501441", "course_name": "Multimedia Technology", "offered": { "fall": false, "spring": false, "summer": false } },
+      { "course_id": "1501442", "course_name": "3D Character Animation and Visual FX", "offered": { "fall": false, "spring": true, "summer": false } },
+      { "course_id": "1501443", "course_name": "Human Computer Interaction", "offered": { "fall": false, "spring": true, "summer": false } },
+      { "course_id": "1501444", "course_name": "Game Design & Development", "offered": { "fall": true, "spring": false, "summer": false } },
+      { "course_id": "1501445", "course_name": "IT Application in E-Comm.", "offered": { "fall": false, "spring": true, "summer": false } },
+      { "course_id": "1501451", "course_name": "Computer Networks", "offered": { "fall": false, "spring": false, "summer": false } },
+      { "course_id": "1501458", "course_name": "Mobile Application & Design", "offered": { "fall": true, "spring": false, "summer": false } },
+      { "course_id": "1501465", "course_name": "Development of Web Application", "offered": { "fall": true, "spring": false, "summer": false } },
+      { "course_id": "1501474", "course_name": "Compiler Design", "offered": { "fall": false, "spring": false, "summer": false } },
+      { "course_id": "1501490", "course_name": "Topics in Computer Science I", "offered": { "fall": true, "spring": false, "summer": false } },
+      { "course_id": "1501491", "course_name": "Topics in Computer Science II", "offered": { "fall": false, "spring": true, "summer": false } },
+      { "course_id": "1501492", "course_name": "Special Topics in IT", "offered": { "fall": false, "spring": true, "summer": false } }
+    ]
+  }
+}

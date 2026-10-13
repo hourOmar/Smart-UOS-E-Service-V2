@@ -1,6 +1,79 @@
-# Local design / Claude working files
+# ---------------------------------------------------------------------------
+# Kept on this computer only (never pushed)
+# ---------------------------------------------------------------------------
+# Database maintenance scripts and notes for the shared project
+database/
+
+# Local skills and design tooling / notes
+.claude/
 .impeccable/
 design-archive/
 references/
 DESIGN.md
 PRODUCT.md
+
+# ---------------------------------------------------------------------------
+# Credentials and secrets (the .env.example templates stay included)
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.local
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*.json
+service-account*.json
+
+# ---------------------------------------------------------------------------
+# Environments and dependencies
+# ---------------------------------------------------------------------------
+.venv/
+venv/
+env/
+node_modules/
+
+# ---------------------------------------------------------------------------
+# Build output and caches
+# ---------------------------------------------------------------------------
+dist/
+dist-ssr/
+build/
+coverage/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.vite/
+.eslintcache
+*.tsbuildinfo
+
+# ---------------------------------------------------------------------------
+# Backups, exports and temporary files
+# ---------------------------------------------------------------------------
+backups/
+exports/
+*.bak
+*.backup
+*.dump
+*.zip
+*.csv
+tmp/
+temp/
+*.tmp
+*.temp
+*.log
+logs/
+
+# ---------------------------------------------------------------------------
+# Editor and operating-system files
+# ---------------------------------------------------------------------------
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini

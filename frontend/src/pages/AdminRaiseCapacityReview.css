@@ -1,0 +1,598 @@
+/* Raise Capacity review (/admin/requests/raise-capacity/:requestId). Page,
+   panel, field and status styles come from AdminDashboard.css and
+   components/requests/Requests.css; only review-specific parts are here. */
+
+.rv-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rv-head__kicker {
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--proto-green);
+}
+
+.student .rv-head__title {
+  margin: 0;
+  font-size: clamp(22px, 3vw, 30px);
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--proto-heading);
+  overflow-wrap: anywhere;
+}
+
+.rv-head__summary {
+  margin: 0;
+  font-size: 15.5px;
+  color: var(--proto-body);
+}
+
+/* Request and student side by side, stacked when narrow. */
+.rv-grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 20px;
+}
+
+.rv-grid > .req-panel {
+  flex: 1 1 380px;
+  min-width: 0;
+}
+
+.rv-panel {
+  min-width: 0;
+}
+
+.rv-panel__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  padding-right: 16px;
+  border-bottom: 1px solid #e2e6e0;
+}
+
+.student .rv-panel__head .rv-panel__title {
+  border-bottom: 0;
+}
+
+.rv-live-tag,
+.rv-snapshot__tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #eef1f6;
+  color: #33415c;
+  font-size: 11.5px;
+  font-weight: 600;
+  vertical-align: middle;
+}
+
+.rv-snapshot__tag {
+  margin: 0 8px 0 0;
+  background: #fbf3e2;
+  color: #6e4b00;
+}
+
+.rv-muted {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--proto-muted);
+}
+
+.req-fields__item dd.rv-missing,
+p.rv-missing {
+  margin: 0;
+  font-weight: 400;
+  color: var(--proto-muted);
+}
+
+.rv-notice {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #e6cf98;
+  border-radius: 8px;
+  background: #fbf3e2;
+  color: #6e4b00;
+  font-size: 13.5px;
+}
+
+/* Eligibility recommendation */
+
+.rv-rerun {
+  padding: 8px 14px;
+  border: 1px solid var(--proto-green);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--proto-green);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rv-rerun:hover:not(:disabled) {
+  background: #eaf3ee;
+}
+
+.rv-rerun:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.rv-advisory-note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--proto-muted);
+}
+
+.rv-running {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 14px;
+  color: var(--proto-body);
+}
+
+.rv-running__dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--proto-green);
+  animation: rv-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes rv-pulse {
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rv-running__dot {
+    animation: none;
+  }
+}
+
+.rv-rec {
+  overflow: hidden;
+  border: 1px solid #c9d1e0;
+  border-radius: 10px;
+}
+
+.rv-rec__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  font-weight: 600;
+}
+
+.rv-rec__label {
+  font-size: 16px;
+}
+
+.rv-rec__advisory {
+  margin-left: auto;
+  padding: 2px 9px;
+  border: 1px solid currentcolor;
+  border-radius: 999px;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.rv-rec[data-tone='approve'] {
+  border-color: #b8d9c8;
+}
+
+.rv-rec[data-tone='approve'] .rv-rec__head {
+  background: #e6f2ec;
+  color: #0b5d45;
+}
+
+.rv-rec[data-tone='reject'] {
+  border-color: #e8c2bc;
+}
+
+.rv-rec[data-tone='reject'] .rv-rec__head {
+  background: #f9e9e7;
+  color: #9a2b1f;
+}
+
+.rv-rec[data-tone='manual'] {
+  border-color: #e6cf98;
+}
+
+.rv-rec[data-tone='manual'] .rv-rec__head {
+  background: #fbf3e2;
+  color: #6e4b00;
+}
+
+.rv-rec__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.rv-rec__reasoning {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #17211c;
+}
+
+.rv-explain {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+}
+
+.rv-explain__item dt {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--proto-muted);
+}
+
+.rv-explain__item dd {
+  margin: 2px 0 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #2b3731;
+  overflow-wrap: anywhere;
+}
+
+.rv-meta {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--proto-muted);
+}
+
+/* Technical problems: visually distinct from any recommendation. */
+.rv-alert {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px dashed #9aa6a0;
+  border-radius: 10px;
+  background: #f4f6f4;
+}
+
+.rv-alert[data-tone='failure'] {
+  border-color: #d39a92;
+  background: #fdf3f1;
+}
+
+.rv-alert__title {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--proto-heading);
+}
+
+.rv-alert__body {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--proto-body);
+  overflow-wrap: anywhere;
+}
+
+/* Evidence */
+
+.rv-snapshot {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--proto-body);
+}
+
+.rv-checks {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 14px;
+}
+
+.rv-check {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid #e2e6e0;
+  border-radius: 10px;
+  background: #fbfcfb;
+}
+
+.rv-check__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.student .rv-check__title {
+  margin: 0;
+  font-family: inherit;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--proto-heading);
+}
+
+.rv-check__fields {
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+.rv-capacity {
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+}
+
+.rv-check__details,
+.rv-check__source {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--proto-body);
+  overflow-wrap: anywhere;
+}
+
+.rv-check__source a {
+  color: var(--proto-green);
+  font-weight: 600;
+}
+
+.rv-check__scope {
+  color: var(--proto-muted);
+}
+
+.rv-pill {
+  flex: none;
+  padding: 2px 9px;
+  border: 1px solid #c9d1e0;
+  border-radius: 999px;
+  background: #eef1f6;
+  color: #33415c;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.rv-pill[data-tone='ok'] {
+  border-color: #b8d9c8;
+  background: #e6f2ec;
+  color: #0b5d45;
+}
+
+.rv-pill[data-tone='bad'] {
+  border-color: #e8c2bc;
+  background: #f9e9e7;
+  color: #9a2b1f;
+}
+
+.rv-pill[data-tone='warn'] {
+  border-color: #e6cf98;
+  background: #fbf3e2;
+  color: #6e4b00;
+}
+
+/* Four short columns fit phone widths (the course name wraps), unlike the
+   seven-column admin lists. */
+.adm-table.rv-table {
+  min-width: 0;
+}
+
+@media (max-width: 640px) {
+  .adm-table.rv-table th,
+  .adm-table.rv-table td {
+    padding: 10px 8px;
+    letter-spacing: 0;
+  }
+
+  .adm-table.rv-table th:first-child,
+  .adm-table.rv-table td:first-child {
+    padding-left: 12px;
+  }
+}
+
+.rv-transcript {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 6px;
+}
+
+.rv-transcript__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.rv-link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--proto-green);
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rv-link-button:hover {
+  text-decoration: underline;
+}
+
+/* Staff decision */
+
+.rv-decision__form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rv-decision__choices {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 24px;
+  margin: 0 0 6px;
+  padding: 0;
+  border: 0;
+}
+
+.rv-decision__legend {
+  flex: 1 1 100%;
+  margin-bottom: 4px;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--proto-muted);
+}
+
+.rv-decision__option {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  cursor: pointer;
+}
+
+.rv-decision__option input {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: var(--proto-green);
+}
+
+.rv-decision__note {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--proto-muted);
+}
+
+.rv-decision__textarea {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #8e9a92;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #17211c;
+  font: inherit;
+  font-size: 14.5px;
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.rv-decision__textarea[aria-invalid='true'] {
+  border-color: #b3261e;
+}
+
+.rv-field-error {
+  flex: 1 1 100%;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #b3261e;
+}
+
+.rv-decision__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.rv-decision__save {
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--proto-green);
+  color: #ffffff;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.rv-decision__save:hover:not(:disabled) {
+  background: #084935;
+}
+
+.rv-decision__save:disabled,
+.rv-decision__back:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rv-decision__back {
+  margin-top: 0;
+}
+
+.rv-decision__explanation {
+  white-space: pre-wrap;
+}
+
+.rv-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px solid #e6cf98;
+  border-radius: 10px;
+  background: #fffaf0;
+}
+
+.rv-confirm__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--proto-heading);
+  overflow-wrap: anywhere;
+}
+
+.rv-confirm__body {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--proto-body);
+}
+
+.rv-confirm__explanation {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.rv-saved {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #b8d9c8;
+  border-radius: 8px;
+  background: #e6f2ec;
+  color: #0b5d45;
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.rv-confirm__notice {
+  margin: 0;
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #6e4b00;
+}

@@ -1,0 +1,49 @@
+{
+  "raise_capacity_prioritization_rules": [
+    {
+      "rule_id": 1,
+      "name": "Expected Graduation",
+      "description": "Students who are closer to their expected graduation term should generally receive higher priority than students who are further from graduation. A request should receive particularly high priority when not taking the requested course in the current term could delay the student's expected graduation."
+    },
+    {
+      "rule_id": 2,
+      "name": "Completed Credit Hours",
+      "description": "Students with more completed credit hours are generally further along in their degree and should receive higher priority when other relevant factors are similar. Completed credit hours should not be considered alone; the potential effect of the requested course on the student's academic progress should also be considered."
+    },
+    {
+      "rule_id": 3,
+      "name": "Prerequisite Completion",
+      "description": "A student who has completed all prerequisites for the requested course should receive higher priority than a student who has not completed the prerequisites."
+    },
+    {
+      "rule_id": 4,
+      "name": "Course Offering Frequency",
+      "description": "Courses that are offered less frequently should receive higher priority when missing the current offering could cause a significant delay. For example, a course offered only once per academic year may be more urgent than a course offered again in the following semester."
+    },
+    {
+      "rule_id": 5,
+      "name": "Impact on Subsequent Courses",
+      "description": "Higher priority should be given when the requested course is a prerequisite for multiple subsequent courses. For example, Data Structures (1501215) is a Year 2, Semester 2 course in the UOS Computer Science degree plan and is a prerequisite for more than 11 subsequent courses. Many of these dependent courses are taken in Years 3 and 4. Therefore, delaying Data Structures can significantly affect a student's academic progression and may potentially delay graduation."
+    },
+    {
+      "rule_id": 6,
+      "name": "Summer Availability",
+      "description": "If the requested course is available during Summer, the student may have an alternative opportunity to take the course. Therefore, a request may receive lower priority when the student can reasonably take the course during Summer without affecting their expected graduation."
+    },
+    {
+      "rule_id": 7,
+      "name": "Availability in the Next Semester",
+      "description": "If the requested course is offered again in the next semester and taking it later would not affect the student's academic progress or expected graduation, the request should generally receive lower priority."
+    },
+    {
+      "rule_id": 8,
+      "name": "Previous Attempts",
+      "description": "A student who has never attempted the requested course should generally receive higher priority on this factor than a student who has attempted it before. Two students who have both attempted the course before should be treated equally on this factor regardless of how many times each attempted it, and two students who have neither attempted the course should also be treated equally on this factor. The grade or outcome of a previous attempt (for example, a fail or a pass) does not affect this factor. This factor is one input to the overall priority decision and must be considered together with the other prioritization factors; it must not by itself determine whether a request is High, Medium, or Low priority."
+    }
+  ],
+  "priority_levels": {
+    "High": "Denying the request could delay the student's expected graduation. This includes cases where the course is needed to meet graduation requirements, is a prerequisite for required subsequent courses, or is offered infrequently enough that missing it could cause a graduation delay.",
+    "Medium": "Denying the request will not delay the student's expected graduation, but the course is important for the student's academic progression, such as being a prerequisite for subsequent required courses.",
+    "Low": "Denying the request will not delay the student's expected graduation, and the course has no significant prerequisite or course-progression impact. The course is offered again in a reasonable future semester."
+  }
+}

@@ -1,0 +1,399 @@
+/* Student dashboard: welcome hero, Academic Requests heading, quick
+   search and service cards, following the approved prototype. Shared page,
+   header and account styles live in components/student/StudentLayout.css. */
+
+/* Hero: full screen, photo under a dark overlay, greeting near the bottom. */
+
+.student-hero {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100svh;
+  margin-top: calc(-1 * var(--header-h));
+  overflow: hidden;
+  background:
+    linear-gradient(
+      180deg,
+      rgb(0 0 0 / 0.45) 0%,
+      rgb(0 0 0 / 0.2) 25%,
+      rgb(0 0 0 / 0.28) 50%,
+      rgb(0 0 0 / 0.55) 75%,
+      rgb(0 0 0 / 0.65) 100%
+    ),
+    url('../assets/dashboard-hero.jpg') 45% 55% / cover no-repeat #1c2a30;
+  font-family: var(--proto-font);
+}
+
+.student-hero__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 120px clamp(20px, 5vw, 40px) clamp(64px, 14vh, 140px);
+  color: #ffffff;
+  text-align: center;
+}
+
+.student-hero__kicker {
+  font-size: clamp(12px, 1.2vw, 14px);
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 8px rgb(0 0 0 / 0.45);
+}
+
+.student .student-hero__title {
+  margin: 0;
+  font-family: inherit;
+  font-size: clamp(38px, 6.4vw, 72px);
+  font-weight: 700;
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  color: #ffffff;
+  text-shadow: 0 2px 18px rgb(0 0 0 / 0.4);
+  text-wrap: balance;
+}
+
+.student-hero__lede {
+  margin: 0;
+  font-size: clamp(17px, 2.1vw, 22px);
+  font-weight: 500;
+  text-shadow: 0 1px 10px rgb(0 0 0 / 0.45);
+}
+
+.student-hero__notice {
+  margin: 0;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgb(0 0 0 / 0.45);
+  font-size: 15px;
+}
+
+.student-hero__retry {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #ffffff;
+  font: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.student-hero__retry:focus-visible {
+  outline-color: #ffffff;
+}
+
+/* Academic Requests: centred heading and quick search (prototype). */
+
+.student-catalog {
+  padding-block: clamp(48px, 6vw, 72px) clamp(80px, 12vh, 140px);
+  scroll-margin-top: var(--header-h);
+}
+
+.student-catalog__header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--proto-font);
+  text-align: center;
+}
+
+.student .student-catalog__title {
+  margin: 0;
+  font-family: inherit;
+  font-size: clamp(30px, 4vw, 42px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--proto-heading);
+}
+
+.student-catalog__title-accent {
+  color: var(--proto-green);
+}
+
+.student-catalog__intro {
+  margin: 0;
+  font-size: 16px;
+  color: var(--proto-body);
+}
+
+.student-search {
+  display: flex;
+  align-items: center;
+  margin: 28px 0;
+  padding-right: 10px;
+  overflow: hidden;
+  border: 1px solid var(--proto-line);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgb(23 33 28 / 0.05);
+  font-family: var(--proto-font);
+}
+
+.student-search:focus-within {
+  border-color: var(--proto-green);
+  box-shadow: 0 0 0 3px rgb(11 93 69 / 0.15);
+}
+
+.student-search__icon {
+  flex: none;
+  width: 19px;
+  height: 19px;
+  padding: 0 6px 0 18px;
+  color: var(--proto-muted);
+}
+
+.student-search__input {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 12px;
+  border: 0;
+  background: transparent;
+  color: #17211c;
+  font: inherit;
+  font-size: 15px;
+}
+
+.student-search__input:focus {
+  outline: none;
+}
+
+.student-search__input::placeholder {
+  color: var(--proto-muted);
+  opacity: 1;
+}
+
+.student-search__count {
+  flex: none;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #f1f4f1;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--proto-body);
+  white-space: nowrap;
+}
+
+/* Service cards (prototype): centred wrap of up to three per row, each
+   card at least 300px wide, so the last row of two sits centred. */
+
+.student-catalog__grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 22px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.student-catalog__item {
+  display: flex;
+  flex: 0 1 calc((100% - 44px) / 3);
+  min-width: min(100%, 300px);
+}
+
+/* Phones: one card per row, using the full width. */
+@media (max-width: 640px) {
+  .student-catalog__item {
+    flex-basis: 100%;
+  }
+}
+
+.student-service {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--proto-line);
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow:
+    0 1px 3px rgb(23 33 28 / 0.05),
+    0 4px 14px rgb(23 33 28 / 0.05);
+  font-family: var(--proto-font);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.student-service:hover {
+  transform: translateY(-3px);
+  border-color: var(--proto-green);
+  box-shadow:
+    0 2px 4px rgb(23 33 28 / 0.06),
+    0 12px 26px rgb(11 93 69 / 0.12);
+}
+
+.student-service__body {
+  display: flex;
+  flex: 1;
+  align-items: flex-start;
+  gap: 20px;
+  min-height: 172px;
+  box-sizing: border-box;
+  padding: 28px 26px 24px;
+}
+
+.student-service__icon-box {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  color: var(--proto-green);
+}
+
+.student-service__icon {
+  width: 60px;
+  height: 60px;
+}
+
+.student-service__text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding-top: 4px;
+}
+
+.student .student-service__name {
+  margin: 0;
+  font-family: inherit;
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--proto-heading);
+}
+
+.student-service__description {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--proto-body);
+  text-wrap: pretty;
+}
+
+/* Footer: the approved split, grey View details (2fr) and green
+   Start request (3fr). */
+
+.student-service__footer {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  border-top: 1px solid #e6eae6;
+}
+
+.student-service__details,
+.student-service__start {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 10px;
+  border: 0;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.student-service__details {
+  background: #f4f6f4;
+  color: #17211c;
+}
+
+.student-service__details:hover {
+  background: #e6ebe7;
+}
+
+.student-service__start {
+  background: var(--proto-green);
+  color: #ffffff;
+}
+
+.student-service__start:hover {
+  background: #084935;
+}
+
+.student-service__details:focus-visible {
+  outline: 3px solid var(--proto-green);
+  outline-offset: -4px;
+}
+
+.student-service__start:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: -5px;
+  box-shadow: inset 0 0 0 6px var(--proto-green);
+}
+
+/* Until the service's form exists, Start request is disabled. */
+.student-service__start:disabled {
+  background: var(--proto-green);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* No-match state (prototype). */
+
+.student-catalog__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 24px;
+  border: 1px solid var(--proto-line);
+  border-radius: 8px;
+  background: #ffffff;
+  font-family: var(--proto-font);
+  text-align: center;
+}
+
+.student .student-catalog__empty-title {
+  margin: 0;
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 600;
+  color: #17211c;
+}
+
+.student-catalog__empty-body {
+  margin: 0;
+  font-size: 14px;
+  color: var(--proto-muted);
+}
+
+.student-catalog__clear {
+  margin-top: 6px;
+  padding: 9px 14px;
+  border: 1px solid #bac4bd;
+  border-radius: 3px;
+  background: #ffffff;
+  color: #17211c;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.student-catalog__clear:hover {
+  border-color: var(--proto-green);
+  color: var(--proto-green);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .student-service:hover {
+    transform: none;
+  }
+}

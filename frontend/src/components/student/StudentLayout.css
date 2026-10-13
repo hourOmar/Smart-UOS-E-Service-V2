@@ -1,0 +1,323 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&family=Public+Sans:wght@400;500;600;700&display=swap');
+
+/* Shared by every student page: the page shell, the header (transparent
+   over the dashboard hero, solid black elsewhere or after scrolling) and
+   the account menu. Values follow the approved prototype. */
+
+.student {
+  --bg: #f6f7f4;
+  --surface: #ffffff;
+  --ink: #111615;
+  --ink-soft: #2f3735;
+  --muted: #5a6360;
+  --line: #e1e4e1;
+  --line-strong: #c4c9c6;
+  --green: #0a6448;
+  --green-hover: #08533b;
+  --green-press: #06412e;
+  --mint: #00c389;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Prototype tokens */
+  --proto-font: 'Public Sans', system-ui, 'Segoe UI', sans-serif;
+  --proto-green: #0b5d45;
+  --proto-heading: #1d2a33;
+  --proto-body: #3c4842;
+  --proto-muted: #55625a;
+  --proto-line: #dde2de;
+  --header-h: 72px;
+
+  /* Full-viewport scroll container; escapes the template #root column
+     in index.css the same way the login page does. */
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow-y: auto;
+  background: var(--bg);
+  color: var(--ink);
+  color-scheme: light;
+  font-family: 'Lato', system-ui, 'Segoe UI', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: 0;
+  text-align: left;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.student ::selection {
+  background: rgb(0 195 137 / 0.24);
+  color: var(--ink);
+}
+
+.student-shell {
+  width: 100%;
+  max-width: 1120px;
+  box-sizing: border-box;
+  margin-inline: auto;
+  padding-inline: clamp(20px, 5vw, 48px);
+}
+
+.student-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.student :focus-visible {
+  outline: 2px solid var(--green);
+  outline-offset: 3px;
+}
+
+/* Header: transparent over the hero, solid black after scrolling.
+   Sticky inside the page's scroll container; the hero slides up under it. */
+
+.student-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  height: var(--header-h);
+  background: rgb(0 0 0 / 0);
+  font-family: var(--proto-font);
+  transition: background-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.student-header[data-scrolled='true'] {
+  background: #000000;
+  box-shadow: 0 2px 14px rgb(0 0 0 / 0.25);
+}
+
+.student-header :focus-visible {
+  outline-color: #ffffff;
+}
+
+.student-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 12px clamp(16px, 3vw, 32px);
+}
+
+.student-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  padding: 4px 0;
+  border-radius: 6px;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.student-header__logo {
+  display: block;
+  flex: none;
+  width: auto;
+  height: 46px;
+}
+
+.student-header__names {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding-left: 14px;
+  border-left: 1px solid rgb(255 255 255 / 0.35);
+  line-height: 1.2;
+}
+
+.student-header__university {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: rgb(255 255 255 / 0.85);
+}
+
+.student-header__product {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+/* Account menu */
+
+.student-account {
+  position: relative;
+  flex: none;
+}
+
+.student-account__trigger {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1.5px solid rgb(255 255 255 / 0.7);
+  border-radius: 50%;
+  background: rgb(255 255 255 / 0.06);
+  color: #ffffff;
+  cursor: pointer;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.student-account__trigger svg {
+  width: 22px;
+  height: 22px;
+}
+
+.student-account__trigger:hover {
+  border-color: #ffffff;
+  background: rgb(255 255 255 / 0.18);
+}
+
+.student-account__trigger[aria-expanded='true'] {
+  border-color: #ffffff;
+  background: rgb(255 255 255 / 0.2);
+}
+
+.student-account__panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 30;
+  display: flex;
+  flex-direction: column;
+  width: 240px;
+  padding: 6px;
+  box-sizing: border-box;
+  border: 1px solid #e2e6e0;
+  border-radius: 12px;
+  background: #ffffff;
+  color: #17211c;
+  box-shadow: 0 12px 32px rgb(0 0 0 / 0.22);
+  animation: student-menu-in 140ms var(--ease-out);
+}
+
+.student-account__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 4px;
+  padding: 10px 12px 12px;
+  border-bottom: 1px solid #edf0eb;
+}
+
+.student-account__name {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.student-account__meta {
+  margin: 0;
+  font-size: 12.5px;
+  color: var(--proto-muted);
+  overflow-wrap: anywhere;
+}
+
+.student-account__item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+
+.student-account__item svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+/* "My Requests": a link styled as a menu item (prototype: green icon). */
+.student-account__item--link {
+  box-sizing: border-box;
+  color: #17211c;
+  text-decoration: none;
+}
+
+.student-account__item--link svg {
+  color: var(--proto-green);
+}
+
+.student-account__item--link:hover {
+  background: #f2f6f3;
+}
+
+.student-account__item--signout {
+  color: #9a2b1f;
+}
+
+.student-account__item--signout:hover {
+  background: #fbf0ee;
+}
+
+.student-account__item:focus-visible {
+  outline: 2px solid var(--proto-green);
+  outline-offset: -2px;
+}
+
+@keyframes student-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+/* Phones */
+
+@media (max-width: 640px) {
+  .student {
+    --header-h: 64px;
+  }
+
+  .student-header__logo {
+    height: 38px;
+  }
+
+  .student-header__brand {
+    gap: 10px;
+  }
+
+  .student-header__names {
+    padding-left: 10px;
+  }
+
+  .student-header__product {
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 360px) {
+  .student-header__university {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .student * {
+    transition: none !important;
+  }
+
+  .student-account__panel {
+    animation: none;
+  }
+}

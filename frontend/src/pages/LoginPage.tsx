@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../services/supabase'
 import loginBackground from '../assets/login-background.jpg'
-import logo from '../assets/logo-on-dark.png'
 import './LoginPage.css'
 
 function LoginPage() {
@@ -12,6 +11,7 @@ function LoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -62,12 +62,6 @@ function LoginPage() {
 
   return (
     <div className="login">
-      <div
-        className="login__backdrop"
-        style={{ backgroundImage: `url(${loginBackground})` }}
-        aria-hidden="true"
-      />
-
       <div className="login__photo">
         <img
           src={loginBackground}
@@ -79,19 +73,9 @@ function LoginPage() {
 
       <main className="login__stage">
         <div className="login__panel">
-          <header className="login__brand">
-            <img
-              className="login__logo"
-              src={logo}
-              alt="University of Sharjah"
-              width={187}
-              height={134}
-            />
-            <span className="login__brand-rule" aria-hidden="true" />
-            <h1 id="login-title" className="login__product">
-              Smart UoS E-Service
-            </h1>
-          </header>
+          <h1 id="login-title" className="login__product">
+            Smart UoS E-Service
+          </h1>
 
           <section aria-labelledby="login-title">
             <form
@@ -100,11 +84,11 @@ function LoginPage() {
               aria-busy={loading}
             >
               <div className="login__field">
-                <label htmlFor="email">University Email</label>
+                <label htmlFor="email">Email</label>
                 <input
                   id="email"
                   type="email"
-                  placeholder="University Email"
+                  placeholder="Email"
                   autoComplete="username"
                   inputMode="email"
                   spellCheck={false}
@@ -115,11 +99,11 @@ function LoginPage() {
                 />
               </div>
 
-              <div className="login__field">
+              <div className="login__field login__field--password">
                 <label htmlFor="password">Password</label>
                 <input
                   id="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   placeholder="Password"
                   autoComplete="current-password"
                   value={password}
@@ -127,6 +111,16 @@ function LoginPage() {
                   aria-describedby={error ? 'login-error' : undefined}
                   required
                 />
+                <button
+                  type="button"
+                  className="login__toggle"
+                  onClick={() => setShowPassword((value) => !value)}
+                  aria-controls="password"
+                  aria-pressed={showPassword}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? 'Hide' : 'Show'}
+                </button>
               </div>
 
               {error && (
@@ -147,7 +141,7 @@ function LoginPage() {
                     <path d="M17.5 10A7.5 7.5 0 0 0 10 2.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                   </svg>
                 )}
-                {loading ? 'Signing in…' : 'Sign In'}
+                {loading ? 'Signing in…' : 'Sign in'}
               </button>
             </form>
           </section>

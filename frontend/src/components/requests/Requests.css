@@ -1,0 +1,649 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+/* My Requests, Recent Requests and request details, following the approved
+   prototype. Shared page, header and account styles live in
+   components/student/StudentLayout.css. */
+
+/* Page shell (My Requests and request details) */
+
+.req-page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 100%;
+  max-width: calc(1120px + 2 * clamp(16px, 4vw, 32px));
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 32px clamp(16px, 4vw, 32px) 56px;
+  font-family: var(--proto-font);
+  color: #17211c;
+}
+
+.req-page__back {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 6px;
+  padding: 2px 0;
+  color: var(--proto-green);
+  font-size: 14.5px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.req-page__back:hover {
+  text-decoration: underline;
+}
+
+.req-page__back svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+.req-page__intro {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.student .req-page__title {
+  margin: 0;
+  font-family: inherit;
+  font-size: clamp(28px, 3.4vw, 38px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--proto-heading);
+}
+
+.req-page__lede {
+  margin: 0;
+  font-size: 16px;
+  color: var(--proto-body);
+}
+
+/* Status pill */
+
+.req-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border: 1px solid #c9d1e0;
+  border-radius: 999px;
+  background: #eef1f6;
+  color: #33415c;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.req-status[data-tone='progress'] {
+  border-color: #e6cf98;
+  background: #fbf3e2;
+  color: #6e4b00;
+}
+
+.req-status[data-tone='completed'] {
+  border-color: #b8d9c8;
+  background: #e6f2ec;
+  color: #0b5d45;
+}
+
+.req-status[data-tone='rejected'] {
+  border-color: #e8c2bc;
+  background: #f9e9e7;
+  color: #9a2b1f;
+}
+
+/* Loading, empty and error states */
+
+.req-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 36px 24px;
+  border: 1px solid #dde2de;
+  border-radius: 8px;
+  background: #ffffff;
+  text-align: center;
+}
+
+.req-state__icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f1f4f1;
+  color: var(--proto-muted);
+  font-weight: 700;
+}
+
+.student .req-state__title {
+  margin: 0;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--proto-heading);
+}
+
+.req-state__body {
+  margin: 0;
+  font-size: 14px;
+  color: var(--proto-muted);
+}
+
+.req-button {
+  margin-top: 6px;
+  padding: 9px 18px;
+  border: 1px solid #bac4bd;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #17211c;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.req-button:hover {
+  border-color: var(--proto-green);
+  color: var(--proto-green);
+}
+
+/* Table (wide screens) */
+
+.req-table-wrap {
+  overflow: hidden;
+  border: 1px solid #dde2de;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgb(23 33 28 / 0.04);
+}
+
+.req-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14.5px;
+}
+
+.req-table thead tr {
+  background: #f6f8f6;
+  text-align: left;
+}
+
+.req-table th {
+  padding: 12px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #4f5b54;
+}
+
+.req-table td {
+  padding: 14px;
+  color: #3c4842;
+}
+
+.req-table th:first-child,
+.req-table td:first-child {
+  padding-left: 20px;
+}
+
+.req-table tbody tr {
+  border-top: 1px solid #edf0eb;
+}
+
+.req-table tbody tr:hover {
+  background: #f8faf8;
+}
+
+.req-table__id {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.req-table td.req-table__id,
+.req-table td.req-table__type {
+  color: #1d2a33;
+}
+
+.req-table__type {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.req-table__date {
+  white-space: nowrap;
+}
+
+.req-table .req-table__view {
+  padding-right: 20px;
+  text-align: right;
+}
+
+.req-view {
+  display: inline-block;
+  padding: 7px 14px;
+  border: 1px solid #bac4bd;
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--proto-green);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.req-view:hover {
+  border-color: var(--proto-green);
+  background: #f1f8f4;
+}
+
+/* Cards (narrow screens) */
+
+.req-cards {
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.req-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid #dde2de;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.req-card__top,
+.req-card__bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.req-card__bottom {
+  padding-top: 8px;
+  border-top: 1px solid #edf0eb;
+}
+
+.req-card__id {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1d2a33;
+  overflow-wrap: anywhere;
+}
+
+.req-card__type {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1d2a33;
+}
+
+.req-card__date {
+  font-size: 13px;
+  color: var(--proto-muted);
+}
+
+@media (max-width: 719px) {
+  .req-table-wrap {
+    display: none;
+  }
+
+  .req-cards {
+    display: flex;
+  }
+}
+
+/* Recent Requests on the dashboard */
+
+.student-recent {
+  padding: clamp(40px, 6vw, 64px) clamp(16px, 4vw, 32px);
+  border-top: 1px solid #e2e6e0;
+  background: #ffffff;
+  font-family: var(--proto-font);
+}
+
+.student-recent__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.student-recent__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.student .student-recent__title {
+  margin: 0;
+  font-family: inherit;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--proto-heading);
+}
+
+.student-recent__all {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 2px;
+  color: var(--proto-green);
+  font-size: 14.5px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.student-recent__all:hover {
+  text-decoration: underline;
+}
+
+/* Request details */
+
+.req-detail__head {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.req-detail__meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.req-detail__id {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--proto-muted);
+}
+
+.student .req-detail__title {
+  margin: 0;
+  font-family: inherit;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  color: var(--proto-heading);
+  overflow-wrap: anywhere;
+}
+
+.req-detail__submitted {
+  margin: 0;
+  font-size: 14px;
+  color: var(--proto-muted);
+}
+
+.req-detail__columns {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 20px;
+}
+
+.req-detail__main {
+  display: flex;
+  flex: 2 1 440px;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.req-panel {
+  border: 1px solid #e2e6e0;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.student .req-panel__title {
+  margin: 0;
+  padding: 14px 20px;
+  border-bottom: 1px solid #e2e6e0;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--proto-heading);
+}
+
+.req-panel__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 20px;
+}
+
+.req-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px 20px;
+  margin: 0;
+}
+
+.req-fields__item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.req-fields__item dt {
+  font-size: 12.5px;
+  color: var(--proto-muted);
+}
+
+.req-fields__item dd {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: #17211c;
+  overflow-wrap: anywhere;
+}
+
+.req-fields__item--wide {
+  grid-column: 1 / -1;
+}
+
+.req-text {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.req-text__label {
+  font-size: 12.5px;
+  color: var(--proto-muted);
+}
+
+.req-text__body {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid #edf0eb;
+  border-radius: 8px;
+  background: #f8faf7;
+  font-size: 14.5px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Decision banner and "no decision yet" note */
+
+.req-decision {
+  overflow: hidden;
+  border: 1px solid #c9d1e0;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.req-decision__head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px;
+  font-weight: 600;
+}
+
+.student .req-decision__title {
+  margin: 0;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: inherit;
+}
+
+.req-decision__body {
+  margin: 0;
+  padding: 14px 20px;
+  font-size: 12.5px;
+  color: var(--proto-muted);
+}
+
+.req-decision[data-tone='completed'] {
+  border-color: #b8d9c8;
+}
+
+.req-decision[data-tone='completed'] .req-decision__head {
+  background: #e6f2ec;
+  color: #0b5d45;
+}
+
+.req-decision[data-tone='rejected'] {
+  border-color: #e8c2bc;
+}
+
+.req-decision[data-tone='rejected'] .req-decision__head {
+  background: #f9e9e7;
+  color: #9a2b1f;
+}
+
+.req-awaiting {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid #e2e6e0;
+  border-radius: 12px;
+  background: #ffffff;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.req-awaiting__glyph {
+  color: #6e4b00;
+  font-weight: 700;
+}
+
+/* Progress */
+
+.req-progress {
+  flex: 1 1 300px;
+  min-width: 0;
+}
+
+.req-progress__list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 16px 20px;
+  list-style: none;
+}
+
+.req-progress__step {
+  display: flex;
+  gap: 14px;
+}
+
+.req-progress__rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.req-progress__dot {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  box-sizing: border-box;
+  border: 2px solid #c9d0cb;
+  border-radius: 50%;
+  background: #ffffff;
+  color: var(--proto-muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.req-progress__step[data-state='done'] .req-progress__dot {
+  border-color: var(--proto-green);
+  background: var(--proto-green);
+  color: #ffffff;
+}
+
+.req-progress__step[data-state='current'] .req-progress__dot {
+  border-color: #e6cf98;
+  background: #fbf3e2;
+  color: #6e4b00;
+}
+
+.req-progress__line {
+  flex: 1;
+  width: 2px;
+  min-height: 14px;
+  background: #e2e6e0;
+}
+
+.req-progress__step:last-child .req-progress__line {
+  display: none;
+}
+
+.req-progress__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 16px;
+}
+
+.req-progress__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #17211c;
+}
+
+.req-progress__meta {
+  font-size: 12.5px;
+  color: var(--proto-muted);
+}
+
+/* Reason for a rejected Raise Capacity request, inside the decision banner. */
+.req-rejection {
+  padding: 0 20px 16px;
+}
+
+.req-rejection .req-button {
+  margin-top: 8px;
+}
