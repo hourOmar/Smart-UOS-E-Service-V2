@@ -15,5 +15,10 @@ export function raiseCapacityReviewPath(requestId: string) {
   return `${adminTypePath('raise-capacity')}/${encodeURIComponent(requestId)}`
 }
 
+/** The staff review page of one Program Change request. */
+export function programChangeReviewPath(requestId: string) {
+  return `${adminTypePath('program-change')}/${encodeURIComponent(requestId)}`
+}
+
 /** Where a review page was opened from, for its back link. */
 export type ReviewOrigin = 'dashboard' | 'type-list'

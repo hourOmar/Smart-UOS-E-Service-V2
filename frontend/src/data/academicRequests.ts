@@ -116,6 +116,7 @@ export const academicRequestTypes: AcademicRequestType[] = [
       'Apply to move from your current program to another major or program.',
     keywords: 'program major transfer change switch',
     details: notYetProvided(),
+    startPath: '/student/services/program-change/new',
   },
   {
     id: 'course-equivalency',

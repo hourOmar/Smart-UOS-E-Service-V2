@@ -1,0 +1,208 @@
+PROGRAM CHANGE CONSTRAINTS
+
+Purpose
+
+The Program Change Agent evaluates a student’s academic record against
+the requirements of the requested new academic program and prepares an
+academic assessment for review by the responsible university staff
+member.
+
+The agent provides an assessment and recommendation only. It does not
+make the final program-change decision.
+
+1.  ACADEMIC ELIGIBILITY REQUIREMENTS
+
+1.1 Minimum Applicable Credit Hours
+
+The student must have completed at least 15 credit hours that are
+applicable to the requested new program.
+
+Semester-based undergraduate students may apply for a Program Change
+after completing at least one semester and before earning 65 credit
+hours.
+
+The total number of credit hours completed by the student must not be
+used alone to determine whether the 15-credit-hour requirement is
+satisfied.
+
+The agent must identify which completed courses are applicable to the
+requested new program by comparing the student’s completed courses with
+the official study plan of the requested program.
+
+1.2 CGPA Requirement
+
+The student’s CGPA must be 2.0 or above unless an explicitly applicable
+exception exists.
+
+The agent must not assume or invent an exception.
+
+If an exception may apply but the available information is insufficient
+to verify it, the requirement must be marked as REQUIRES_REVIEW.
+
+1.3 Course Applicability to the Requested Program
+
+A completed course is considered applicable to the requested program
+when its Course_ID appears in the requested program’s official study
+plan.
+
+Course matching must be based on the Course_ID.
+
+The course name may be used as supporting information when presenting
+course matches, but it must not be used instead of the Course_ID to
+establish that two different courses are equivalent.
+
+If two different Course_IDs would need to be treated as equivalent, the
+agent must not make that determination. The case must be marked as
+REQUIRES_REVIEW.
+
+1.4 University Courses
+
+The file “university_courses.txt” contains university-wide courses that
+are relevant to the Program Change applicable-credit-hour calculation.
+
+If a student has completed any course listed in
+“university_courses.txt”, that course’s credit hours must automatically
+be counted toward the completed credit hours applicable to the requested
+new program.
+
+The classification of a university course as compulsory or elective
+does not affect this calculation.
+
+A university course does not need to appear in the requested program’s
+study plan for its credit hours to be counted toward the requested
+program.
+
+University-course matching must be based on the Course_ID.
+
+2. STUDY PLAN RULES
+
+2.1 Official Study Plan
+
+The agent must retrieve the official University of Sharjah study plan
+for the requested new program.
+
+The student's current program information is retrieved from the
+Program Change request in the database and is used as contextual
+information. The agent does not need to retrieve the current program’s
+study plan for the academic eligibility calculation.
+
+The program ID and corresponding official University of Sharjah URL for
+the requested program are provided in the file
+“bachelors_program_catalog.txt”.
+
+The agent must use the requested program ID to locate the corresponding
+official program webpage in “bachelors_program_catalog.txt” and retrieve
+the study plan from that official URL.
+
+The requested program study plan is retrieved as part of the agent’s
+processing and is not treated as a permanent rule in this knowledge
+base.
+
+2.2 Official UOS Terminology
+
+The agent must use the terminology provided in the official University
+of Sharjah study plan.
+
+The agent must not rename or reinterpret categories appearing in the
+study plan.
+
+For example, if the official study plan uses the term “Major Elective”,
+the agent must use “Major Elective” rather than replacing it with terms
+such as “Program-Specific Elective”, “Technical Elective”, or
+“Specialization Elective” unless those terms are explicitly used by the
+official source.
+
+3. UNCERTAINTY AND MISSING INFORMATION
+
+3.1 No Assumptions
+
+The agent must not infer an eligibility result when the available data
+or authoritative sources are insufficient to establish the result.
+
+When a requirement cannot be reliably verified, the result must be:
+
+REQUIRES_REVIEW
+
+The agent must identify the missing or ambiguous information that caused
+the requirement to require review.
+
+3.2 Assessment Statuses
+
+The agent uses the following statuses:
+
+SATISFIED
+The requirement has been verified and the student satisfies it.
+
+NOT_SATISFIED
+The requirement has been verified and the student does not satisfy it.
+
+REQUIRES_REVIEW
+The requirement cannot be reliably determined from the available data
+or authoritative sources.
+
+4. AGENT DECISION BOUNDARIES
+
+The agent may:
+
+- Analyze the student’s academic record.
+- Compare completed courses with the requested program study plan.
+- Determine applicable completed credit hours based on the requested
+  program study plan and the university courses listed in
+  “university_courses.txt”.
+- Evaluate the CGPA requirement.
+- Identify satisfied and outstanding academic requirements.
+- Identify potential academic issues.
+- Explain the evidence supporting each assessment.
+- Prepare an academic assessment and recommendation for the
+  responsible university staff member.
+
+The agent must not:
+
+- Invent University of Sharjah rules.
+- Invent courses or study-plan requirements.
+- Invent course equivalencies.
+- Treat different Course_IDs as equivalent without authoritative
+  evidence.
+- Assume missing student information.
+- Make the final university decision on the Program Change request.
+
+5. FINAL ACADEMIC ASSESSMENT AND REPORT
+
+The agent/LLM must produce a detailed academic assessment report for
+each Program Change request.
+
+The report is intended to assist the responsible university staff member
+in evaluating the request. It is not a final approval or rejection
+decision.
+
+The report should clearly present:
+
+- The Program Change request being evaluated.
+- The requirements evaluated.
+- The student’s relevant academic information.
+- The completed courses considered applicable to the requested program.
+- The applicable completed credit-hour calculation.
+- The CGPA assessment.
+- The evidence supporting each requirement assessment.
+- Any missing, ambiguous, or conflicting information.
+- The sources used during the assessment.
+- The assessment status for each requirement: SATISFIED,
+  NOT_SATISFIED, or REQUIRES_REVIEW.
+
+The final report should distinguish between:
+
+- Requirements that are SATISFIED.
+- Requirements that are NOT_SATISFIED.
+- Requirements that REQUIRES_REVIEW.
+
+The report must not present the agent’s recommendation as the final
+university decision.
+
+KNOWN CORRECTIONS
+
+1501250 = Networking Fundamentals
+1501252 = Comp. Org. & Assembly Language
+1501100 = Introduction to IT (English)
+
+If an official webpage contains an incorrect mapping for these courses,
+use the corrected mapping above.

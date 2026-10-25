@@ -275,3 +275,38 @@ export async function fetchRejectionReason(requestId: string): Promise<Rejection
   const body = data as { has_decision_record?: boolean; explanation?: string | null } | null
   return { explanation: body?.has_decision_record ? text(body.explanation) || null : null }
 }
+
+// ---------------------------------------------------------------------------
+// Final decision on a Program Change request
+
+export interface ProgramChangeDecisionView {
+  decision: 'approve' | 'reject'
+  /** The administrator's explanation (both outcomes); null when no decision
+   *  record exists. */
+  explanation: string | null
+  /** ISO timestamp (UTC) of the decision, when recorded. */
+  decidedAt: string | null
+}
+
+// The decision on the signed-in student's own decided Program Change request
+// (database function get_my_program_change_decision, which returns nothing for
+// any other request, or one still In Progress). Throws when it cannot be
+// loaded, so a loading failure is never shown as "no explanation".
+export async function fetchProgramChangeDecision(requestId: string): Promise<ProgramChangeDecisionView | null> {
+  const { data, error } = await supabase.rpc('get_my_program_change_decision', { p_request_id: requestId })
+  if (error) throw error
+  const body = data as {
+    decision?: string
+    has_decision_record?: boolean
+    explanation?: string | null
+    decided_at?: string | null
+  } | null
+  if (!body || (body.decision !== 'approve' && body.decision !== 'reject')) return null
+  const decidedAt = text(body.decided_at)
+  return {
+    decision: body.decision,
+    explanation: body.has_decision_record ? text(body.explanation) || null : null,
+    // Stored without a time zone: the database clock is UTC.
+    decidedAt: decidedAt ? (/[zZ]|[+-]\d{2}:?\d{2}$/.test(decidedAt) ? decidedAt : `${decidedAt.replace(' ', 'T')}Z`) : null,
+  }
+}

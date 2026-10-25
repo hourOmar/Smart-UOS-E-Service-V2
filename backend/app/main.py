@@ -10,6 +10,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.api.program_change_review import router as program_change_review_router
 from app.api.raise_capacity_priority import router as raise_capacity_priority_router
 from app.api.raise_capacity_review import router as raise_capacity_review_router
 from app.config import get_settings
@@ -49,3 +50,4 @@ def health() -> dict:
 
 app.include_router(raise_capacity_review_router)
 app.include_router(raise_capacity_priority_router)
+app.include_router(program_change_review_router)

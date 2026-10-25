@@ -2,7 +2,7 @@ import { statusLabel } from '../../utils/statusLabels'
 
 interface RequestStatusBadgeProps {
   status: string
-  /** The request's type; Raise Capacity shows 'Completed' as 'Approved'. */
+  /** The request's type; Raise Capacity and Program Change show 'Completed' as 'Approved'. */
   requestType?: string | null
 }
 

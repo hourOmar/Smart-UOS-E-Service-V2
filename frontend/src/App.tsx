@@ -5,12 +5,14 @@ import LoginPage from './pages/LoginPage'
 import StudentDashboard from './pages/StudentDashboard'
 import StudentServiceDetails from './pages/StudentServiceDetails'
 import RaiseCapacityForm from './pages/RaiseCapacityForm'
+import ProgramChangeForm from './pages/ProgramChangeForm'
 import MyRequests from './pages/MyRequests'
 import MyProfile from './pages/MyProfile'
 import StudentRequestDetails from './pages/StudentRequestDetails'
 import AdminDashboard from './pages/AdminDashboard'
 import AdminTypeRequests from './pages/AdminTypeRequests'
 import AdminRaiseCapacityReview from './pages/AdminRaiseCapacityReview'
+import AdminProgramChangeReview from './pages/AdminProgramChangeReview'
 
 function App() {
   return (
@@ -32,6 +34,15 @@ function App() {
           element={
             <ProtectedRoute requiredRole="student">
               <RaiseCapacityForm />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/student/services/program-change/new"
+          element={
+            <ProtectedRoute requiredRole="student">
+              <ProgramChangeForm />
             </ProtectedRoute>
           }
         />
@@ -86,6 +97,15 @@ function App() {
           element={
             <ProtectedRoute requiredRole="admin">
               <AdminRaiseCapacityReview />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/requests/program-change/:requestId"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminProgramChangeReview />
             </ProtectedRoute>
           }
         />

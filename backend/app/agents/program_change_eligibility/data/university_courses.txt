@@ -1,0 +1,61 @@
+UNIVERSITY COURSES
+
+Purpose
+
+All courses listed below form one combined pool for the Program Change applicable-credit calculation. If a student has genuinely completed a course listed below, its credit hours count toward the applicable credit hours for the requested new program. The compulsory/elective classification does not affect whether the course counts.
+
+COMPULSORY COURSES — DOMAINS A-F
+
+A. English Language
+- 0202111 — Basic English — 3 credit hours
+- 0202112 — English for Academic Purposes — 3 credit hours
+- 0202121 — English for Medical Sciences — 3 credit hours
+
+B. Arabic Language
+- 0201102 — Arabic Language — 3 credit hours
+- 0201105 — Arabic Language for Non-Arabic Speakers — 3 credit hours
+
+C. Islamic Culture and Society
+- 0104100 — Islamic Culture — 3 credit hours
+- 0204102 — UAE Society — 3 credit hours
+
+D. Innovation and Entrepreneurship
+- 0302200 — Fundamentals of Innovation & Entrepreneurship — 3 credit hours
+
+E. Information Technology
+- 1501100 — Introduction to IT (English) — 3 credit hours
+
+ELECTIVE COURSES — DOMAINS G-H
+
+G. University Electives
+- 0203100 — Islamic Civilization — 3 credit hours
+- 0602246 — Human Rights in Islam and International Declarations — 3 credit hours
+- 0201140 — Introduction to Arabic Literature — 3 credit hours
+- 0203200 — History of the Sciences among Muslims — 3 credit hours
+- 0203102 — History of the Arabian Gulf — 3 credit hours
+- 0900107 — History of Medical & Health Sciences — 3 credit hours
+- 0070310 — Introduction to Islamic Art and Design — 3 credit hours
+- 0206102 — Fundamentals of Islamic Education — 3 credit hours
+- 0206103 — Introduction to Psychology — 3 credit hours
+- 0308150 — Introduction to Economics* — 3 credit hours
+- 0302150 — Introduction to Business Administration* — 3 credit hours
+- 0800107 — Media in Modern Societies** — 3 credit hours
+- 0308131 — Personal Finance — 3 credit hours
+- 0104130 — Analytical Biography of the Prophet — 3 credit hours
+- 0103103 — Islamic System*** — 3 credit hours
+- 0202130 — French Language — 3 credit hours
+- 1430101 — Astronomy and Space Sciences — 3 credit hours
+- 0401142 — Man and the Environment* — 3 credit hours
+- 0503101 — Health and Safety* — 3 credit hours
+- 0507101 — Health Awareness and Nutrition** — 3 credit hours
+- 0505101 — Fitness and Wellness*** — 3 credit hours
+- 1450100 — Biology and Society — 3 credit hours
+- 1502233 — Artificial Intelligence**** — 3 credit hours
+
+MATCHING RULES
+
+- Match courses by Course_ID.
+- Only genuinely completed courses should be counted.
+- If a completed transcript course has a Course_ID listed above, its credit hours count toward the applicable credit hours for the requested new program.
+- The compulsory/elective classification does not affect counting.
+- Do not treat different Course_IDs as equivalent based only on similar course names.

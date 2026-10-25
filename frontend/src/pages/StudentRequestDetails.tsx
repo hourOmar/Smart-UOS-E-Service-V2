@@ -10,11 +10,13 @@ import {
 import StudentLayout from '../components/student/StudentLayout'
 import RequestStatusBadge from '../components/requests/RequestStatusBadge'
 import useRejectionReason from '../hooks/useRejectionReason'
-import { RAISE_CAPACITY, statusLabel } from '../utils/statusLabels'
+import useProgramChangeDecision from '../hooks/useProgramChangeDecision'
+import { PROGRAM_CHANGE, RAISE_CAPACITY, statusLabel } from '../utils/statusLabels'
 import '../components/requests/Requests.css'
 
-// Final outcomes use the same wording as the student notifications; an
-// approved Raise Capacity request (stored as Completed) reads "approved".
+// Final outcomes use the same wording as the student notifications; a request
+// type whose 'Completed' means an approval (statusLabel: Raise Capacity,
+// Program Change) reads "approved".
 const DECISION_HEADINGS: Record<string, { tone: string; glyph: string; heading: string }> = {
   Completed: { tone: 'completed', glyph: '✓', heading: 'Your request has been completed.' },
   Rejected: { tone: 'rejected', glyph: '✕', heading: 'Your request has been rejected.' },
@@ -22,10 +24,37 @@ const DECISION_HEADINGS: Record<string, { tone: string; glyph: string; heading: 
 
 function decisionHeading(request: Details) {
   const heading = DECISION_HEADINGS[request.status]
-  if (heading && request.type === RAISE_CAPACITY && request.status === 'Completed') {
+  if (heading && statusLabel(request.status, request.type) === 'Approved') {
     return { ...heading, heading: 'Your request has been approved.' }
   }
   return heading
+}
+
+// The administrator's explanation of a decided Program Change request, for
+// approvals and rejections alike. A loading failure is reported as such, never
+// as a missing explanation.
+function ProgramChangeDecisionText({ requestId, rejected }: { requestId: string; rejected: boolean }) {
+  const { status, decision, retry } = useProgramChangeDecision(requestId, true)
+  return (
+    <div className={`req-text${rejected ? ' req-rejection' : ''}`}>
+      <span className="req-text__label">{rejected ? 'Reason for rejection' : 'Explanation from the administrator'}</span>
+      {status === 'loading' && <p className="req-state__body" role="status">Loading the explanation…</p>}
+      {status === 'error' && (
+        <div role="alert">
+          <p className="req-state__body">We couldn’t load the explanation.</p>
+          <button type="button" className="req-button" onClick={retry}>
+            Try again
+          </button>
+        </div>
+      )}
+      {status === 'ready' &&
+        (decision?.explanation ? (
+          <p className="req-text__body">{decision.explanation}</p>
+        ) : (
+          <p className="req-state__body">No explanation recorded.</p>
+        ))}
+    </div>
+  )
 }
 
 // The explanation staff saved when rejecting a Raise Capacity request. A
@@ -106,6 +135,8 @@ function Progress({ request }: { request: Details }) {
 function RequestBody({ request }: { request: Details }) {
   const decision = decisionHeading(request)
   const showRejectionReason = request.type === RAISE_CAPACITY && request.status === 'Rejected'
+  const showProgramChangeDecision =
+    request.type === PROGRAM_CHANGE && (request.status === 'Completed' || request.status === 'Rejected')
 
   return (
     <>
@@ -141,6 +172,9 @@ function RequestBody({ request }: { request: Details }) {
                 </p>
               )}
               {showRejectionReason && <RejectionReasonText requestId={request.id} />}
+              {showProgramChangeDecision && (
+                <ProgramChangeDecisionText requestId={request.id} rejected={request.status === 'Rejected'} />
+              )}
             </section>
           ) : (
             <div className="req-awaiting">

@@ -8,6 +8,7 @@ import logging
 import re
 import threading
 import time
+from collections.abc import Callable, Sequence
 
 from google import genai
 from google.genai import errors as genai_errors
@@ -167,3 +168,54 @@ def _generate_once[T: BaseModel](
             + (f" (finish reason: {finish})." if finish else ".")
         )
     return parsed
+
+
+def _is_default_temporary(exc: genai_errors.APIError) -> bool:
+    return exc.code in _TEMPORARY_STATUS_CODES
+
+
+def generate_text_with_fallback(
+    prompt: str, models: Sequence[str], *, use_url_context: bool = False,
+    is_temporary: Callable[[genai_errors.APIError], bool] | None = None, context: str = "",
+) -> tuple[str | None, str]:
+    """Plain-text generation (no response schema) for agents whose prompts ask
+    for free text or hand-written JSON. Returns (response.text, model that
+    answered); the text may be empty or None, which callers check.
+
+    `models` are tried in order. The next one is tried only after a temporary
+    error: HTTP 429/503 by default (as in generate_structured_with_model), or
+    whatever `is_temporary` accepts. Any other failure raises at once.
+    `use_url_context` enables Gemini's URL context tool, so the prompt may ask
+    Gemini to read a web page. Failures raise GeminiUnavailableError with a
+    sanitized message and are logged without the prompt or reply."""
+    if not models:
+        raise ValueError("At least one Gemini model is required.")
+    temporary = is_temporary or _is_default_temporary
+    label = f", {context}" if context else ""
+    failures: list[str] = []
+    for index, model in enumerate(models):
+        started = time.monotonic()
+        try:
+            config = (
+                types.GenerateContentConfig(tools=[types.Tool(url_context=types.UrlContext())])
+                if use_url_context else None
+            )
+            response = get_client().models.generate_content(model=model, contents=prompt, config=config)
+        except GeminiUnavailableError as exc:
+            log.warning("Gemini unavailable (model=%s%s): %s", model, label, exc)
+            raise
+        except Exception as exc:  # noqa: BLE001 - any client/network failure means "unavailable"
+            detail = describe_failure(exc)
+            log.warning("Gemini request failed after %.1fs (model=%s%s): %s",
+                        time.monotonic() - started, model, label, detail)
+            if not (isinstance(exc, genai_errors.APIError) and temporary(exc)):
+                raise GeminiUnavailableError(f"Gemini request failed: {detail}") from exc
+            failures.append(f"{model}: {detail}")
+            if index == len(models) - 1:
+                message = (f"Gemini request failed: {detail}" if len(models) == 1 else
+                           "Gemini request failed on every configured model: " + "; ".join(failures))
+                raise GeminiUnavailableError(message) from exc
+            log.info("Trying the next Gemini model after a temporary error (model=%s%s)", model, label)
+            continue
+        return getattr(response, "text", None), model
+    raise AssertionError("unreachable")  # pragma: no cover
