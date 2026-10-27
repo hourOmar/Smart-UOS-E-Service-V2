@@ -1,7 +1,10 @@
 import { useState } from 'react'
+import { notAvailableMessage } from '../data/academicRequests'
 import useStaffIdentity from '../hooks/useStaffIdentity'
 import useRequestTypeCounts from '../hooks/useRequestTypeCounts'
+import useToast from '../hooks/useToast'
 import StudentLayout from '../components/student/StudentLayout'
+import Toast from '../components/student/Toast'
 import AdminSearch from '../components/admin/AdminSearch'
 import AdminRequestTypes from '../components/admin/AdminRequestTypes'
 import PendingRequests from '../components/admin/PendingRequests'
@@ -17,6 +20,7 @@ function AdminDashboard() {
   const typeCounts = useRequestTypeCounts()
   const [pendingType, setPendingType] = useState<string | null>(null)
   const [pendingPage, setPendingPage] = useState(1)
+  const toast = useToast()
 
   const handleTypeChange = (type: string | null) => {
     setPendingType(type)
@@ -32,6 +36,7 @@ function AdminDashboard() {
           status={typeCounts.status}
           counts={typeCounts.counts}
           onRetry={typeCounts.retry}
+          onUnavailable={(service) => toast.show(notAvailableMessage(service.name))}
         />
       </div>
 
@@ -42,6 +47,8 @@ function AdminDashboard() {
         onTypeChange={handleTypeChange}
         onPageChange={setPendingPage}
       />
+
+      <Toast message={toast.message} onDismiss={toast.dismiss} />
     </StudentLayout>
   )
 }

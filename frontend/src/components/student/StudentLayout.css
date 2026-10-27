@@ -122,21 +122,24 @@
   flex: none;
   width: auto;
   height: 46px;
+  filter: drop-shadow(0 1px 6px rgb(6 46 34 / 0.45));
 }
 
+/* The shadows keep the white header readable over the light hero (v3). */
 .student-header__names {
   display: flex;
   flex-direction: column;
   min-width: 0;
   padding-left: 14px;
-  border-left: 1px solid rgb(255 255 255 / 0.35);
+  border-left: 1px solid rgb(255 255 255 / 0.5);
   line-height: 1.2;
+  text-shadow: 0 1px 10px rgb(6 46 34 / 0.55), 0 0 2px rgb(6 46 34 / 0.35);
 }
 
 .student-header__university {
   font-size: 12px;
   letter-spacing: 0.04em;
-  color: rgb(255 255 255 / 0.85);
+  color: #ffffff;
 }
 
 .student-header__product {
@@ -165,6 +168,7 @@
   background: rgb(255 255 255 / 0.06);
   color: #ffffff;
   cursor: pointer;
+  filter: drop-shadow(0 1px 6px rgb(6 46 34 / 0.45));
   transition: background-color 0.2s, border-color 0.2s;
 }
 
@@ -320,4 +324,43 @@
   .student-account__panel {
     animation: none;
   }
+}
+
+/* Toast (prototype): bottom centre, dismisses itself. */
+
+.student-toast-region {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  z-index: 60;
+  transform: translateX(-50%);
+  max-width: calc(100vw - 32px);
+}
+
+.student-toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: #17211c;
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.18);
+  font-family: var(--proto-font);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.student-toast__close {
+  flex: none;
+  padding: 2px 4px;
+  border: 0;
+  background: none;
+  color: #d5ddd8;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.student-toast__close:focus-visible {
+  outline-color: #ffffff;
 }

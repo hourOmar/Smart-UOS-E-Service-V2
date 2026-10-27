@@ -10,11 +10,27 @@ interface RequestListProps {
   onRetry: () => void
   /** Where the list is shown, so the details page can link back to it. */
   origin: RequestsOrigin
+  /** Heading of the first column (the dashboard says "Request Reference"). */
+  idHeading?: string
+  /**
+   * Adds the Course / Program column (dashboard, prototype v3). Its values
+   * by request ID; null while they load.
+   */
+  targets?: ReadonlyMap<string, string> | null
+  showTarget?: boolean
 }
 
 // The signed-in student's requests: a table on wide screens and cards on
 // narrow ones (as in the prototype), plus loading, empty and error states.
-function RequestList({ status, requests, onRetry, origin }: RequestListProps) {
+function RequestList({
+  status,
+  requests,
+  onRetry,
+  origin,
+  idHeading = 'Request ID',
+  targets = null,
+  showTarget = false,
+}: RequestListProps) {
   if (status === 'loading') {
     return (
       <div className="req-state" role="status">
@@ -50,6 +66,8 @@ function RequestList({ status, requests, onRetry, origin }: RequestListProps) {
   }
 
   const linkState = { from: origin }
+  // Blank while loading; a dash when the request has no recorded subject.
+  const targetOf = (id: string) => (targets ? targets.get(id) || '—' : '')
 
   return (
     <>
@@ -57,8 +75,9 @@ function RequestList({ status, requests, onRetry, origin }: RequestListProps) {
         <table className="req-table">
           <thead>
             <tr>
-              <th scope="col">Request ID</th>
+              <th scope="col">{idHeading}</th>
               <th scope="col">Request Type</th>
+              {showTarget && <th scope="col">Course / Program</th>}
               <th scope="col">Submitted Date</th>
               <th scope="col">Status</th>
               <th scope="col" className="req-table__view">
@@ -71,6 +90,7 @@ function RequestList({ status, requests, onRetry, origin }: RequestListProps) {
               <tr key={request.id}>
                 <td className="req-table__id">{request.id}</td>
                 <td className="req-table__type">{request.type}</td>
+                {showTarget && <td className="req-table__target">{targetOf(request.id)}</td>}
                 <td className="req-table__date">{formatDate(request.date)}</td>
                 <td>
                   <RequestStatusBadge status={request.status} requestType={request.type} />
@@ -99,6 +119,9 @@ function RequestList({ status, requests, onRetry, origin }: RequestListProps) {
               <RequestStatusBadge status={request.status} requestType={request.type} />
             </div>
             <span className="req-card__type">{request.type}</span>
+            {showTarget && targetOf(request.id) && (
+              <span className="req-card__target">{targetOf(request.id)}</span>
+            )}
             <div className="req-card__bottom">
               <span className="req-card__date">Submitted {formatDate(request.date)}</span>
               <Link

@@ -1,25 +1,47 @@
-import type { FormEvent } from 'react'
-import type { AcademicRequestType } from '../../data/academicRequests'
-import RequestCard from './RequestCard'
+import { useState } from 'react'
+import {
+  CATALOG_INITIAL_CARDS,
+  type AcademicRequestType,
+  type FutureService,
+} from '../../data/academicRequests'
+import { CatalogNoMatch, QuickSearch, ShowMoreToggle } from './CatalogControls'
+import RequestCard, { FutureServiceCard } from './RequestCard'
+
+/** One catalog card: a real service, or one planned for a future release. */
+export type CatalogEntry =
+  | { kind: 'service'; request: AcademicRequestType }
+  | { kind: 'future'; service: FutureService }
 
 interface RequestCatalogProps {
   id: string
-  requests: AcademicRequestType[]
+  /** Matching cards, in display order. */
+  entries: CatalogEntry[]
   query: string
   onQueryChange: (value: string) => void
   onClearSearch: () => void
+  /** A real service without a form, or a future service, was opened. */
+  onUnavailable: (name: string, kind: CatalogEntry['kind']) => void
 }
 
+// Academic Requests (prototype v3): heading with the quick search on its
+// right, then the first nine cards and Show more. While searching, every
+// match is shown.
 function RequestCatalog({
   id,
-  requests,
+  entries,
   query,
   onQueryChange,
   onClearSearch,
+  onUnavailable,
 }: RequestCatalogProps) {
-  // Filtering happens as the student types; Enter has nothing extra to do.
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const [moreOpen, setMoreOpen] = useState(false)
+  const searching = query.trim() !== ''
+  const canMore = !searching && entries.length > CATALOG_INITIAL_CARDS
+  const shown = searching || moreOpen ? entries : entries.slice(0, CATALOG_INITIAL_CARDS)
+
+  const handleClear = () => {
+    onClearSearch()
+    setMoreOpen(false)
   }
 
   return (
@@ -28,79 +50,60 @@ function RequestCatalog({
       className="student-catalog"
       aria-labelledby="student-catalog-title"
     >
-      <div className="student-shell">
-        <header className="student-catalog__header">
-          <h2 id="student-catalog-title" className="student-catalog__title">
-            <span className="student-catalog__title-accent">Academic</span>{' '}
-            Requests
-          </h2>
-          <p className="student-catalog__intro">
-            Choose a request to see what it involves, or start it directly.
-          </p>
-        </header>
-
-        <form className="student-search" role="search" onSubmit={handleSubmit}>
-          <label
-            htmlFor="student-search-input"
-            className="student-visually-hidden"
-          >
-            Quick search
-          </label>
-          <svg
-            className="student-search__icon"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            aria-hidden="true"
-          >
-            <circle cx="11" cy="11" r="6.5" />
-            <path d="m16 16 4 4" />
-          </svg>
-          <input
+      <div className="student-catalog__inner">
+        <div className="catalog-head">
+          <div className="catalog-head__text">
+            <h2 id="student-catalog-title" className="catalog-head__title">
+              <span className="catalog-head__accent">Academic</span> Requests
+            </h2>
+            <p className="catalog-head__intro">
+              Choose a request to see what it involves, or start it directly.
+            </p>
+          </div>
+          <QuickSearch
             id="student-search-input"
-            className="student-search__input"
-            type="search"
-            placeholder="Quick search"
-            autoComplete="off"
+            label="Quick search"
             value={query}
-            onChange={(event) => onQueryChange(event.target.value)}
-            aria-describedby="student-search-count"
+            onChange={onQueryChange}
+            onClear={handleClear}
+            countLabel={`${entries.length} ${entries.length === 1 ? 'service' : 'services'}`}
           />
-          <span
-            id="student-search-count"
-            className="student-search__count"
-            aria-live="polite"
-          >
-            {requests.length} {requests.length === 1 ? 'service' : 'services'}
-          </span>
-        </form>
+        </div>
 
-        {requests.length > 0 ? (
+        {entries.length === 0 ? (
+          <CatalogNoMatch
+            title="No matching services found. Try a different keyword."
+            onClear={handleClear}
+          />
+        ) : (
           <ul className="student-catalog__grid">
-            {requests.map((request) => (
-              <li key={request.id} className="student-catalog__item">
-                <RequestCard request={request} />
+            {shown.map((entry) => (
+              <li
+                key={entry.kind === 'service' ? entry.request.id : entry.service.name}
+                className="student-catalog__item"
+              >
+                {entry.kind === 'service' ? (
+                  <RequestCard
+                    request={entry.request}
+                    onUnavailable={(request) => onUnavailable(request.name, 'service')}
+                  />
+                ) : (
+                  <FutureServiceCard
+                    service={entry.service}
+                    onOpen={(service) => onUnavailable(service.name, 'future')}
+                  />
+                )}
               </li>
             ))}
           </ul>
-        ) : (
-          <div className="student-catalog__empty">
-            <h3 className="student-catalog__empty-title">
-              No requests match “{query.trim()}”
-            </h3>
-            <p className="student-catalog__empty-body">
-              Try another word, such as “grade”, “exam” or “course”.
-            </p>
-            <button
-              type="button"
-              className="student-catalog__clear"
-              onClick={onClearSearch}
-            >
-              Clear search
-            </button>
-          </div>
+        )}
+
+        {canMore && (
+          <ShowMoreToggle
+            open={moreOpen}
+            hiddenCount={entries.length - CATALOG_INITIAL_CARDS}
+            onToggle={() => setMoreOpen((open) => !open)}
+          />
         )}
       </div>
     </section>

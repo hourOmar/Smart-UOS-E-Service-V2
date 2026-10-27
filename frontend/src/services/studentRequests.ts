@@ -220,6 +220,82 @@ async function fetchTypeDetails(type: string, requestId: string): Promise<TypeDe
   return { title: null, fields: [], reason: null }
 }
 
+// ---------------------------------------------------------------------------
+// Course / Program column (dashboard Recent Requests)
+
+interface TargetSource {
+  table: string
+  columns: string
+  courses: (row: Record<string, unknown>) => string[]
+  label: (row: Record<string, unknown>, names: Map<string, string>) => string
+}
+
+const courseTarget = (table: string): TargetSource => ({
+  table,
+  columns: 'Course_ID',
+  courses: (row) => [text(row.Course_ID)],
+  label: (row, names) => courseLabel(text(row.Course_ID), names),
+})
+
+const pairTarget = (table: string, from: string, to: string): TargetSource => ({
+  table,
+  columns: `${from}, ${to}`,
+  courses: () => [],
+  label: (row) => [text(row[from]), text(row[to])].filter(Boolean).join(' → '),
+})
+
+// The same subjects as the details page headings, per request type.
+const TARGET_SOURCES: Record<string, TargetSource> = {
+  'Raise Capacity': courseTarget('Raise_Capacity'),
+  'Incomplete Exam': courseTarget('Incomplete_Exam'),
+  'Course Substitution': pairTarget('Course_Substitution', 'Original_Course_ID', 'Proposed_Course_ID'),
+  'Program Change': {
+    table: 'Program_Change',
+    columns: 'Current_Program_ID, Current_Program_Name, New_Program_ID, New_Program_Name',
+    courses: () => [],
+    label: (row) =>
+      [
+        text(row.Current_Program_Name) || text(row.Current_Program_ID),
+        text(row.New_Program_Name) || text(row.New_Program_ID),
+      ]
+        .filter(Boolean)
+        .join(' → '),
+  },
+  'Course Equivalency': pairTarget('Course_Equivalency', 'Old_Course_ID', 'New_Course_ID'),
+}
+
+// The course or program each request is about, by Request_ID, read from its
+// type's table with the student's own access (one query per type present).
+export async function fetchRequestTargets(rows: StudentRequestRow[]): Promise<Map<string, string>> {
+  const idsByType = new Map<string, string[]>()
+  for (const row of rows) {
+    if (!TARGET_SOURCES[row.type]) continue
+    idsByType.set(row.type, [...(idsByType.get(row.type) ?? []), row.id])
+  }
+
+  const fetched = await Promise.all(
+    [...idsByType].map(async ([type, ids]) => {
+      const source = TARGET_SOURCES[type]
+      const { data, error } = await supabase
+        .from(source.table)
+        .select(`Request_ID, ${source.columns}`)
+        .in('Request_ID', ids)
+      if (error) throw error
+      return { source, rows: (data ?? []) as unknown as Record<string, unknown>[] }
+    }),
+  )
+
+  const names = await courseNames(fetched.flatMap(({ source, rows }) => rows.flatMap(source.courses)))
+  const targets = new Map<string, string>()
+  for (const { source, rows } of fetched) {
+    for (const row of rows) {
+      const label = source.label(row, names)
+      if (label) targets.set(text(row.Request_ID), label)
+    }
+  }
+  return targets
+}
+
 // One request with its saved details, or null when it does not exist or
 // belongs to someone else (the database returns nothing in both cases).
 export async function fetchStudentRequestDetails(

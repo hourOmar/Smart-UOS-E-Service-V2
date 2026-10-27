@@ -6,6 +6,7 @@ import {
 } from '../../services/adminRequests'
 import { formatDate } from '../../services/studentRequests'
 import RequestStatusBadge from '../requests/RequestStatusBadge'
+import HeroBackdrop from '../student/HeroBackdrop'
 
 type SearchState =
   | { kind: 'idle' }
@@ -13,8 +14,9 @@ type SearchState =
   | { kind: 'message'; text: string }
   | { kind: 'found'; result: Exclude<SearchResult, null> }
 
-// Admin home hero: find a student or a request by its exact ID. The match
-// is shown here; its own page will be linked once that page exists.
+// Admin home hero (light design of prototype v3): find a student or a
+// request by its exact ID. The match is shown here; its own page will be
+// linked once that page exists.
 function AdminSearch() {
   const [query, setQuery] = useState('')
   const [state, setState] = useState<SearchState>({ kind: 'idle' })
@@ -48,6 +50,8 @@ function AdminSearch() {
 
   return (
     <section className="adm-hero" aria-labelledby="adm-hero-title">
+      <HeroBackdrop />
+      <div className="adm-hero__glow" aria-hidden="true" />
       <div className="adm-hero__content">
         <span className="adm-hero__kicker">Registrar's Office · Administration</span>
         <h1 id="adm-hero-title" className="adm-hero__title">
