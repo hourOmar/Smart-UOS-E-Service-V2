@@ -13,6 +13,11 @@ references/
 DESIGN.md
 PRODUCT.md
 
+# Temporary copy of the standalone Incomplete Exam agent (has its own .git,
+# .venv and a .env with credentials). Ported into
+# backend/app/agents/incomplete_exam/; delete this folder after the port.
+Incomplete-Exam-Eligibility-/
+
 # ---------------------------------------------------------------------------
 # Credentials and secrets (the .env.example templates stay included)
 # ---------------------------------------------------------------------------

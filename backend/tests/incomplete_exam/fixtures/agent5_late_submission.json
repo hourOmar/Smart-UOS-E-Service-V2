@@ -1,0 +1,22 @@
+{
+  "request_id": "STUD_INCRQ_INC2_000001",
+  "evidence": {
+    "request_id": "STUD_INCRQ_INC2_000001",
+    "course_id": 101,
+    "section_id": "1",
+    "term": "Fall 2025",
+    "checks": {
+      "enrollment": {"found": true, "record": {"Grade": null}},
+      "submission_window": {"satisfied": false, "missed_exam_date": "2025-12-01", "request_date": "2025-12-12", "working_days_elapsed": 9, "limit_working_days": 3},
+      "proof": {"provided": true, "raw_value": "Medical report", "file_attached": true, "file_source": "local"},
+      "exam_type": {"value": "Final", "excluded": false, "excluded_values_confirmed": true}
+    },
+    "reason_for_review": "I was hospitalised on the day of the exam.",
+    "policy_reference": {"acceptable_proof_categories": ["Medical report"], "explicitly_invalid_reasons": ["Misreading the exam schedule"]}
+  },
+  "recommendation": "REJECT",
+  "reasoning": "The request was filed 9 working days after the exam; the limit is 3.",
+  "checks": {"enrollment": "Enrolled.", "submission_window": "Filed after the 3 working day limit.", "proof": "Medical report provided.", "reason_validity": "Valid reason.", "exam_type": "Not excluded."},
+  "gemini_status": "ok",
+  "gemini_error": null
+}

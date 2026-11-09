@@ -27,6 +27,10 @@ export interface StudentRequestDetails extends StudentRequestRow {
   reason: { label: string; text: string } | null
   /** Request_History, once a final decision has been recorded. */
   decision: { status: string; date: string } | null
+  /** Incomplete Exam only: the stored paths of the submitted supporting
+   *  documents (Incomplete_Exam.Proof_Files; may be empty). Null for every
+   *  other request type. */
+  documents: string[] | null
 }
 
 interface RequestRowData {
@@ -113,7 +117,12 @@ interface TypeDetails {
   title: string | null
   fields: RequestField[]
   reason: StudentRequestDetails['reason']
+  documents?: string[]
 }
+
+/** The text entries of a stored text[] column (anything else is ignored). */
+const textList = (value: unknown): string[] =>
+  Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string' && v !== '') : []
 
 // Reads the saved information for one request from its type's table.
 async function fetchTypeDetails(type: string, requestId: string): Promise<TypeDetails> {
@@ -149,7 +158,7 @@ async function fetchTypeDetails(type: string, requestId: string): Promise<TypeDe
     case 'Incomplete Exam': {
       const row = await one(
         'Incomplete_Exam',
-        'Course_ID, Section_ID, Term, Exam_Type, Missed_Exam_Date, Missed_Exam_Time, Proof, Reason',
+        'Course_ID, Section_ID, Term, Exam_Type, Missed_Exam_Date, Missed_Exam_Time, Proof, Reason, Proof_Files',
       )
       if (!row) break
       const courseId = text(row.Course_ID)
@@ -164,9 +173,10 @@ async function fetchTypeDetails(type: string, requestId: string): Promise<TypeDe
           { label: 'Exam type', value: text(row.Exam_Type) },
           { label: 'Missed exam date', value: formatDate(text(row.Missed_Exam_Date)) },
           { label: 'Missed exam time', value: formatTime(row.Missed_Exam_Time) },
-          { label: 'Proof', value: text(row.Proof) },
+          { label: 'Description of evidence', value: text(row.Proof) },
         ],
         reason: reasonOf(row),
+        documents: textList(row.Proof_Files),
       }
     }
     case 'Course Substitution': {
@@ -330,6 +340,7 @@ export async function fetchStudentRequestDetails(
     decision: decision
       ? { status: decision.Final_Status, date: decision.Completion_Date }
       : null,
+    documents: row.Request_Type === 'Incomplete Exam' ? (details.documents ?? []) : null,
   }
 }
 

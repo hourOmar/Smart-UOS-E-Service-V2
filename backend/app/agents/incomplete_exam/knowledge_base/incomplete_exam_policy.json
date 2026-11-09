@@ -1,0 +1,38 @@
+{
+  "status": "populated_from_policy_text",
+  "note": "Populated from the UoS Incomplete Exam Constraint policy as given to the team. The parts of that policy about what happens AFTER an incomplete is granted (the makeup/removal deadline and automatic F conversion, prerequisite-chain blocking, GPA timing) are deliberately NOT included here -- they are downstream consequences, not eligibility criteria for this agent to evaluate. Fields marked 'confirm' need a real value checked against the live database before this is trustworthy.",
+
+  "submission_window": {
+    "limit_working_days": 4,
+    "measured_from": "Missed_Exam_Date",
+    "measured_to": "Request.Request_Date",
+    "weekend_days": ["Friday", "Saturday"],
+    "note": "Policy says within 4 working days of the missed exam, OR before final grades are formally approved -- whichever applies. Only the 4-working-day rule can be checked from the current schema, since no grade-approval date is stored anywhere. If a grade-approval date becomes available later, add a second condition here."
+  },
+
+  "proof_required": true,
+
+  "acceptable_proof_categories": [
+    "Authenticated medical report from an approved healthcare facility or hospital",
+    "For online/remote exams only: documented proof of a system or internet outage, raised via the IT helpline immediately at the time of the exam",
+    "For an emergency requiring travel: a flight itinerary or booking confirmation showing the travel dates, together with a written statement explaining the emergency"
+  ],
+
+  "explicitly_invalid_reasons": [
+    "Misreading the exam schedule",
+    "Personal or discretionary travel not related to any emergency (e.g. vacation, planned personal trips, non-essential travel)",
+    "Standard job obligations"
+  ],
+
+  "clarifications": {
+    "emergency_travel": "Travel undertaken because of a genuine emergency (e.g. a family member's hospitalization, a death in the family) is NOT the same as the 'personal travel' exclusion above. Emergency-driven travel should be evaluated like any other emergency claim -- on the strength of its stated reason and supporting proof -- not auto-rejected just because the word 'travel' appears in the explanation. The matching proof category for this is listed above (flight itinerary/booking confirmation + written statement) -- both the reason rule and the proof rule need to agree for this scenario to actually resolve to APPROVE; updating one without the other (as happened here) leaves a real gap."
+  },
+
+  "valid_exam_types": ["Midterm", "Final"],
+
+  "excluded_exam_types": {
+    "values": [],
+    "status": "confirmed",
+    "note": "Confirmed with the team: University of Sharjah has no Graduate Entrance or DBA Admission examination category at all -- Incomplete_Exam requests only ever cover Midterm or Final exams. So there is nothing for this table to ever exclude; an empty list here means 'confirmed none apply', not 'not yet checked'."
+  }
+}

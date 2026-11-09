@@ -9,32 +9,44 @@ import {
 } from '../utils/requestPaths'
 import StudentLayout from '../components/student/StudentLayout'
 import RequestStatusBadge from '../components/requests/RequestStatusBadge'
+import StudentProofDocuments from '../components/requests/StudentProofDocuments'
 import useRejectionReason from '../hooks/useRejectionReason'
 import useProgramChangeDecision from '../hooks/useProgramChangeDecision'
-import { PROGRAM_CHANGE, RAISE_CAPACITY, statusLabel } from '../utils/statusLabels'
+import useIncompleteExamDecision from '../hooks/useIncompleteExamDecision'
+import { INCOMPLETE_EXAM, PROGRAM_CHANGE, RAISE_CAPACITY, statusLabel } from '../utils/statusLabels'
 import '../components/requests/Requests.css'
 
 // Final outcomes use the same wording as the student notifications; a request
 // type whose 'Completed' means an approval (statusLabel: Raise Capacity,
-// Program Change) reads "approved".
+// Program Change; Incomplete Exam only with a recorded approval decision)
+// reads "approved".
 const DECISION_HEADINGS: Record<string, { tone: string; glyph: string; heading: string }> = {
   Completed: { tone: 'completed', glyph: '✓', heading: 'Your request has been completed.' },
   Rejected: { tone: 'rejected', glyph: '✕', heading: 'Your request has been rejected.' },
 }
 
-function decisionHeading(request: Details) {
+function decisionHeading(request: Details, approvalRecorded: boolean) {
   const heading = DECISION_HEADINGS[request.status]
-  if (heading && statusLabel(request.status, request.type) === 'Approved') {
+  if (heading && statusLabel(request.status, request.type, approvalRecorded) === 'Approved') {
     return { ...heading, heading: 'Your request has been approved.' }
   }
   return heading
 }
 
-// The administrator's explanation of a decided Program Change request, for
-// approvals and rejections alike. A loading failure is reported as such, never
-// as a missing explanation.
-function ProgramChangeDecisionText({ requestId, rejected }: { requestId: string; rejected: boolean }) {
-  const { status, decision, retry } = useProgramChangeDecision(requestId, true)
+// The administrator's explanation of a decided request, for approvals and
+// rejections alike. A loading failure is reported as such, never as a missing
+// explanation.
+function DecisionExplanation({
+  status,
+  explanation,
+  retry,
+  rejected,
+}: {
+  status: 'loading' | 'ready' | 'error'
+  explanation: string | null | undefined
+  retry: () => void
+  rejected: boolean
+}) {
   return (
     <div className={`req-text${rejected ? ' req-rejection' : ''}`}>
       <span className="req-text__label">{rejected ? 'Reason for rejection' : 'Explanation from the administrator'}</span>
@@ -48,13 +60,19 @@ function ProgramChangeDecisionText({ requestId, rejected }: { requestId: string;
         </div>
       )}
       {status === 'ready' &&
-        (decision?.explanation ? (
-          <p className="req-text__body">{decision.explanation}</p>
+        (explanation ? (
+          <p className="req-text__body">{explanation}</p>
         ) : (
           <p className="req-state__body">No explanation recorded.</p>
         ))}
     </div>
   )
+}
+
+// A decided Program Change request (get_my_program_change_decision).
+function ProgramChangeDecisionText({ requestId, rejected }: { requestId: string; rejected: boolean }) {
+  const { status, decision, retry } = useProgramChangeDecision(requestId, true)
+  return <DecisionExplanation status={status} explanation={decision?.explanation} retry={retry} rejected={rejected} />
 }
 
 // The explanation staff saved when rejecting a Raise Capacity request. A
@@ -83,7 +101,7 @@ function RejectionReasonText({ requestId }: { requestId: string }) {
   )
 }
 
-function Progress({ request }: { request: Details }) {
+function Progress({ request, approvalRecorded }: { request: Details; approvalRecorded: boolean }) {
   const decided = request.status !== 'In Progress'
   const steps = [
     { title: 'Request submitted', meta: formatDate(request.date), state: 'done', glyph: '✓' },
@@ -95,7 +113,7 @@ function Progress({ request }: { request: Details }) {
     },
     decided
       ? {
-          title: statusLabel(request.status, request.type),
+          title: statusLabel(request.status, request.type, approvalRecorded),
           meta: request.decision ? formatDate(request.decision.date) : '',
           state: 'done',
           glyph: request.status === 'Rejected' ? '✕' : '✓',
@@ -133,17 +151,25 @@ function Progress({ request }: { request: Details }) {
 }
 
 function RequestBody({ request }: { request: Details }) {
-  const decision = decisionHeading(request)
   const showRejectionReason = request.type === RAISE_CAPACITY && request.status === 'Rejected'
-  const showProgramChangeDecision =
-    request.type === PROGRAM_CHANGE && (request.status === 'Completed' || request.status === 'Rejected')
+  const decided = request.status === 'Completed' || request.status === 'Rejected'
+  const showProgramChangeDecision = request.type === PROGRAM_CHANGE && decided
+  const showIncompleteExamDecision = request.type === INCOMPLETE_EXAM && decided
+  // A decided Incomplete Exam request (get_my_incomplete_exam_decision, which
+  // returns only the signed-in student's own decided request). Its 'Completed'
+  // reads "Approved" only when an approval decision record exists, never from
+  // the status alone.
+  const incompleteExam = useIncompleteExamDecision(request.id, showIncompleteExamDecision)
+  const approvalRecorded =
+    incompleteExam.decision?.decision === 'approve' && incompleteExam.decision.hasDecisionRecord
+  const decision = decisionHeading(request, approvalRecorded)
 
   return (
     <>
       <div className="req-detail__head">
         <div className="req-detail__meta-row">
           <span className="req-detail__id">{request.id}</span>
-          <RequestStatusBadge status={request.status} requestType={request.type} />
+          <RequestStatusBadge status={request.status} requestType={request.type} approvalRecorded={approvalRecorded} />
         </div>
         <h1 className="req-detail__title">
           {request.type}
@@ -174,6 +200,14 @@ function RequestBody({ request }: { request: Details }) {
               {showRejectionReason && <RejectionReasonText requestId={request.id} />}
               {showProgramChangeDecision && (
                 <ProgramChangeDecisionText requestId={request.id} rejected={request.status === 'Rejected'} />
+              )}
+              {showIncompleteExamDecision && (
+                <DecisionExplanation
+                  status={incompleteExam.status}
+                  explanation={incompleteExam.decision?.explanation}
+                  retry={incompleteExam.retry}
+                  rejected={request.status === 'Rejected'}
+                />
               )}
             </section>
           ) : (
@@ -219,9 +253,13 @@ function RequestBody({ request }: { request: Details }) {
               )}
             </div>
           </section>
+
+          {request.type === INCOMPLETE_EXAM && request.documents !== null && (
+            <StudentProofDocuments requestId={request.id} paths={request.documents} />
+          )}
         </div>
 
-        <Progress request={request} />
+        <Progress request={request} approvalRecorded={approvalRecorded} />
       </div>
     </>
   )

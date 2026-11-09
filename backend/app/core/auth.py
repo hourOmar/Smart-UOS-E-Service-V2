@@ -10,7 +10,7 @@ Only then may a route read request data or run an agent. Tokens are never logged
 or stored.
 """
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import requests
 from fastapi import Header, HTTPException, status
@@ -68,6 +68,24 @@ def find_staff(auth_user_id: str) -> int | None:
             {"uid": auth_user_id},
         ).first()
     return None if row is None else int(row[0])
+
+
+@dataclass(frozen=True)
+class StaffSession:
+    """A verified staff identity plus the caller's own access token, for routes
+    that must act AS that staff member (e.g. Supabase Storage downloads under
+    the staff read policy). Lives only for one request; the token is excluded
+    from repr so it cannot reach logs, and must never be stored."""
+
+    identity: StaffIdentity
+    access_token: str = field(repr=False)
+
+
+def require_staff_session(authorization: str | None = Header(default=None)) -> StaffSession:
+    """require_staff, also keeping the verified bearer token for this request."""
+    identity = require_staff(authorization)
+    _, _, token = (authorization or "").partition(" ")
+    return StaffSession(identity=identity, access_token=token.strip())
 
 
 def require_staff(authorization: str | None = Header(default=None)) -> StaffIdentity:

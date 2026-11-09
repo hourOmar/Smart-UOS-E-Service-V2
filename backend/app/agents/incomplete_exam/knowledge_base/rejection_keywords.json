@@ -1,0 +1,54 @@
+{
+  "note": "Closed vocabulary of rejection keywords. 'deterministic' keywords are detected by Python from Agent 5's verified checks. 'judgment' keywords can only be selected by Gemini from this fixed list, and only when Agent 5's own explanations clearly support them -- Gemini can never invent a new keyword. Wording of the invalid-reason and proof keywords must stay in sync with Agent 5's app/knowledge_base/incomplete_exam_policy.json.",
+  "keywords": {
+    "late_submission": {
+      "detection": "deterministic",
+      "label": "Late submission",
+      "policy_basis": "An Incomplete Exam request must be submitted within the allowed number of working days after the missed exam.",
+      "plain_reason": "Your request was submitted {working_days_elapsed} working days after the missed exam, but the policy allows a maximum of {limit_working_days} working days."
+    },
+    "no_proof_provided": {
+      "detection": "deterministic",
+      "label": "No proof provided",
+      "policy_basis": "Supporting proof is required for an Incomplete Exam request.",
+      "plain_reason": "No supporting proof was provided with your request, and the policy requires supporting proof for an Incomplete Exam."
+    },
+    "excluded_exam_type": {
+      "detection": "deterministic",
+      "label": "Excluded exam type",
+      "policy_basis": "Certain exam types are excluded from Incomplete Exam consideration.",
+      "plain_reason": "The exam type ({exam_type}) is not eligible for an Incomplete Exam under the policy."
+    },
+    "no_enrollment_record": {
+      "detection": "deterministic",
+      "label": "No enrollment record",
+      "policy_basis": "The student must have been enrolled in the course, section, and term of the missed exam.",
+      "plain_reason": "No enrollment record was found for you in this course, section, and term, so the request could not be linked to a course you were registered in."
+    },
+    "invalid_reason_schedule_misread": {
+      "detection": "judgment",
+      "label": "Misreading the exam schedule",
+      "policy_basis": "Misreading the exam schedule is explicitly listed as an invalid reason for an Incomplete Exam."
+    },
+    "invalid_reason_personal_travel": {
+      "detection": "judgment",
+      "label": "Personal / discretionary travel",
+      "policy_basis": "Personal or discretionary travel not related to an emergency (for example vacation or planned personal trips) is explicitly listed as an invalid reason. Emergency-driven travel is evaluated like any other emergency claim and is NOT covered by this keyword."
+    },
+    "invalid_reason_job_obligation": {
+      "detection": "judgment",
+      "label": "Standard job obligations",
+      "policy_basis": "Standard job obligations are explicitly listed as an invalid reason for an Incomplete Exam."
+    },
+    "proof_not_acceptable_category": {
+      "detection": "judgment",
+      "label": "Proof not in an accepted category",
+      "policy_basis": "Accepted proof is limited to the categories in the policy reference. The submitted proof does not match any of them."
+    },
+    "proof_inconsistent_or_unverifiable": {
+      "detection": "judgment",
+      "label": "Proof inconsistent or could not be accepted",
+      "policy_basis": "The submitted document does not support the stated reason, or could not be accepted as valid proof of it."
+    }
+  }
+}

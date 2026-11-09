@@ -19,8 +19,27 @@ test('Raise Capacity is unchanged', () => {
   assert.equal(statusLabel('In Progress', 'Raise Capacity'), 'In Progress')
 })
 
+test('Incomplete Exam: Completed is Approved only with a recorded approval decision', () => {
+  // Historical Completed requests (no decision record) and views that do not
+  // load the decision keep the stored status.
+  assert.equal(statusLabel('Completed', 'Incomplete Exam'), 'Completed')
+  assert.equal(statusLabel('Completed', 'Incomplete Exam', false), 'Completed')
+  assert.equal(statusLabel('Completed', 'Incomplete Exam', true), 'Approved')
+  for (const recorded of [true, false]) {
+    assert.equal(statusLabel('Rejected', 'Incomplete Exam', recorded), 'Rejected')
+    assert.equal(statusLabel('In Progress', 'Incomplete Exam', recorded), 'In Progress')
+  }
+})
+
+test('the approval flag changes nothing for the other types', () => {
+  assert.equal(statusLabel('Completed', 'Program Change', false), 'Approved')
+  assert.equal(statusLabel('Completed', 'Raise Capacity', false), 'Approved')
+  assert.equal(statusLabel('Completed', 'Course Equivalency', true), 'Completed')
+  assert.equal(statusLabel('Completed', null, true), 'Completed')
+})
+
 test('other request types keep their stored status', () => {
-  for (const type of ['Incomplete Exam', 'Course Equivalency', 'Course Substitution']) {
+  for (const type of ['Course Equivalency', 'Course Substitution']) {
     assert.equal(statusLabel('Completed', type), 'Completed')
     assert.equal(statusLabel('Rejected', type), 'Rejected')
     assert.equal(statusLabel('In Progress', type), 'In Progress')

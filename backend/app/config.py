@@ -34,6 +34,8 @@ class Settings:
     # only by callers that ask for fallbacks (the priority agent).
     gemini_fallback_models: tuple[str, ...] = ()
     auth_timeout_seconds: float = 10.0
+    # Supabase Storage downloads (proof documents), per connect/read step.
+    storage_timeout_seconds: float = 20.0
 
 
 @lru_cache(maxsize=1)

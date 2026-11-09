@@ -100,7 +100,39 @@ export const academicRequestTypes: AcademicRequestType[] = [
     description:
       'Request an incomplete for a final exam you were unable to attend.',
     keywords: 'exam final missed medical incomplete',
-    details: notYetProvided(),
+    details: {
+      description:
+        "Request an incomplete for a final exam you were unable to attend. You'll provide: the course section, the date and time of the missed final exam, your explanation and, if you have them, supporting PDF documents.",
+      audience: 'Students registered in the course section of the missed exam this term.',
+      requirements:
+        'Submit within four working days of the missed exam (Friday and Saturday are not counted). Later requests can still be submitted, but may not be accepted.',
+      supportingDocuments:
+        'Optional: up to 5 PDF files (10 MB each, 18 MB in total), for example a medical report.',
+      steps: [
+        'Select Start request on this page.',
+        'Choose the course section of the final exam you missed.',
+        'Enter the date and time of the missed final exam and explain what happened.',
+        'Attach supporting PDF documents, if you have them.',
+        'Submit, then track the status and decision in My Requests.',
+      ],
+      requiredDocuments: [
+        'Supporting documents are optional. If you have them, attach them as PDF files: up to 5 files, 10 MB each, 18 MB in total.',
+        'Documents cannot be added, replaced or deleted after you submit.',
+      ],
+      notes: [
+        'Incomplete Exam requests are for final exams only. Midterm exams have a separate request service.',
+        'Your request stays In Progress until the Registrar’s Office makes a decision.',
+        'Accepted evidence includes an authenticated medical report, documented proof of a system outage for online exams, or travel documents together with a statement for an emergency.',
+        'Status updates and the decision appear in My Requests.',
+      ],
+      checklist: [
+        'Know the course section of the missed final exam.',
+        'Have the date and time of the missed final exam.',
+        'Prepare a clear explanation (at least 20 characters).',
+        'Have your supporting documents ready as PDF files, if any.',
+      ],
+    },
+    startPath: '/student/services/incomplete-exam/new',
   },
   {
     id: 'program-change',

@@ -6,6 +6,7 @@ import StudentDashboard from './pages/StudentDashboard'
 import StudentServiceDetails from './pages/StudentServiceDetails'
 import RaiseCapacityForm from './pages/RaiseCapacityForm'
 import ProgramChangeForm from './pages/ProgramChangeForm'
+import IncompleteExamForm from './pages/IncompleteExamForm'
 import MyRequests from './pages/MyRequests'
 import MyProfile from './pages/MyProfile'
 import StudentRequestDetails from './pages/StudentRequestDetails'
@@ -13,6 +14,7 @@ import AdminDashboard from './pages/AdminDashboard'
 import AdminTypeRequests from './pages/AdminTypeRequests'
 import AdminRaiseCapacityReview from './pages/AdminRaiseCapacityReview'
 import AdminProgramChangeReview from './pages/AdminProgramChangeReview'
+import AdminIncompleteExamReview from './pages/AdminIncompleteExamReview'
 
 function App() {
   return (
@@ -43,6 +45,15 @@ function App() {
           element={
             <ProtectedRoute requiredRole="student">
               <ProgramChangeForm />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/student/services/incomplete-exam/new"
+          element={
+            <ProtectedRoute requiredRole="student">
+              <IncompleteExamForm />
             </ProtectedRoute>
           }
         />
@@ -106,6 +117,15 @@ function App() {
           element={
             <ProtectedRoute requiredRole="admin">
               <AdminProgramChangeReview />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/requests/incomplete-exam/:requestId"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminIncompleteExamReview />
             </ProtectedRoute>
           }
         />

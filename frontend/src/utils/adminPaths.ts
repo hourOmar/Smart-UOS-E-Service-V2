@@ -20,5 +20,10 @@ export function programChangeReviewPath(requestId: string) {
   return `${adminTypePath('program-change')}/${encodeURIComponent(requestId)}`
 }
 
+/** The staff review page of one Incomplete Exam request. */
+export function incompleteExamReviewPath(requestId: string) {
+  return `${adminTypePath('incomplete-exam')}/${encodeURIComponent(requestId)}`
+}
+
 /** Where a review page was opened from, for its back link. */
 export type ReviewOrigin = 'dashboard' | 'type-list'

@@ -2,6 +2,10 @@
 
 Agents pass a prompt and a Pydantic schema; the reply is requested as JSON matching
 that schema (structured output), so it is never free-form text to re-parse.
+
+Optional document attachments (PDF or image bytes) are sent after the prompt as
+inline parts. Without attachments a call is built exactly as before: the prompt
+alone is the request contents.
 """
 
 import logging
@@ -9,6 +13,7 @@ import re
 import threading
 import time
 from collections.abc import Callable, Sequence
+from dataclasses import dataclass, field
 
 from google import genai
 from google.genai import errors as genai_errors
@@ -25,6 +30,25 @@ _MAX_DETAIL = 300
 class GeminiUnavailableError(Exception):
     """Gemini is not configured, could not be reached, or returned no usable reply.
     Its message is sanitized (see describe_failure) and safe to store and show."""
+
+
+# Document types Gemini accepts as inline attachments in this backend.
+ATTACHMENT_MIME_TYPES = frozenset({"application/pdf", "image/png", "image/jpeg", "image/webp"})
+
+
+@dataclass(frozen=True)
+class Attachment:
+    """One document sent to Gemini after the prompt. The bytes are never logged
+    (repr shows the type and size only)."""
+
+    mime_type: str
+    data: bytes = field(repr=False)
+
+    def __post_init__(self):
+        if self.mime_type not in ATTACHMENT_MIME_TYPES:
+            raise ValueError(f"Unsupported attachment type: {self.mime_type!r}.")
+        if not isinstance(self.data, bytes) or not self.data:
+            raise ValueError("An attachment needs non-empty bytes.")
 
 
 def sanitize(text: str | None) -> str:
@@ -106,31 +130,65 @@ def generate_structured[T: BaseModel](
 def generate_structured_with_model[T: BaseModel](
     prompt: str, schema: type[T], *, model: str | None = None, context: str = "",
     system_instruction: str | None = None, fallback_models: tuple[str, ...] | list[str] = (),
+    attachments: Sequence[Attachment] = (), temperature: float | None = None,
+    retry_delays: Sequence[float] = (),
 ) -> tuple[T, str]:
     """generate_structured, also returning the model that answered.
 
     `fallback_models` are tried in order, each only after the previous model
     failed with a temporary error (HTTP 429 or 503). Any other failure, or an
     unusable reply, raises at once. With no fallbacks this is exactly
-    generate_structured."""
+    generate_structured.
+
+    Optional (defaults leave a call exactly as before):
+    - `attachments`: documents sent after the prompt as inline parts, resent
+      unchanged on every retry and fallback;
+    - `temperature`: passed to the model when given;
+    - `retry_delays`: seconds to wait before retrying the SAME model after a
+      temporary error, one retry per entry, before moving on to the next
+      fallback model."""
     models = [model or model_name(), *fallback_models]
+    contents = _contents(prompt, attachments)
     temporary: list[str] = []
+    label = f", {context}" if context else ""
     for index, current in enumerate(models):
-        try:
-            return _generate_once(prompt, schema, current, context, system_instruction), current
-        except _TemporaryFailure as failure:
-            temporary.append(f"{current}: {failure.detail}")
-            if index == len(models) - 1:
-                message = (f"Gemini request failed: {failure.detail}" if len(models) == 1 else
-                           "Gemini request failed on every configured model: " + "; ".join(temporary))
-                raise GeminiUnavailableError(message) from failure.__cause__
-            log.info("Trying the next Gemini model after a temporary error (model=%s%s)",
-                     current, f", {context}" if context else "")
+        for attempt in range(len(retry_delays) + 1):
+            try:
+                return _generate_once(contents, schema, current, context, system_instruction, temperature), current
+            except _TemporaryFailure as failure:
+                last_failure = failure
+                if attempt < len(retry_delays):
+                    log.info("Retrying Gemini after a temporary error (model=%s%s, attempt %d)",
+                             current, label, attempt + 2)
+                    _sleep(retry_delays[attempt])
+                    continue
+                temporary.append(f"{current}: {failure.detail}")
+        if index == len(models) - 1:
+            message = (f"Gemini request failed: {last_failure.detail}" if len(models) == 1 else
+                       "Gemini request failed on every configured model: " + "; ".join(temporary))
+            raise GeminiUnavailableError(message) from last_failure.__cause__
+        log.info("Trying the next Gemini model after a temporary error (model=%s%s)", current, label)
     raise AssertionError("unreachable")  # pragma: no cover
 
 
+# Indirection so tests can skip real waiting.
+_sleep = time.sleep
+
+
+def _contents(prompt: str, attachments: Sequence[Attachment]):
+    """The prompt alone (unchanged behaviour), or the prompt followed by one
+    inline part per attachment."""
+    if not attachments:
+        return prompt
+    for attachment in attachments:
+        if not isinstance(attachment, Attachment):
+            raise TypeError("attachments must be app.core.gemini.Attachment values.")
+    return [prompt, *(types.Part.from_bytes(data=a.data, mime_type=a.mime_type) for a in attachments)]
+
+
 def _generate_once[T: BaseModel](
-    prompt: str, schema: type[T], model: str, context: str, system_instruction: str | None,
+    contents, schema: type[T], model: str, context: str, system_instruction: str | None,
+    temperature: float | None = None,
 ) -> T:
     started = time.monotonic()
     try:
@@ -138,8 +196,9 @@ def _generate_once[T: BaseModel](
             response_mime_type="application/json",
             response_schema=schema,
             **({"system_instruction": system_instruction} if system_instruction else {}),
+            **({"temperature": temperature} if temperature is not None else {}),
         )
-        response = get_client().models.generate_content(model=model, contents=prompt, config=config)
+        response = get_client().models.generate_content(model=model, contents=contents, config=config)
     except GeminiUnavailableError as exc:
         log.warning("Gemini unavailable (model=%s%s): %s", model, f", {context}" if context else "", exc)
         raise

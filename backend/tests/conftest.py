@@ -11,6 +11,7 @@ TEST_ENV = {
     "SUPABASE_ANON_KEY": "",
     "GEMINI_API_KEY": "",
     "GEMINI_MODEL": "test-model",
+    "GEMINI_FALLBACK_MODELS": "",
     "FRONTEND_ORIGINS": "http://localhost:5173",
 }
 
