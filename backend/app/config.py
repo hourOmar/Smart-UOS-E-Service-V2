@@ -31,7 +31,8 @@ class Settings:
     gemini_model: str
     frontend_origins: tuple[str, ...]
     # Optional, ordered; tried only after a temporary Gemini error (429/503) and
-    # only by callers that ask for fallbacks (the priority agent).
+    # only by callers that ask for fallbacks: the Raise Capacity priority agent
+    # and both Incomplete Exam agents (eligibility and rejection explanation).
     gemini_fallback_models: tuple[str, ...] = ()
     auth_timeout_seconds: float = 10.0
     # Supabase Storage downloads (proof documents), per connect/read step.

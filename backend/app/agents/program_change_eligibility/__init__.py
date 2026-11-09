@@ -27,9 +27,6 @@ in data/. Changes:
   Gemini through app.core.gemini (shared client, sanitized errors, logging
   instead of print);
 - imports are package-relative.
-
-Phase 1 only: no run history, API route or frontend yet, and the backend role
-cannot read Program_Change until its grant is installed (see request_data.py).
 """
 
 AGENT_NAME = "program_change_eligibility"
