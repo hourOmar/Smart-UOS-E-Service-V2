@@ -47,9 +47,11 @@ Port changes (agent version 1.0.0):
    check runs (workflow.py), instead of the import-time RuntimeError.
 6. Sanitization: Gemini failure text (check 3's evidence, the rejection
    step's gemini_error) passes through app.core.gemini.describe_failure.
-7. Run history (Phase 4, not in this package yet):
-   agents.course_substitution_evaluation and
-   /api/staff/course-substitution/{id}.
+7. Run history (service.py, repository.py): runs are stored in
+   agents.course_substitution_evaluation, and the staff-only API is
+   /api/staff/course-substitution/{id} (app/api/course_substitution_review.py).
+   A request without Course_Substitution details is shown as "details
+   missing" and is never evaluated (no run row).
 8. Current term saved: current_term and current_semester are part of the
    stored result. The date-based rule is unchanged.
 9. Models recorded: the model that answered each call is returned as

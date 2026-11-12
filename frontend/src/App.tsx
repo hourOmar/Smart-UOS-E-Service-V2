@@ -15,6 +15,7 @@ import AdminTypeRequests from './pages/AdminTypeRequests'
 import AdminRaiseCapacityReview from './pages/AdminRaiseCapacityReview'
 import AdminProgramChangeReview from './pages/AdminProgramChangeReview'
 import AdminIncompleteExamReview from './pages/AdminIncompleteExamReview'
+import AdminCourseSubstitutionReview from './pages/AdminCourseSubstitutionReview'
 
 function App() {
   return (
@@ -126,6 +127,15 @@ function App() {
           element={
             <ProtectedRoute requiredRole="admin">
               <AdminIncompleteExamReview />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/requests/course-substitution/:requestId"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminCourseSubstitutionReview />
             </ProtectedRoute>
           }
         />

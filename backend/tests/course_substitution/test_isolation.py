@@ -34,8 +34,8 @@ def test_version_and_expected_modules():
         "course_substitution_eligibility", "1.0.0", "32f83d3")
     assert set(MODULES) == {
         "agent", "eligibility_checks", "exceptions", "explanation_generator", "llm_client", "pipeline",
-        "rejection_agent", "rejection_gemini", "rejection_input_tools", "rejection_keyword_tools", "request_data",
-        "study_plan_check", "workflow",
+        "rejection_agent", "rejection_gemini", "rejection_input_tools", "rejection_keyword_tools", "repository",
+        "request_data", "service", "study_plan_check", "workflow",
     }
 
 
@@ -62,11 +62,20 @@ def test_no_standalone_configuration_clients_prints_or_credentials():
             assert token not in body, f"{token!r} found in {name}"
 
 
-def test_no_writes_and_no_env_files():
+def test_no_writes_except_the_run_history_and_no_env_files():
+    """Only the run history (agents.course_substitution_evaluation) is ever written:
+    SQL writes only in repository.py, write transactions only in service.py, and
+    nothing writes a public (application) table."""
     for name, source in CODE.items():
         body = code_only(source).upper()
-        for statement in ("INSERT ", "UPDATE PUBLIC", "DELETE FROM", "TRUNCATE", "WRITE_TRANSACTION"):
+        for statement in ("INSERT INTO PUBLIC", "UPDATE PUBLIC", "DELETE FROM", "TRUNCATE"):
             assert statement not in body, f"{statement} in {name}"
+        if name != "repository.py":
+            assert "INSERT INTO" not in body and "UPDATE {TABLE}" not in body, f"SQL write in {name}"
+        if name != "service.py":
+            assert "WRITE_TRANSACTION" not in body, f"write_transaction used in {name}"
+    assert "INSERT INTO {TABLE}" in CODE["repository.py"]
+    assert 'TABLE = "agents.course_substitution_evaluation"' in CODE["repository.py"]
     assert not any(PACKAGE.rglob(".env*"))
     assert not any(PACKAGE.rglob(".git"))
 

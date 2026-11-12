@@ -136,3 +136,10 @@ def get_course_substitution_request(request_id: str) -> dict:
     request, in one read-only transaction."""
     with read_only() as conn:
         return fetch_course_substitution_request(conn, request_id)
+
+
+def has_course_substitution_details(conn: Connection, request_id: str) -> bool:
+    """For the 'details missing' state: True when a Course_Substitution row exists."""
+    return conn.execute(
+        text('SELECT 1 FROM public."Course_Substitution" WHERE "Request_ID" = :rid LIMIT 1'), {"rid": request_id}
+    ).first() is not None

@@ -9,7 +9,7 @@ here, and nothing is written anywhere.
 
 import hashlib
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import date, datetime, time, timezone
 from pathlib import Path
 
 from app.config import get_settings
@@ -42,11 +42,23 @@ def knowledge_file_fingerprints() -> list[dict]:
     ]
 
 
+def json_ready(value):
+    """Dates and times as ISO 8601 strings (Request_Date, Submission_Time), in
+    nested dicts and lists; every other value unchanged."""
+    if isinstance(value, dict):
+        return {key: json_ready(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [json_ready(item) for item in value]
+    if isinstance(value, (date, time)):   # datetime is a date
+        return value.isoformat()
+    return value
+
+
 def evidence_snapshot(request: dict) -> dict:
-    """The request dict (request_data reads no student email), the knowledge
-    files' fingerprints and the collection time."""
+    """The request dict (request_data reads no student email) with dates and
+    times serialized, the knowledge files' fingerprints and the collection time."""
     return {
-        "request": request,
+        "request": json_ready(request),
         "knowledge_files": knowledge_file_fingerprints(),
         "collected_at": datetime.now(timezone.utc).isoformat(),
     }

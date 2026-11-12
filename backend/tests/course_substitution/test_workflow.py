@@ -49,7 +49,8 @@ def test_eligible_outcome_and_evidence_snapshot(monkeypatch):
                                        "expected_graduation_term"}
     for course in ("original_course", "proposed_course"):
         assert set(request[course]) == {"course_id", "course_name"}
-    assert "email" not in json.dumps(evidence, default=str).lower()
+    assert (request["request_date"], request["submission_time"]) == ("2026-11-04", "10:30:00")
+    assert "email" not in json.dumps(evidence).lower()      # JSON-ready without a default=
 
 
 def test_not_eligible_keeps_the_rejection_and_records_both_models(monkeypatch):

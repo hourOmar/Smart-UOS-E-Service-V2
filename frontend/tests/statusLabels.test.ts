@@ -31,6 +31,16 @@ test('Incomplete Exam: Completed is Approved only with a recorded approval decis
   }
 })
 
+test('Course Substitution: Completed is Approved only with a recorded approval decision', () => {
+  assert.equal(statusLabel('Completed', 'Course Substitution'), 'Completed')
+  assert.equal(statusLabel('Completed', 'Course Substitution', false), 'Completed')
+  assert.equal(statusLabel('Completed', 'Course Substitution', true), 'Approved')
+  for (const recorded of [true, false]) {
+    assert.equal(statusLabel('Rejected', 'Course Substitution', recorded), 'Rejected')
+    assert.equal(statusLabel('In Progress', 'Course Substitution', recorded), 'In Progress')
+  }
+})
+
 test('the approval flag changes nothing for the other types', () => {
   assert.equal(statusLabel('Completed', 'Program Change', false), 'Approved')
   assert.equal(statusLabel('Completed', 'Raise Capacity', false), 'Approved')
@@ -39,7 +49,7 @@ test('the approval flag changes nothing for the other types', () => {
 })
 
 test('other request types keep their stored status', () => {
-  for (const type of ['Course Equivalency', 'Course Substitution']) {
+  for (const type of ['Course Equivalency']) {
     assert.equal(statusLabel('Completed', type), 'Completed')
     assert.equal(statusLabel('Rejected', type), 'Rejected')
     assert.equal(statusLabel('In Progress', type), 'In Progress')
