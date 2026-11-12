@@ -1,0 +1,51 @@
+
+{
+  "note": "Closed vocabulary of rejection keywords for the Course Substitution Rejection Explanation Agent. Deterministic keywords are detected by Python from verified eligibility checks. Judgment keywords may only be selected by Gemini when supported by the eligibility agent's explanations.",
+  "keywords": {
+    "original_course_offered_before_graduation": {
+      "detection": "deterministic",
+      "label": "Original course available before graduation",
+      "policy_basis": "Course substitution is only considered when the original core course will not be offered before the student's expected graduation.",
+      "plain_reason": "The original course is scheduled to be offered before your expected graduation, so a substitution is not required."
+    },
+    "proposed_course_lower_level": {
+      "detection": "deterministic",
+      "label": "Proposed course is at a lower level",
+      "policy_basis": "The replacement course must be at the same academic level as, or a higher level than, the original course.",
+      "plain_reason": "The proposed replacement course is at a lower academic level than the original course. A replacement must be at the same level or a higher level."
+    },
+    "original_course_not_core": {
+      "detection": "deterministic",
+      "label": "Original course is not a core course",
+      "policy_basis": "Course substitution applies to required core courses in the student's study plan.",
+      "plain_reason": "The original course was not identified as a required core course in your study plan."
+    },
+    "proposed_course_not_offered": {
+      "detection": "deterministic",
+      "label": "Proposed course not offered in the current semester",
+      "policy_basis": "The proposed replacement course must be offered in the current semester.",
+      "plain_reason": "The proposed replacement course is not listed as offered in the current semester."
+    },
+    "proposed_course_already_completed": {
+      "detection": "deterministic",
+      "label": "Proposed course already completed",
+      "policy_basis": "A replacement course must not have been successfully completed previously by the student.",
+      "plain_reason": "Your academic record indicates that you have already successfully completed the proposed replacement course."
+    },
+    "graduation_timing_not_satisfied": {
+      "detection": "judgment",
+      "label": "Graduation timing does not meet the substitution conditions",
+      "policy_basis": "Course substitution is intended for graduating students whose remaining study period does not allow them to take the original core course."
+    },
+    "study_plan_requirement_not_confirmed": {
+      "detection": "judgment",
+      "label": "Study plan requirement could not be confirmed",
+      "policy_basis": "The original course must be verified as a required core course in the student's official study plan."
+    },
+    "course_offering_information_uncertain": {
+      "detection": "judgment",
+      "label": "Course offering information is uncertain",
+      "policy_basis": "Course offering information must be sufficiently confirmed to establish whether a course is available in the required semester."
+    }
+  }
+}

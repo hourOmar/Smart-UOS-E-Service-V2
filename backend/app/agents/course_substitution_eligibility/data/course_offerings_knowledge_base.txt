@@ -1,0 +1,95 @@
+# COURSE OFFERINGS KNOWLEDGE BASE
+University of Sharjah — Bachelor of Science in Computer Science
+
+- `Yes` means the source lists the course as offered in that semester.
+- `No` means the source indicates that the course is not offered in that semester.
+- `Unknown` means the source does not specify the course offering for that semester.
+
+**SEMESTERS:** Fall | Spring | Summer
+
+## A. UNIVERSITY COMPULSORY COURSES
+
+| Course ID | Course Name | Fall | Spring | Summer |
+|---|---|---|---|---|
+| 0201102 | Arabic Language | Yes | Yes | Yes |
+| 0202112 | English for Academic Purposes | Yes | Yes | Yes |
+| 1401100 | Introduction to IT (English) | Yes | Yes | Yes |
+| 0101100 | Islamic Culture | Yes | Yes | Yes |
+| 0302200 | Fundamentals of Innovation and Entrepreneurship | Yes | Yes | Yes |
+| 0204102 | UAE Society | Yes | Yes | Yes |
+
+## B. COLLEGE COMPULSORY COURSES
+
+| Course ID | Course Name | Fall | Spring | Summer |
+|---|---|---|---|---|
+| 1430110 | Physics I for Sciences | Yes | Yes | Yes |
+| 1430116 | Physics I Lab | Yes | Yes | Yes |
+| 1420101 | General Chemistry I | Yes | Yes | Yes |
+| 1420102 | General Chemistry I Lab | Yes | Yes | Yes |
+| 1440131 | Calculus I | Yes | Yes | Yes |
+
+## C. MAJOR COMPULSORY COURSES
+
+| Course ID | Course Name | Fall | Spring | Summer |
+|---|---|---|---|---|
+| 1501116 | Programming I | Yes | Yes | Yes |
+| 1501211 | Programming II | Yes | Yes | Yes |
+| 1501215 | Data Structures | Yes | Yes | Yes |
+| 1501246 | Object Oriented Design with Java | No | Yes | No |
+| 1501252 | Computer Organization and Assembly Language | No | Yes | No |
+| 1501263 | Introduction to Database Management System | Yes | Yes | Yes |
+| 1501279 | Discrete Structures | Yes | Yes | No |
+| 1501319 | Programming Languages and Paradigms | No | Yes | No |
+| 1501322 | Professional, Social and Ethical Issues in CS | Yes | No | No |
+| 1501352 | Operating Systems | Yes | Yes | No |
+| 1501330 | Introduction to Artificial Intelligence | Yes | No | No |
+| 1501366 | Software Engineering | Yes | Yes | No |
+| 1501250 | Networking Fundamentals | No | Yes | No |
+| 1501371 | Design and Analysis of Algorithms | Yes | Yes | No |
+| 1501372 | Formal Languages and Automata Theory | No | Yes | No |
+| 1501394 | Junior Project in CS | Yes | Yes | No |
+| 1501397 | CO-OP Summer Training | Yes | Yes | Yes |
+| 1501494 | Senior Project in CS | Yes | Yes | No |
+| 1501459 | Information Security | Yes | No | No |
+| 1501454 | Cloud Computing | Yes | No | No |
+
+## D. SUPPORT COMPULSORY COURSES
+
+| Course ID | Course Name | Fall | Spring | Summer |
+|---|---|---|---|---|
+| 1440132 | Calculus II | Yes | Yes | Yes |
+| 1440211 | Linear Algebra | Yes | Yes | Yes |
+| 1440281 | Introduction to Probability and Statistics | Yes | Yes | Yes |
+| 0202213 | Critical Reading and Writing | Yes | Yes | Yes |
+
+## E. MAJOR ELECTIVE COURSES
+
+The source states that CS students must complete 12 credit hours of elective Computer Science courses chosen from this list.
+
+| Course ID | Course Name | Fall | Spring | Summer |
+|---|---|---|---|---|
+| 1501341 | Web Programming | Yes | No | No |
+| 1501342 | 2D/3D Computer Animation | Yes | No | No |
+| 1501343 | Interactive 3D Design | No | Yes | No |
+| 1501344 | 2D Character Design | Yes | No | No |
+| 1501355 | Computer Architecture | Unknown | Unknown | Unknown |
+| 1501365 | Advanced Database System | Yes | No | No |
+| 1501370 | Numerical Methods | Yes | No | No |
+| 1501433 | Introduction to Computer Vision and Image Processing | Unknown | Unknown | Unknown |
+| 1501440 | Introduction to Computer Graphics | Unknown | Unknown | Unknown |
+| 1501441 | Multimedia Technology | Unknown | Unknown | Unknown |
+| 1501442 | 3D Character Animation and Visual FX | No | Yes | No |
+| 1501443 | Human Computer Interaction | No | Yes | No |
+| 1501444 | Game Design and Development | Yes | No | No |
+| 1501445 | IT Application in E-Commerce | No | Yes | No |
+| 1501451 | Computer Networks | Unknown | Unknown | Unknown |
+| 1501458 | Mobile Application and Design | Yes | No | No |
+| 1501465 | Development of Web Application | Yes | No | No |
+| 1501474 | Compiler Design | Unknown | Unknown | Unknown |
+| 1501490 | Topics in Computer Science I | Yes | No | No |
+| 1501491 | Topics in Computer Science II | No | Yes | No |
+| 1501492 | Special Topics in IT | No | Yes | No |
+
+## IMPORTANT LIMITATION
+
+This document records course offerings only. It does not establish whether two courses are academically equivalent or whether a substitution should be approved.

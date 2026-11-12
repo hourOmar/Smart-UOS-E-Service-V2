@@ -1,0 +1,296 @@
+UOS BACHELOR'S PROGRAM URLS
+
+Program ID: 0104
+Program Name: Bachelor in Religious Discourse and Community Communication
+College: College of Shari'a and Islamic Studies
+Official URL: https://www.sharjah.ac.ae/ar/academics/degree/undergraduate/religious-discourse-and-community-communication
+
+Program ID: 0103
+Program Name: Bachelor in Shari'a – Jurisprudence and its Foundations
+College: College of Shari'a and Islamic Studies
+Official URL: https://www.sharjah.ac.ae/ar/Academics/Degree/Undergraduate/Jurisprudence-and-its-Foundations
+
+Program ID: 0104
+Program Name: Bachelor in Shari'a – Foundations of Religion
+College: College of Shari'a and Islamic Studies
+Official URL: https://www.sharjah.ac.ae/ar/Academics/Degree/Undergraduate/Foundations-of-Religion
+
+Program ID: 0206
+Program Name: Bachelor of Education in Special Education
+College: College of Arts, Humanities and Social Sciences
+Official URL: https://www.sharjah.ac.ae/ar/Academics/Degree/Undergraduate/Special-Education
+
+Program ID: 0206
+Program Name: Bachelor of Education in Early Childhood
+College: College of Arts, Humanities and Social Sciences
+Official URL: https://www.sharjah.ac.ae/ar/Academics/Degree/Undergraduate/Early-Childhood
+
+Program ID: 0201
+Program Name: Bachelor of Arts in Arabic for Non-Native Speakers
+College: College of Arts, Humanities and Social Sciences
+Official URL: https://newsite-admin.sharjah.ac.ae/Academics/Degree/Undergraduate/Arabic-for-Non-Native-Speakers
+
+Program ID: 0206
+Program Name: Bachelor in Family Counseling and Guidance
+College: College of Arts, Humanities and Social Sciences
+Official URL: https://www.sharjah.ac.ae/ar/academics/degree/undergraduate/family-counseling-and-guidance
+
+Program ID: 0202
+Program Name: Bachelor of Arts in French Language and Literature
+College: College of Arts, Humanities and Social Sciences
+Official URL: https://www.sharjah.ac.ae/Academics/Degree/Undergraduate/French-Language-and-Literature
+
+Program ID: 0201
+Program Name: Bachelor of Arts in Arabic Language and Literature
+College: College of Arts, Humanities and Social Sciences
+Official URL: https://www.sharjah.ac.ae/ar/academics/degree/undergraduate/arabic-language-and-literature
+
+Program ID: 0202
+Program Name: Bachelor of Arts in English Language and Literature
+College: College of Arts, Humanities and Social Sciences
+Official URL: https://www.sharjah.ac.ae/academics/degree/undergraduate/english-language-and-literature
+
+Program ID: 0203
+Program Name: Bachelor of Arts in History and Islamic Civilization
+College: College of Arts, Humanities and Social Sciences
+Official URL: https://www.sharjah.ac.ae/ar/academics/degree/undergraduate/history-and-islamic-civilization
+
+Program ID: 0203
+Program Name: Bachelor of Arts in History and Islamic Civilization – Tourism Guidance
+College: College of Arts, Humanities and Social Sciences
+Official URL: https://www.sharjah.ac.ae/ar/academics/degree/undergraduate/history-and-islamic-civilization-tourism-guidance
+
+Program ID: 0204
+Program Name: Bachelor of Arts in Sociology
+College: College of Arts, Humanities and Social Sciences
+Official URL: https://www.sharjah.ac.ae/ar/academics/degree/undergraduate/sociology
+
+Program ID: 0301
+Program Name: Bachelor of Science in Accounting
+College: College of Business Administration
+Official URL: https://www.sharjah.ac.ae/academics/degree/undergraduate/accounting
+
+Program ID: 0302
+Program Name: Bachelor of Science in Business Administration - Management
+College: College of Business Administration
+Official URL: https://www.sharjah.ac.ae/academics/degree/undergraduate/business-administration-management
+
+Program ID: 0302
+Program Name: Bachelor of Science in Business Administration - Marketing
+College: College of Business Administration
+Official URL: https://www.sharjah.ac.ae/academics/degree/undergraduate/business-administration-marketing
+
+Program ID: 0302
+Program Name: Bachelor of Science in Business Administration - Human Resource Management
+College: College of Business Administration
+Official URL: https://www.sharjah.ac.ae/academics/degree/undergraduate/business-administration-human-resource-management
+
+Program ID: 0308
+Program Name: Bachelor of Science in Finance
+College: College of Business Administration
+Official URL: https://www.sharjah.ac.ae/academics/degree/undergraduate/finance
+
+Program ID: 0308
+Program Name: Bachelor of Science in Economics
+College: College of Business Administration
+Official URL: https://www.sharjah.ac.ae/academics/degree/undergraduate/economics
+
+Program ID: 0302
+Program Name: Bachelor of Science in Supply Chain Management
+College: College of Business Administration
+Official URL: https://www.sharjah.ac.ae/en/academics/degree/undergraduate/supply-chain-management
+
+Program ID: 0408
+Program Name: Bachelor of Science in Mechatronics and Robotics Engineering
+College: College of Engineering
+Official URL: https://www.sharjah.ac.ae/Academics/Degree/Undergraduate/Mechatronics-and-Robotics-Engineering
+
+Program ID: 0408
+Program Name: Bachelor of Science in Chemical and Water Desalination Engineering
+College: College of Engineering
+Official URL: https://www.sharjah.ac.ae/en/academics/degree/undergraduate/chemical-and-water-desalination-engineering
+
+Program ID: 0401
+Program Name: Bachelor of Science in Civil Engineering
+College: College of Engineering
+Official URL: https://www.sharjah.ac.ae/Academics/Degree/Undergraduate/Civil-Engineering
+
+Program ID: 0402
+Program Name: Bachelor of Science in Electrical and Electronics Engineering
+College: College of Engineering
+Official URL: https://www.sharjah.ac.ae/en/academics/degree/undergraduate/electrical-and-electronics-engineering
+
+Program ID: 0404
+Program Name: Bachelor of Science in Architectural Engineering
+College: College of Engineering
+Official URL: https://www.sharjah.ac.ae/en/academics/degree/undergraduate/architectural-engineering
+
+Program ID: 0405
+Program Name: Bachelor of Science in Industrial Engineering and Engineering Management
+College: College of Engineering
+Official URL: https://www.sharjah.ac.ae/Academics/Degree/Undergraduate/Industrial-Engineering-and-Engineering-Management
+
+Program ID: 0406
+Program Name: Bachelor of Science in Sustainable and Renewable Energy Engineering
+College: College of Engineering
+Official URL: https://www.sharjah.ac.ae/en/academics/degree/undergraduate/sustainable-and-renewable-energy-engineering
+
+Program ID: 0407
+Program Name: Bachelor of Science in Nuclear Engineering
+College: College of Engineering
+Official URL: https://www.sharjah.ac.ae/en/academics/degree/undergraduate/nuclear-engineering
+
+Program ID: 0408
+Program Name: Bachelor of Science in Mechanical Engineering
+College: College of Engineering
+Official URL: https://www.sharjah.ac.ae/Academics/Degree/Undergraduate/Mechanical-Engineering
+
+Program ID: 0508
+Program Name: Bachelor of Science in Audiology and Speech Language Pathology
+College: College of Health Sciences
+Official URL: https://www.sharjah.ac.ae/academics/degree/undergraduate/audiology-and-speech-language-pathology
+
+Program ID: 0501
+Program Name: Bachelor of Science in Medical Laboratory Sciences
+College: College of Health Sciences
+Official URL: https://www.sharjah.ac.ae/academics/degree/undergraduate/medical-laboratory-sciences
+
+Program ID: 0502
+Program Name: Bachelor of Science in Medical Diagnostic Imaging
+College: College of Health Sciences
+Official URL: https://www.sharjah.ac.ae/en/academics/degree/undergraduate/medical-diagnostic-imaging
+
+Program ID: 0503
+Program Name: Bachelor of Science in Nursing
+College: College of Health Sciences
+Official URL: https://www.sharjah.ac.ae/Academics/Degree/Undergraduate/Nursing
+
+Program ID: 0504
+Program Name: Bachelor of Science in Healthcare Management
+College: College of Health Sciences
+Official URL: https://www.sharjah.ac.ae/academics/degree/undergraduate/healthcare-management
+
+Program ID: 0505
+Program Name: Bachelor of Science in Physiotherapy
+College: College of Health Sciences
+Official URL: https://www.sharjah.ac.ae/en/academics/degree/undergraduate/physiotherapy
+
+Program ID: 0506
+Program Name: Bachelor of Science in Environmental Health Sciences
+College: College of Health Sciences
+Official URL: https://www.sharjah.ac.ae/academics/degree/undergraduate/environmental-health-sciences
+
+Program ID: 0507
+Program Name: Bachelor of Science in Clinical Nutrition and Dietetics
+College: College of Health Sciences
+Official URL: https://www.sharjah.ac.ae/en/academics/degree/undergraduate/clinical-nutrition-and-dietetics
+
+Program ID: 0601
+Program Name: Bachelor in Law
+College: College of Law
+Official URL: https://www.sharjah.ac.ae/ar/academics/degree/undergraduate/law
+
+Program ID: 0605
+Program Name: Bachelor of Law in English
+College: College of Law
+Official URL: https://www.sharjah.ac.ae/academics/degree/undergraduate/law-in-english
+
+Program ID: 0807
+Program Name: Bachelor of Arts in Strategic Communication and Advertising
+College: College of Communication
+Official URL: https://www.sharjah.ac.ae/Academics/Degree/Undergraduate/Strategic-Communication-and-Advertising
+
+Program ID: 0806
+Program Name: Bachelor of Arts in Communication – Digital Media Design
+College: College of Communication
+Official URL: https://www.sharjah.ac.ae/ar/academics/degree/undergraduate/communication--digital-media-design
+
+Program ID: 0806
+Program Name: Bachelor of Arts in Communication – Electronic Journalism
+College: College of Communication
+Official URL: https://www.sharjah.ac.ae/ar/academics/degree/undergraduate/communication--electronic-journalism
+
+Program ID: 0806
+Program Name: Bachelor of Arts in Communication – Radio and Television
+College: College of Communication
+Official URL: https://www.sharjah.ac.ae/ar/academics/degree/undergraduate/communication-radio-and-television
+
+Program ID: 0806
+Program Name: Bachelor of Arts in Mass Communication
+College: College of Communication
+Official URL: https://www.sharjah.ac.ae/Academics/Degree/Undergraduate/Mass-Communication
+
+Program ID: 0807
+Program Name: Bachelor of Arts in Public Relations
+College: College of Communication
+Official URL: https://www.sharjah.ac.ae/ar/academics/degree/undergraduate/public-relations
+
+Program ID: 1100
+Program Name: Bachelor of Pharmacy
+College: College of Pharmacy
+Official URL: https://www.sharjah.ac.ae/en/academics/degree/undergraduate/pharmacy
+
+Program ID: 1420
+Program Name: Bachelor of Science in Chemistry
+College: College of Sciences
+Official URL: https://www.sharjah.ac.ae/academics/degree/undergraduate/chemistry
+
+Program ID: 1430
+Program Name: Bachelor of Science in Applied Physics
+College: College of Sciences
+Official URL: https://www.sharjah.ac.ae/academics/degree/undergraduate/applied-physics
+
+Program ID: 1440
+Program Name: Bachelor of Science in Mathematics
+College: College of Sciences
+Official URL: https://www.sharjah.ac.ae/academics/degree/undergraduate/mathematics
+
+Program ID: 1450
+Program Name: Bachelor of Science in Biotechnology
+College: College of Sciences
+Official URL: https://www.sharjah.ac.ae/academics/degree/undergraduate/biotechnology
+
+Program ID: 1460
+Program Name: Bachelor of Science in Petroleum Geosciences and Remote Sensing
+College: College of Sciences
+Official URL: https://www.sharjah.ac.ae/en/academics/degree/undergraduate/petroleum-geosciences-and-remote-sensing
+
+Program ID: 1501
+Program Name: Bachelor of Science in Biomedical Informatics
+College: College of Computing and Informatics
+Official URL: https://www.sharjah.ac.ae/en/academics/degree/undergraduate/biomedical-informatics
+
+Program ID: 1502
+Program Name: Bachelor of Science in Cybersecurity Engineering
+College: College of Computing and Informatics
+Official URL: https://www.sharjah.ac.ae/Academics/Degree/Undergraduate/Cybersecurity-Engineering
+
+Program ID: 1503
+Program Name: Bachelor of Science in Business Information Systems
+College: College of Computing and Informatics
+Official URL: https://www.sharjah.ac.ae/academics/degree/undergraduate/information-systems
+
+Program ID: 1502
+Program Name: Bachelor of Science in Computer Engineering
+College: College of Computing and Informatics
+Official URL: https://www.sharjah.ac.ae/academics/degree/undergraduate/computer-engineering
+
+Program ID: 1501
+Program Name: Bachelor of Science in Computer Science
+College: College of Computing and Informatics
+Official URL: https://www.sharjah.ac.ae/academics/degree/undergraduate/computer-science
+
+Program ID: 1501
+Program Name: Bachelor of Science in Information Technology - Multimedia
+College: College of Computing and Informatics
+Official URL: https://www.sharjah.ac.ae/Academics/Degree/Undergraduate/Information-Technology-Multimedia
+
+Program ID: 1601
+Program Name: Bachelor of Arts in International Relations
+College: College of Public Policy
+Official URL: https://www.sharjah.ac.ae/academics/degree/undergraduate/international-relations
+
+Program ID: 1501
+Program Name: Bachelor of Science in Artificial Intelligence
+College: College of Computing and Informatics
+Official URL: https://www.sharjah.ac.ae/en/academics/degree/undergraduate/artificial-intelligence
