@@ -7,6 +7,7 @@ import StudentServiceDetails from './pages/StudentServiceDetails'
 import RaiseCapacityForm from './pages/RaiseCapacityForm'
 import ProgramChangeForm from './pages/ProgramChangeForm'
 import IncompleteExamForm from './pages/IncompleteExamForm'
+import CourseSubstitutionForm from './pages/CourseSubstitutionForm'
 import MyRequests from './pages/MyRequests'
 import MyProfile from './pages/MyProfile'
 import StudentRequestDetails from './pages/StudentRequestDetails'
@@ -55,6 +56,15 @@ function App() {
           element={
             <ProtectedRoute requiredRole="student">
               <IncompleteExamForm />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/student/services/course-substitution/new"
+          element={
+            <ProtectedRoute requiredRole="student">
+              <CourseSubstitutionForm />
             </ProtectedRoute>
           }
         />

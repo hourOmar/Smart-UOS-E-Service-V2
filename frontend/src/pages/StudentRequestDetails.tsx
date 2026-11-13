@@ -13,7 +13,8 @@ import StudentProofDocuments from '../components/requests/StudentProofDocuments'
 import useRejectionReason from '../hooks/useRejectionReason'
 import useProgramChangeDecision from '../hooks/useProgramChangeDecision'
 import useIncompleteExamDecision from '../hooks/useIncompleteExamDecision'
-import { INCOMPLETE_EXAM, PROGRAM_CHANGE, RAISE_CAPACITY, statusLabel } from '../utils/statusLabels'
+import useCourseSubstitutionDecision from '../hooks/useCourseSubstitutionDecision'
+import { COURSE_SUBSTITUTION, INCOMPLETE_EXAM, PROGRAM_CHANGE, RAISE_CAPACITY, statusLabel } from '../utils/statusLabels'
 import '../components/requests/Requests.css'
 
 // Final outcomes use the same wording as the student notifications; a request
@@ -160,8 +161,14 @@ function RequestBody({ request }: { request: Details }) {
   // reads "Approved" only when an approval decision record exists, never from
   // the status alone.
   const incompleteExam = useIncompleteExamDecision(request.id, showIncompleteExamDecision)
+  // A decided Course Substitution request (get_my_course_substitution_decision),
+  // under the same recorded-approval rule as Incomplete Exam.
+  const showCourseSubstitutionDecision = request.type === COURSE_SUBSTITUTION && decided
+  const courseSubstitution = useCourseSubstitutionDecision(request.id, showCourseSubstitutionDecision)
+  const courseSubstitutionApproved =
+    courseSubstitution.decision?.decision === 'approve' && courseSubstitution.decision.hasDecisionRecord
   const approvalRecorded =
-    incompleteExam.decision?.decision === 'approve' && incompleteExam.decision.hasDecisionRecord
+    incompleteExam.decision?.decision === 'approve' && incompleteExam.decision.hasDecisionRecord || courseSubstitutionApproved
   const decision = decisionHeading(request, approvalRecorded)
 
   return (
@@ -206,6 +213,14 @@ function RequestBody({ request }: { request: Details }) {
                   status={incompleteExam.status}
                   explanation={incompleteExam.decision?.explanation}
                   retry={incompleteExam.retry}
+                  rejected={request.status === 'Rejected'}
+                />
+              )}
+              {showCourseSubstitutionDecision && (
+                <DecisionExplanation
+                  status={courseSubstitution.status}
+                  explanation={courseSubstitution.decision?.explanation}
+                  retry={courseSubstitution.retry}
                   rejected={request.status === 'Rejected'}
                 />
               )}

@@ -2,8 +2,9 @@
 // catalog order of the final prototype (Smart UoS E-Service v3.dc.html).
 // Fixed application content. Raise Capacity's wording is taken verbatim
 // from the approved prototype design (Smart UoS E-Service.dc.html, kept
-// outside the project). The details-page content of the other four services
-// is deliberately empty until the university supplies it: their pages keep
+// outside the project). Incomplete Exam and Course Substitution use wording
+// supplied for them. The details-page content of the other services is
+// deliberately empty until the university supplies it: their pages keep
 // every heading but show no text, and nothing here may be filled in with
 // invented or placeholder wording.
 // Student data and submitted requests always come from the database.
@@ -157,7 +158,33 @@ export const academicRequestTypes: AcademicRequestType[] = [
     description:
       'Request that another University of Sharjah course count in place of a course in your plan.',
     keywords: 'substitution substitute replace course plan',
-    details: notYetProvided(),
+    details: {
+      description:
+        "Enables undergraduate students in their final semester to request an approved substitute for a required major course where permitted, supporting completion of graduation requirements. You'll provide: the course you want to replace, the course you propose instead, and your reason for the request.",
+      audience: 'Undergraduate students in their final semester.',
+      requirements:
+        'Undergraduate students in their final semester. Your request is reviewed against these conditions: the original course will not be available before you graduate; the original course is a core course in your program; the proposed course is offered in the current semester; the proposed course is at the same academic level or higher than the original; and you have not already passed the proposed course.',
+      supportingDocuments: 'No documents are requested in the current form.',
+      steps: [
+        'Select Start request on this page.',
+        'Choose the course in your plan that you want to replace.',
+        'Choose the course you propose instead.',
+        'Explain your reason for the request.',
+        'Submit, then track the status and decision in My Requests.',
+      ],
+      requiredDocuments: ['No documents are requested in the current Course Substitution form.'],
+      notes: [
+        'This service is free of charge.',
+        'Processing time: 3 to 5 business days.',
+        'Status updates and the decision appear in My Requests.',
+      ],
+      checklist: [
+        'Know the code of the course you want to replace.',
+        'Know the code of the course you propose instead.',
+        'Prepare a clear reason (at least 20 characters).',
+      ],
+    },
+    startPath: '/student/services/course-substitution/new',
   },
 ]
 

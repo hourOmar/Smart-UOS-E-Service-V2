@@ -1,0 +1,111 @@
+/* Course Substitution request form: only what the Raise Capacity and Program
+   Change form styles do not already cover (the searchable course pickers). */
+
+.csf-form .pc-details {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.csf-picker {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.csf-picker__hint {
+  font-size: 13px;
+  color: var(--proto-muted);
+}
+
+.csf-picker__selected {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  font-size: 14px;
+}
+
+.csf-picker__selected-label {
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--proto-muted);
+}
+
+.csf-picker__selected-name {
+  font-weight: 700;
+  color: var(--proto-heading);
+  overflow-wrap: anywhere;
+}
+
+.csf-picker__selected-empty,
+.csf-picker__empty,
+.csf-picker__more {
+  margin: 0;
+  font-size: 13px;
+  color: var(--proto-muted);
+}
+
+.csf-picker__list {
+  display: flex;
+  flex-direction: column;
+  max-height: 260px;
+  overflow-y: auto;
+  border: 1px solid #dde2de;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.csf-option {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-bottom: 1px solid #edf0eb;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.csf-option:last-child {
+  border-bottom: 0;
+}
+
+.csf-option:hover {
+  background: #f6f8f5;
+}
+
+.csf-option[data-selected='true'] {
+  background: #e6f2ec;
+}
+
+.csf-option__id {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  color: var(--proto-heading);
+}
+
+.csf-option__name {
+  min-width: 0;
+  color: var(--proto-body);
+  overflow-wrap: anywhere;
+}
+
+.csf-option__hours {
+  font-size: 12.5px;
+  color: var(--proto-muted);
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .csf-option {
+    grid-template-columns: auto auto 1fr;
+  }
+
+  .csf-option__hours {
+    grid-column: 3;
+  }
+}
