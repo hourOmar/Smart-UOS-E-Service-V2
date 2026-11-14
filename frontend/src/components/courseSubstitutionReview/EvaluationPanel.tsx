@@ -1,7 +1,9 @@
 import { formatDateTime } from '../review/format'
 import {
   ADVISORY_NOTE,
+  UNCERTAIN_OFFERING_WARNING,
   checkRows,
+  manualReviewSummary,
   rejectionSuggestions,
   summerLimitation,
   termLabel,
@@ -78,8 +80,29 @@ function Suggestions({ run, onUseReason }: { run: CourseSubstitutionRun; onUseRe
             <li key={reason.tone} className="ier-suggest__item">
               <span className="ier-suggest__tone">{reason.label}</span>
               <p className="ier-suggest__text">{reason.text}</p>
+              {/* A warning only: the explanation stays editable and nothing is blocked. */}
+              {reason.uncertainOffering && (
+                <div id={`csr-uncertain-${reason.tone}`} className="pcr-warning csr-uncertain" role="note">
+                  <p className="csr-uncertain__text">
+                    <span aria-hidden="true">! </span>
+                    <strong>Verify before use.</strong> {UNCERTAIN_OFFERING_WARNING}
+                  </p>
+                  {suggestions.unverifiedOffering.length > 0 && (
+                    <ul className="csr-note-list">
+                      {suggestions.unverifiedOffering.map((line) => (
+                        <li key={line}>{line}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              )}
               {onUseReason && (
-                <button type="button" className="pcr-rerun" onClick={() => onUseReason(reason.text)}>
+                <button
+                  type="button"
+                  className="pcr-rerun"
+                  onClick={() => onUseReason(reason.text)}
+                  aria-describedby={reason.uncertainOffering ? `csr-uncertain-${reason.tone}` : undefined}
+                >
                   Use this reason
                   <span className="student-visually-hidden"> ({reason.label})</span>
                 </button>
@@ -98,6 +121,7 @@ function Suggestions({ run, onUseReason }: { run: CourseSubstitutionRun; onUseRe
 function Results({ run, onUseReason }: { run: CourseSubstitutionRun; onUseReason: ((text: string) => void) | null }) {
   const result = run.overall_result ? RESULTS[run.overall_result] : null
   const checks = checkRows(run)
+  const manualReview = manualReviewSummary(run)
   const summer = summerLimitation(run)
   const term = termLabel(run)
 
@@ -113,6 +137,22 @@ function Results({ run, onUseReason }: { run: CourseSubstitutionRun; onUseReason
             </span>
           ) : (
             <span className="pcr-verdict" data-tone="none">Not recorded</span>
+          )}
+          {/* MANUAL_REVIEW: which checks could not be verified, in the agent's
+              own words; the full checks stay listed beside it. */}
+          {manualReview && (
+            <div className="pcr-warning csr-review-summary" role="note">
+              <p className="csr-review-summary__intro">{manualReview.intro}</p>
+              {manualReview.items.length > 0 && (
+                <ul className="csr-note-list">
+                  {manualReview.items.map((item, index) => (
+                    <li key={index}>
+                      <strong>{item.condition}:</strong> {item.evidence}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           )}
           <dl className="csr-term">
             <dt>Term checked</dt>

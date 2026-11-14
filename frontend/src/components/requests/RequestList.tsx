@@ -93,7 +93,11 @@ function RequestList({
                 {showTarget && <td className="req-table__target">{targetOf(request.id)}</td>}
                 <td className="req-table__date">{formatDate(request.date)}</td>
                 <td>
-                  <RequestStatusBadge status={request.status} requestType={request.type} />
+                  <RequestStatusBadge
+                    status={request.status}
+                    requestType={request.type}
+                    approvalRecorded={request.approvalRecorded}
+                  />
                 </td>
                 <td className="req-table__view">
                   <Link
@@ -116,7 +120,11 @@ function RequestList({
           <li key={request.id} className="req-card">
             <div className="req-card__top">
               <span className="req-card__id">{request.id}</span>
-              <RequestStatusBadge status={request.status} requestType={request.type} />
+              <RequestStatusBadge
+                status={request.status}
+                requestType={request.type}
+                approvalRecorded={request.approvalRecorded}
+              />
             </div>
             <span className="req-card__type">{request.type}</span>
             {showTarget && targetOf(request.id) && (

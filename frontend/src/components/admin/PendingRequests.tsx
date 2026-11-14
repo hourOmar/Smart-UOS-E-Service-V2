@@ -124,7 +124,11 @@ function PendingRequests({ counts, type, page, onTypeChange, onPageChange }: Pen
                       <td className="adm-table__type">{row.type}</td>
                       <td className="adm-table__date">{formatDate(row.date)}</td>
                       <td>
-                        <RequestStatusBadge status={row.status} requestType={row.type} />
+                        <RequestStatusBadge
+                          status={row.status}
+                          requestType={row.type}
+                          approvalRecorded={row.approvalRecorded}
+                        />
                       </td>
                       <td className="adm-table__prio">
                         <PriorityCell requestId={row.id} requestType={row.type} priorities={priorities} />

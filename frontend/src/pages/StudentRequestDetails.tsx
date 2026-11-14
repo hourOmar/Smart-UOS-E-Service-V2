@@ -10,6 +10,7 @@ import {
 import StudentLayout from '../components/student/StudentLayout'
 import RequestStatusBadge from '../components/requests/RequestStatusBadge'
 import StudentProofDocuments from '../components/requests/StudentProofDocuments'
+import { CopyRequestId, DetailIcon } from '../components/requests/RequestDetailParts'
 import useRejectionReason from '../hooks/useRejectionReason'
 import useProgramChangeDecision from '../hooks/useProgramChangeDecision'
 import useIncompleteExamDecision from '../hooks/useIncompleteExamDecision'
@@ -102,38 +103,53 @@ function RejectionReasonText({ requestId }: { requestId: string }) {
   )
 }
 
+type StepState = 'done' | 'current' | 'pending' | 'rejected'
+
+// The request's three stages, from its stored status and dates only.
 function Progress({ request, approvalRecorded }: { request: Details; approvalRecorded: boolean }) {
   const decided = request.status !== 'In Progress'
-  const steps = [
-    { title: 'Request submitted', meta: formatDate(request.date), state: 'done', glyph: '✓' },
+  const steps: { title: string; meta: string; state: StepState }[] = [
+    { title: 'Request Submitted', meta: formatDate(request.date), state: 'done' },
     {
-      title: 'Under review',
+      title: 'Under Review',
       meta: decided ? 'Review finished' : 'In progress',
       state: decided ? 'done' : 'current',
-      glyph: decided ? '✓' : '◐',
     },
     decided
       ? {
-          title: statusLabel(request.status, request.type, approvalRecorded),
+          title: `Request ${statusLabel(request.status, request.type, approvalRecorded)}`,
           meta: request.decision ? formatDate(request.decision.date) : '',
-          state: 'done',
-          glyph: request.status === 'Rejected' ? '✕' : '✓',
+          state: request.status === 'Rejected' ? 'rejected' : 'done',
         }
-      : { title: 'Decision', meta: 'Not yet decided', state: 'pending', glyph: '' },
+      : { title: 'Decision', meta: 'Not yet decided', state: 'pending' },
   ]
-  const stateLabel: Record<string, string> = { done: 'done', current: 'current step', pending: 'not started' }
+  const stateLabel: Record<StepState, string> = {
+    done: 'done',
+    current: 'current step',
+    pending: 'not started',
+    rejected: 'rejected',
+  }
 
   return (
     <section className="req-panel req-progress" aria-labelledby="req-progress-title">
       <h2 id="req-progress-title" className="req-panel__title">
-        Progress
+        <DetailIcon name="progress" />
+        Request Progress
       </h2>
       <ol className="req-progress__list">
-        {steps.map((step) => (
-          <li key={step.title} className="req-progress__step" data-state={step.state}>
+        {steps.map((step, index) => (
+          <li
+            key={step.title}
+            className="req-progress__step"
+            data-state={step.state}
+            // The line below a stage takes the colour of the stage it leads to.
+            data-next={steps[index + 1]?.state}
+          >
             <div className="req-progress__rail">
               <span className="req-progress__dot" aria-hidden="true">
-                {step.glyph}
+                {step.state === 'done' && <DetailIcon name="check" />}
+                {step.state === 'rejected' && <DetailIcon name="cross" />}
+                {step.state === 'current' && '◐'}
               </span>
               <span className="req-progress__line" aria-hidden="true" />
             </div>
@@ -170,76 +186,38 @@ function RequestBody({ request }: { request: Details }) {
   const approvalRecorded =
     incompleteExam.decision?.decision === 'approve' && incompleteExam.decision.hasDecisionRecord || courseSubstitutionApproved
   const decision = decisionHeading(request, approvalRecorded)
+  // Whether this type has an administrator's explanation to show.
+  const hasExplanation =
+    showRejectionReason || showProgramChangeDecision || showIncompleteExamDecision || showCourseSubstitutionDecision
 
   return (
     <>
-      <div className="req-detail__head">
-        <div className="req-detail__meta-row">
-          <span className="req-detail__id">{request.id}</span>
-          <RequestStatusBadge status={request.status} requestType={request.type} approvalRecorded={approvalRecorded} />
+      <header className="req-hero">
+        <h1 className="req-detail__title">{request.type} Request</h1>
+        {request.title && <p className="req-hero__subtitle">{request.title}</p>}
+        <div className="req-hero__meta">
+          <span className="req-hero__id">
+            <DetailIcon name="file" />
+            <span className="req-detail__id">{request.id}</span>
+            <CopyRequestId requestId={request.id} />
+          </span>
+          <span className="req-hero__divider" aria-hidden="true" />
+          <span className="req-hero__date">
+            <DetailIcon name="calendar" />
+            Submitted {formatDate(request.date)}
+          </span>
+          <span className="req-hero__status">
+            <RequestStatusBadge status={request.status} requestType={request.type} approvalRecorded={approvalRecorded} />
+          </span>
         </div>
-        <h1 className="req-detail__title">
-          {request.type}
-          {request.title ? ` · ${request.title}` : ''}
-        </h1>
-        <p className="req-detail__submitted">Submitted {formatDate(request.date)}</p>
-      </div>
+      </header>
 
       <div className="req-detail__columns">
         <div className="req-detail__main">
-          {decision ? (
-            <section
-              className="req-decision"
-              data-tone={decision.tone}
-              aria-labelledby="req-decision-title"
-            >
-              <div className="req-decision__head">
-                <span aria-hidden="true">{decision.glyph}</span>
-                <h2 id="req-decision-title" className="req-decision__title">
-                  {decision.heading}
-                </h2>
-              </div>
-              {request.decision && (
-                <p className="req-decision__body">
-                  Decided {formatDate(request.decision.date)}
-                </p>
-              )}
-              {showRejectionReason && <RejectionReasonText requestId={request.id} />}
-              {showProgramChangeDecision && (
-                <ProgramChangeDecisionText requestId={request.id} rejected={request.status === 'Rejected'} />
-              )}
-              {showIncompleteExamDecision && (
-                <DecisionExplanation
-                  status={incompleteExam.status}
-                  explanation={incompleteExam.decision?.explanation}
-                  retry={incompleteExam.retry}
-                  rejected={request.status === 'Rejected'}
-                />
-              )}
-              {showCourseSubstitutionDecision && (
-                <DecisionExplanation
-                  status={courseSubstitution.status}
-                  explanation={courseSubstitution.decision?.explanation}
-                  retry={courseSubstitution.retry}
-                  rejected={request.status === 'Rejected'}
-                />
-              )}
-            </section>
-          ) : (
-            <div className="req-awaiting">
-              <span className="req-awaiting__glyph" aria-hidden="true">
-                ◐
-              </span>
-              <span>
-                <strong>No decision yet.</strong> Your request is being reviewed. The
-                decision will appear here.
-              </span>
-            </div>
-          )}
-
           <section className="req-panel" aria-labelledby="req-submitted-title">
             <h2 id="req-submitted-title" className="req-panel__title">
-              What you submitted
+              <DetailIcon name="details" />
+              Request Details
             </h2>
             <div className="req-panel__body">
               <dl className="req-fields">
@@ -276,6 +254,66 @@ function RequestBody({ request }: { request: Details }) {
 
         <Progress request={request} approvalRecorded={approvalRecorded} />
       </div>
+
+      {/* Below both columns: the final decision once the request is decided,
+          otherwise a note that none has been made yet. */}
+      {decision ? (
+        <section
+          className="req-decision"
+          data-tone={decision.tone}
+          data-explained={hasExplanation || undefined}
+          aria-labelledby="req-decision-title"
+        >
+          <span className="req-decision__icon" aria-hidden="true">
+            <DetailIcon name={decision.tone === 'rejected' ? 'cross' : 'check'} />
+          </span>
+          <div className="req-decision__summary">
+            <h2 id="req-decision-title" className="req-decision__title">
+              Final Decision
+            </h2>
+            <p className="req-decision__outcome">{decision.heading}</p>
+            {request.decision && (
+              <p className="req-decision__body">
+                Decided on {formatDate(request.decision.date)}
+              </p>
+            )}
+          </div>
+          {hasExplanation && (
+            <div className="req-decision__explanation">
+              {showRejectionReason && <RejectionReasonText requestId={request.id} />}
+              {showProgramChangeDecision && (
+                <ProgramChangeDecisionText requestId={request.id} rejected={request.status === 'Rejected'} />
+              )}
+              {showIncompleteExamDecision && (
+                <DecisionExplanation
+                  status={incompleteExam.status}
+                  explanation={incompleteExam.decision?.explanation}
+                  retry={incompleteExam.retry}
+                  rejected={request.status === 'Rejected'}
+                />
+              )}
+              {showCourseSubstitutionDecision && (
+                <DecisionExplanation
+                  status={courseSubstitution.status}
+                  explanation={courseSubstitution.decision?.explanation}
+                  retry={courseSubstitution.retry}
+                  rejected={request.status === 'Rejected'}
+                />
+              )}
+            </div>
+          )}
+        </section>
+      ) : (
+        <div className="req-awaiting">
+          <span className="req-awaiting__glyph" aria-hidden="true">
+            ◐
+          </span>
+          <span>
+            <strong>No decision yet.</strong> Your request is being reviewed. The
+            decision will appear here.
+          </span>
+        </div>
+      )}
     </>
   )
 }
@@ -296,7 +334,7 @@ function StudentRequestDetails() {
 
   return (
     <StudentLayout profile={profile} solidHeader>
-      <div className="req-page">
+      <div className="req-page req-details">
         <Link to={back.to} state={back.state} className="req-page__back">
           <svg
             viewBox="0 0 24 24"

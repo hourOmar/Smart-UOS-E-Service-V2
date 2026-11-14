@@ -256,7 +256,11 @@ function TypeRequestList({ requestType }: { requestType: (typeof academicRequest
                     <td>{row.target ?? '—'}</td>
                     <td className="adm-table__date">{formatDate(row.date)}</td>
                     <td>
-                      <RequestStatusBadge status={row.status} requestType={type} />
+                      <RequestStatusBadge
+                        status={row.status}
+                        requestType={type}
+                        approvalRecorded={row.approvalRecorded}
+                      />
                     </td>
                     {showPriority && (
                       <td className="adm-table__prio">

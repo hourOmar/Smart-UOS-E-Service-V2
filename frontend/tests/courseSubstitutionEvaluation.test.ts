@@ -8,13 +8,16 @@ import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import {
   ADVISORY_NOTE,
+  OFFERING_UNCERTAIN_KEYWORD,
   SUMMER_LIMITATION_MESSAGE,
+  UNCERTAIN_OFFERING_WARNING,
   canStartFirstEvaluation,
   canStartReevaluation,
   checkRows,
   courseSubstitutionEvaluationPath,
   courseSubstitutionEvaluationsPath,
   evaluationRequestBody,
+  manualReviewSummary,
   rejectionSuggestions,
   savedEvaluationStatus,
   summerLimitation,
@@ -24,7 +27,9 @@ import {
   type CourseSubstitutionRun,
 } from '../src/utils/courseSubstitutionEvaluation.ts'
 
-const source = (path: string) => readFileSync(new URL(path, import.meta.url), 'utf8')
+// Sources are read with LF line endings, so the patterns below hold on a
+// Windows (CRLF) checkout too.
+const source = (path: string) => readFileSync(new URL(path, import.meta.url), 'utf8').replace(/\r\n/g, '\n')
 const SERVICE = source('../src/services/courseSubstitutionReview.ts')
 const HOOK = source('../src/hooks/useCourseSubstitutionEvaluation.ts')
 const PAGE = source('../src/pages/AdminCourseSubstitutionReview.tsx')
@@ -162,6 +167,136 @@ test('fallback and missing suggestions are explained', () => {
   assert.match(none?.message ?? '', /Write the explanation yourself/)
   const empty = rejectionSuggestions(run({ rejection: rejection({ suggested_reasons: [{ tone: 'formal', text: ' ' }] }) }))
   assert.match(empty?.message ?? '', /Write the explanation yourself/)
+})
+
+// -- manual review summary ------------------------------------------------------------------
+
+const KB_MISSING = 'Course 1501999 is missing from the offerings knowledge base.'
+
+test('MANUAL_REVIEW: a summary of the checks that need review, in the agent\'s own words', () => {
+  const checks = [
+    { condition: 'Original course unavailable before graduation', status: 'REQUIRES_REVIEW', evidence: KB_MISSING },
+    { condition: 'Proposed course is at the same level or higher', status: 'PASS', evidence: 'Level 300 vs 300.' },
+    { condition: 'Original course is a core course', status: 'PASS', evidence: 'Core in the study plan.' },
+    { condition: 'Proposed course is offered in the current semester', status: 'REQUIRES_REVIEW', evidence: KB_MISSING },
+    { condition: 'Proposed course has not been completed previously', status: 'PASS', evidence: 'Not completed.' },
+  ]
+  const summary = manualReviewSummary(run({ overall_result: 'MANUAL_REVIEW', checks }))
+  assert.ok(summary)
+  assert.match(summary.intro, /could not verify every condition/)
+  assert.match(summary.intro, /2 of 5 checks need your review:$/)
+  assert.deepEqual(summary.items, [
+    { condition: checks[0].condition, evidence: KB_MISSING },
+    { condition: checks[3].condition, evidence: KB_MISSING },
+  ])
+})
+
+test('the manual review summary only restates saved checks, and only for MANUAL_REVIEW', () => {
+  assert.equal(manualReviewSummary(null), null)
+  assert.equal(manualReviewSummary(run({ overall_result: 'ELIGIBLE' })), null)
+  assert.equal(manualReviewSummary(run({ overall_result: 'NOT_ELIGIBLE' })), null)
+  // Singular wording; an unknown status counts as needing review, as on the check list.
+  const one = manualReviewSummary(run({
+    overall_result: 'MANUAL_REVIEW',
+    checks: [
+      { condition: 'Original course is a core course', status: 'SOMETHING_NEW', evidence: ' Study plan page unavailable. ' },
+      { condition: 'Proposed course is at the same level or higher', status: 'PASS', evidence: 'ok' },
+    ],
+  }))
+  assert.match(one?.intro ?? '', /1 of 2 checks needs your review:$/)
+  assert.deepEqual(one?.items, [{ condition: 'Original course is a core course', evidence: 'Study plan page unavailable.' }])
+  // Nothing marked for review, or no checks: it says so rather than guessing a reason.
+  const none = manualReviewSummary(run({ overall_result: 'MANUAL_REVIEW', checks: [{ condition: 'X', status: 'PASS', evidence: 'ok' }] }))
+  assert.deepEqual(none?.items, [])
+  assert.match(none?.intro ?? '', /no saved check is marked as needing review/)
+  assert.deepEqual(manualReviewSummary(run({ overall_result: 'MANUAL_REVIEW', checks: null }))?.items, [])
+})
+
+test('the summary is shown directly below the overall result; the full checks stay listed', () => {
+  const results = EVALUATION_PANEL.slice(EVALUATION_PANEL.indexOf('function Results'))
+  const verdict = results.indexOf('className="pcr-verdict"')
+  const summary = results.indexOf('{manualReview && (')
+  const term = results.indexOf('<dl className="csr-term">')
+  assert.ok(verdict >= 0 && verdict < summary && summary < term)
+  assert.match(results, /const manualReview = manualReviewSummary\(run\)/)
+  assert.match(results, /checks\.map\(\(check\) =>/)
+})
+
+// -- uncertain course-offering information in suggested explanations --------------------
+
+// Check 4 could not be verified (course missing from the knowledge base);
+// check 5 failed, so the run is NOT_ELIGIBLE.
+const UNCERTAIN_CHECKS = CHECKS.map((check, index) =>
+  index === 3 ? { ...check, status: 'REQUIRES_REVIEW', evidence: KB_MISSING }
+    : index === 4 ? { ...check, status: 'FAIL', evidence: 'Completed with grade B.' }
+      : check)
+const UNVERIFIED_LINE = `Proposed course is offered in the current semester: ${KB_MISSING}`
+
+test('an explanation that addresses the uncertain-offering keyword is flagged, the others are not', () => {
+  const s = rejectionSuggestions(run({
+    checks: UNCERTAIN_CHECKS,
+    rejection: rejection({
+      judgment_keywords: [OFFERING_UNCERTAIN_KEYWORD],
+      suggested_reasons: [
+        { tone: 'formal', text: 'You have already completed the proposed course.', addresses_keywords: ['proposed_course_already_completed'] },
+        { tone: 'concise', text: 'Already completed; whether it runs this term is unclear.', addresses_keywords: ['proposed_course_already_completed', OFFERING_UNCERTAIN_KEYWORD] },
+        { tone: 'supportive', text: 'We are sorry: you have already completed this course.', addresses_keywords: ['proposed_course_already_completed'] },
+      ],
+    }),
+  }))
+  assert.deepEqual(s?.reasons.map((r) => [r.tone, r.uncertainOffering]), [['formal', false], ['concise', true], ['supportive', false]])
+  assert.deepEqual(s?.unverifiedOffering, [UNVERIFIED_LINE])
+})
+
+test('an AI explanation that mentions offerings while an offering check is unverified is flagged', () => {
+  const s = rejectionSuggestions(run({
+    checks: UNCERTAIN_CHECKS,
+    rejection: rejection({
+      judgment_keywords: [],
+      suggested_reasons: [
+        { tone: 'formal', text: 'The proposed course is not offered this semester and was already completed.', addresses_keywords: ['proposed_course_already_completed'] },
+        { tone: 'concise', text: 'Already completed.', addresses_keywords: ['proposed_course_already_completed'] },
+        { tone: 'supportive', text: 'Unfortunately, the course is not available to you now.', addresses_keywords: ['proposed_course_already_completed'] },
+      ],
+    }),
+  }))
+  assert.deepEqual(s?.reasons.map((r) => r.uncertainOffering), [true, false, true])
+})
+
+test('verified offering failures and fallback templates are never flagged', () => {
+  // Check 4 FAILED (verified) and no uncertainty keyword: "not offered" is a verified reason.
+  const verified = rejectionSuggestions(run({ rejection: rejection({ judgment_keywords: [] }) }))
+  assert.deepEqual(verified?.reasons.map((r) => r.uncertainOffering), [false, false, false])
+  assert.deepEqual(verified?.unverifiedOffering, [])
+  // Fallback suggestions are built from the verified checks only.
+  const fallback = rejectionSuggestions(run({
+    checks: UNCERTAIN_CHECKS,
+    rejection: rejection({
+      status: 'fallback',
+      suggested_reasons: [{ tone: 'formal', text: 'The course is not offered.', addresses_keywords: ['proposed_course_already_completed'] }],
+    }),
+  }))
+  assert.deepEqual(fallback?.reasons.map((r) => r.uncertainOffering), [false])
+  // A record saved before this change (default fixture, no addresses_keywords) still works.
+  const existing = rejectionSuggestions(run({ rejection: rejection() }))
+  assert.deepEqual(existing?.reasons.map((r) => [r.tone, r.uncertainOffering]), [['formal', false], ['concise', true], ['supportive', false]])
+})
+
+test('the warning sits beside "Use this reason" and never blocks it or touches the decision', () => {
+  assert.match(UNCERTAIN_OFFERING_WARNING, /could not be verified/)
+  assert.match(UNCERTAIN_OFFERING_WARNING, /Verify it before including it in your final explanation/)
+  const warning = EVALUATION_PANEL.indexOf('{reason.uncertainOffering && (')
+  const button = EVALUATION_PANEL.indexOf('onClick={() => onUseReason(reason.text)}')
+  assert.ok(warning >= 0 && warning < button)
+  const block = EVALUATION_PANEL.slice(warning, button)
+  assert.match(block, /role="note"/)
+  assert.match(block, /\{UNCERTAIN_OFFERING_WARNING\}/)
+  assert.match(block, /suggestions\.unverifiedOffering\.map/)
+  assert.match(EVALUATION_PANEL, /aria-describedby=\{reason\.uncertainOffering \? `csr-uncertain-\$\{reason\.tone\}` : undefined\}/)
+  // The button stays enabled and still only fills the editable explanation.
+  assert.doesNotMatch(EVALUATION_PANEL, /disabled=\{[^}]*uncertain/)
+  assert.doesNotMatch(PAGE, /uncertain/i)
+  assert.doesNotMatch(DECISION_PANEL, /uncertain/i)
 })
 
 // -- saved evaluation summary -------------------------------------------------------------

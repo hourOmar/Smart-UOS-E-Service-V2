@@ -20,6 +20,39 @@ const APPROVAL_TYPES: ReadonlySet<string> = new Set([RAISE_CAPACITY, PROGRAM_CHA
 // Request types whose 'Completed' status is an approval only with a recorded approval decision.
 const RECORDED_APPROVAL_TYPES: ReadonlySet<string> = new Set([INCOMPLETE_EXAM, COURSE_SUBSTITUTION])
 
+/** The Decision_Type that records an approval, for each type whose
+ *  'Completed' needs one before it reads "Approved". */
+export const APPROVAL_DECISION_TYPES: Readonly<Record<string, string>> = {
+  [INCOMPLETE_EXAM]: 'Incomplete Exam Approved',
+  [COURSE_SUBSTITUTION]: 'Course Substitution Approved',
+}
+
+/** Whether a request's label depends on a recorded approval decision: a
+ *  Completed request of Incomplete Exam or Course Substitution. Lists load the
+ *  decision only for these rows. */
+export function needsApprovalRecord(status: string, requestType?: string | null): boolean {
+  return status === 'Completed' && requestType != null && RECORDED_APPROVAL_TYPES.has(requestType)
+}
+
+/** The IDs of the requests that have a matching approval decision record:
+ *  Completed, of a recorded-approval type, with a decision of exactly that
+ *  type's '<type> Approved'. A decision of another type, or on a request that
+ *  does not need one, never counts. */
+export function recordedApprovalIds(
+  requests: readonly { id: string; type: string; status: string }[],
+  decisions: readonly { requestId: string; decisionType: string }[],
+): Set<string> {
+  const typeById = new Map(
+    requests.filter((r) => needsApprovalRecord(r.status, r.type)).map((r) => [r.id, r.type] as const),
+  )
+  const ids = new Set<string>()
+  for (const d of decisions) {
+    const type = typeById.get(d.requestId)
+    if (type !== undefined && APPROVAL_DECISION_TYPES[type] === d.decisionType) ids.add(d.requestId)
+  }
+  return ids
+}
+
 /**
  * @param approvalRecorded true only when a matching administrative approval
  *   decision record is known to exist for this request.

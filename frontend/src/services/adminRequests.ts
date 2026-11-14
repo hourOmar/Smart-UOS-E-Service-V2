@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import { academicRequestTypes } from '../data/academicRequests'
+import { APPROVAL_DECISION_TYPES, needsApprovalRecord, recordedApprovalIds } from '../utils/statusLabels'
 
 // Read-only queries for the admin home. They run with the signed-in staff
 // member's session; the database policies let linked staff read every
@@ -80,6 +81,10 @@ export interface AdminRequestRow {
   status: string
   studentId: string
   studentName: string | null
+  /** A matching approval decision record exists, so a Completed Incomplete
+   *  Exam / Course Substitution request reads "Approved" (as on its review
+   *  page). False: shown as stored. */
+  approvalRecorded: boolean
 }
 
 interface RequestWithStudent {
@@ -103,7 +108,31 @@ function toAdminRow(row: RequestWithStudent): AdminRequestRow {
     status: row.Current_Status,
     studentId: String(row.Student_ID),
     studentName: student?.Student_Name?.trim() || null,
+    approvalRecorded: false,
   }
+}
+
+// Marks the Completed Incomplete Exam / Course Substitution rows that have a
+// matching approval decision, with one read of Decision (staff may read
+// decisions) for just those rows. If decisions cannot be read, the rows keep
+// their stored status ('Completed'), never a guessed "Approved".
+async function withRecordedApprovals<T extends AdminRequestRow>(rows: T[]): Promise<T[]> {
+  const needed = rows.filter((row) => needsApprovalRecord(row.status, row.type))
+  if (needed.length === 0) return rows
+  const { data, error } = await supabase
+    .from('Decision')
+    .select('Request_ID, Decision_Type')
+    .in('Request_ID', needed.map((row) => row.id))
+    .in('Decision_Type', Object.values(APPROVAL_DECISION_TYPES))
+  if (error) return rows
+  const approved = recordedApprovalIds(
+    needed,
+    ((data ?? []) as { Request_ID: unknown; Decision_Type: unknown }[]).map((d) => ({
+      requestId: String(d.Request_ID),
+      decisionType: String(d.Decision_Type),
+    })),
+  )
+  return rows.map((row) => (approved.has(row.id) ? { ...row, approvalRecorded: true } : row))
 }
 
 // A filtered, ordered request query that can be asked for one page.
@@ -366,7 +395,9 @@ export async function fetchTypeRequests({ type, status, search, page }: TypeRequ
   }
 
   return {
-    rows: raw.map((row) => ({ ...toAdminRow(row), target: targetText(type, detailOf(row), courseNames) })),
+    rows: await withRecordedApprovals(
+      raw.map((row) => ({ ...toAdminRow(row), target: targetText(type, detailOf(row), courseNames) })),
+    ),
     total: result.total,
     page: result.page,
   }
@@ -449,7 +480,8 @@ export async function searchStudentOrRequest(rawQuery: string): Promise<SearchRe
 
   if (request.data) {
     const r = request.data as unknown as RequestWithStudent & { Description: string | null }
-    return { kind: 'request', request: toAdminRow(r), summary: r.Description?.trim() || null }
+    const [row] = await withRecordedApprovals([toAdminRow(r)])
+    return { kind: 'request', request: row, summary: r.Description?.trim() || null }
   }
 
   return null

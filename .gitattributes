@@ -1,0 +1,6 @@
+# Agent knowledge files: their SHA-256 is pinned in the tests and recorded in
+# every evaluation run's evidence, so every checkout must have the same bytes
+# (LF), whatever core.autocrlf says. The agents parse them in text mode, so
+# line endings never change their results.
+backend/app/agents/course_substitution_eligibility/data/** text eol=lf
+backend/app/agents/incomplete_exam/knowledge_base/** text eol=lf

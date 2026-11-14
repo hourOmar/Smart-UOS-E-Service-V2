@@ -1,4 +1,7 @@
 import { supabase } from './supabase'
+import { fetchCourseSubstitutionDecision } from './courseSubstitutionStudent'
+import { fetchIncompleteExamDecision } from './incompleteExamStudent'
+import { COURSE_SUBSTITUTION, INCOMPLETE_EXAM, needsApprovalRecord } from '../utils/statusLabels'
 
 // Every query here runs with the signed-in student's session. The database
 // policies return only that student's own requests and details, so another
@@ -10,6 +13,10 @@ export interface StudentRequestRow {
   /** Request_Date (YYYY-MM-DD) */
   date: string
   status: string
+  /** Lists only: a matching approval decision record exists, so a Completed
+   *  Incomplete Exam / Course Substitution request reads "Approved" (as on
+   *  its details page). Absent or false: shown as stored. */
+  approvalRecorded?: boolean
 }
 
 export interface RequestField {
@@ -64,7 +71,37 @@ export async function fetchStudentRequests(limit?: number): Promise<StudentReque
 
   const { data, error } = await query
   if (error) throw error
-  return ((data ?? []) as RequestRowData[]).map(toRow)
+  return withRecordedApprovals(((data ?? []) as RequestRowData[]).map(toRow))
+}
+
+// The student's own decision view for each type whose 'Completed' needs a
+// recorded approval (students cannot read Decision directly). Each returns a
+// view only for a matching decision record.
+const OWN_DECISION: Record<string, (requestId: string) => Promise<{ decision: 'approve' | 'reject' } | null>> = {
+  [INCOMPLETE_EXAM]: fetchIncompleteExamDecision,
+  [COURSE_SUBSTITUTION]: fetchCourseSubstitutionDecision,
+}
+
+// Marks the Completed Incomplete Exam / Course Substitution rows that have a
+// recorded approval, with the same function the details page uses, so both
+// show the same status. Only those rows are looked up. A row whose decision
+// cannot be loaded keeps its stored status ('Completed'), never a guessed
+// "Approved"; the list itself still loads.
+async function withRecordedApprovals(rows: StudentRequestRow[]): Promise<StudentRequestRow[]> {
+  const needed = rows.filter((row) => needsApprovalRecord(row.status, row.type))
+  if (needed.length === 0) return rows
+  const approved = new Set<string>()
+  await Promise.all(
+    needed.map(async (row) => {
+      try {
+        const view = await OWN_DECISION[row.type]?.(row.id)
+        if (view?.decision === 'approve') approved.add(row.id)
+      } catch {
+        // Shown as stored.
+      }
+    }),
+  )
+  return rows.map((row) => (approved.has(row.id) ? { ...row, approvalRecorded: true } : row))
 }
 
 // ---------------------------------------------------------------------------

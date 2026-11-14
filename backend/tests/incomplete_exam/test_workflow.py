@@ -14,8 +14,9 @@ from app.core import gemini, storage
 from .fakes import PDF, REQUEST_ID, TOKEN, FakeClient, api_error, decision_reply, rejection_reply
 from .fakes import request_data as make_request_data
 
-POLICY_SHA256 = "86620b3dd6a7fa14cbd530d74a005817c67a7a740f143ecb6149ac25f7c80b26"
-KEYWORDS_SHA256 = "6af530355d975d5c4e20f4721e125bb378d5c9c104bbfdaf193a090f2c2c1217"
+# SHA-256 of the files as stored in git (LF; .gitattributes keeps every checkout LF).
+POLICY_SHA256 = "a8b944c4928edd414aa122538c6187cc2ce0d54f3c4df1f167324dc605e84025"
+KEYWORDS_SHA256 = "c73163803fb20463a422fd993f5a79fc2bfdd6330d4e27f84b7aa84842e0e572"
 
 
 @pytest.fixture

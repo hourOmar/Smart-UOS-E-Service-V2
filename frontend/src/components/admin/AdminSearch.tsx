@@ -142,7 +142,11 @@ function SearchMatch({ result }: { result: Exclude<SearchResult, null> }) {
       <span className="adm-match__kind">Request</span>
       <div className="adm-match__row">
         <h2 className="adm-match__title adm-mono">{request.id}</h2>
-        <RequestStatusBadge status={request.status} requestType={request.type} />
+        <RequestStatusBadge
+          status={request.status}
+          requestType={request.type}
+          approvalRecorded={request.approvalRecorded}
+        />
       </div>
       <dl className="adm-match__fields">
         <div>

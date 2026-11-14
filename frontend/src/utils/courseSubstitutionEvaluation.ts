@@ -170,6 +170,39 @@ export function termLabel(run: CourseSubstitutionRun | null | undefined): string
   return run.current_semester ? `${run.current_semester} ${year} (${run.current_term})` : String(run.current_term)
 }
 
+export interface ManualReviewSummary {
+  /** One sentence above the list, counted from the stored checks. */
+  intro: string
+  /** The checks shown as REQUIRES REVIEW, in stored order, each with the
+   *  agent's own evidence text (never rewritten or completed). */
+  items: { condition: string; evidence: string }[]
+}
+
+/** Why a run is MANUAL_REVIEW: the checks that could not be verified and the
+ *  evidence the agent stored for each. Built only from the saved checks (an
+ *  unknown status counts as REQUIRES_REVIEW, as in checkRows); it adds no
+ *  reason of its own. Null for any other result. */
+export function manualReviewSummary(run: CourseSubstitutionRun | null | undefined): ManualReviewSummary | null {
+  if (!run || run.overall_result !== 'MANUAL_REVIEW') return null
+  const rows = checkRows(run) ?? []
+  const items = rows
+    .filter((row) => row.status === 'REQUIRES_REVIEW')
+    .map(({ condition, evidence }) => ({ condition, evidence }))
+  if (items.length === 0) {
+    return {
+      intro: 'The agent did not reach a result, but no saved check is marked as needing review. Review the checks below before deciding.',
+      items,
+    }
+  }
+  const total = `${rows.length} ${rows.length === 1 ? 'check' : 'checks'}`
+  return {
+    intro:
+      `The agent could not verify every condition, so it did not reach a result. ` +
+      `${items.length} of ${total} ${items.length === 1 ? 'needs' : 'need'} your review:`,
+    items,
+  }
+}
+
 /** The suggestion tones, in the order shown. */
 export const SUGGESTION_TONES: readonly { tone: string; label: string }[] = [
   { tone: 'formal', label: 'Formal' },
@@ -186,12 +219,41 @@ export const JUDGMENT_REASON_LABELS: Record<string, string> = {
   course_offering_information_uncertain: 'Course offering information is uncertain',
 }
 
+/** The judgment keyword for course-offering data the agent could not verify. */
+export const OFFERING_UNCERTAIN_KEYWORD = 'course_offering_information_uncertain'
+
+/** The two checks that depend on the course-offerings knowledge base (the
+ *  agent's own condition texts). */
+const OFFERING_CHECK_CONDITIONS: ReadonlySet<string> = new Set([
+  'Original course unavailable before graduation',
+  'Proposed course is offered in the current semester',
+])
+
+// Words with which an AI-written explanation refers to course offerings.
+const OFFERING_WORDS = /\boffer(?:s|ed|ing|ings)?\b|\bavailab(?:le|ility)\b|\bschedul(?:e|ed|ing)\b/i
+
+export const UNCERTAIN_OFFERING_WARNING =
+  'This explanation may rely on course-offering information that could not be verified. ' +
+  'Verify it before including it in your final explanation to the student.'
+
+export interface SuggestedReason {
+  tone: string
+  label: string
+  text: string
+  /** The explanation may state course-offering information the agent could
+   *  not verify (see rejectionSuggestions). Warns only; never blocks. */
+  uncertainOffering: boolean
+}
+
 export interface RejectionSuggestions {
-  reasons: { tone: string; label: string; text: string }[]
+  reasons: SuggestedReason[]
   /** The verified reasons behind the rejection (failed checks; labels only). */
   policyReasons: string[]
   /** Reasons the AI assessed (judgment keywords; labels only). Not verified facts. */
   assessedReasons: string[]
+  /** "Condition: evidence" of each offering check stored as REQUIRES_REVIEW
+   *  (the agent's own text), for the uncertainty warning. */
+  unverifiedOffering: string[]
   conflictNote: string | null
   /** Why there are no (or only template) suggestions; null when the AI succeeded. */
   message: string | null
@@ -204,24 +266,47 @@ const SUGGESTION_MESSAGES: Record<string, string> = {
 }
 
 /** The suggested explanations of a NOT_ELIGIBLE run (formal, concise,
- *  supportive, in that order), or null for any other run. */
+ *  supportive, in that order), or null for any other run.
+ *
+ *  A suggestion is marked uncertainOffering when, from the saved record:
+ *  - it explicitly addresses the course_offering_information_uncertain
+ *    keyword (addresses_keywords), or
+ *  - the run has offering uncertainty (that judgment keyword was selected, or
+ *    an offering check is REQUIRES_REVIEW), the suggestion was written by the
+ *    AI, and its text refers to course offerings.
+ *  Fallback suggestions are built from the verified (failed) checks only, so
+ *  only the explicit keyword can mark them. */
 export function rejectionSuggestions(run: CourseSubstitutionRun | null | undefined): RejectionSuggestions | null {
   if (!run || run.overall_result !== 'NOT_ELIGIBLE') return null
   const rejection = run.rejection
   if (!rejection) {
-    return { reasons: [], policyReasons: [], assessedReasons: [], conflictNote: null, message: SUGGESTION_MESSAGES.unavailable }
+    return {
+      reasons: [], policyReasons: [], assessedReasons: [], unverifiedOffering: [], conflictNote: null,
+      message: SUGGESTION_MESSAGES.unavailable,
+    }
   }
+  const unverifiedOffering = (checkRows(run) ?? [])
+    .filter((row) => row.status === 'REQUIRES_REVIEW' && OFFERING_CHECK_CONDITIONS.has(row.condition))
+    .map((row) => `${row.condition}: ${row.evidence}`)
+  const judgment = Array.isArray(rejection.judgment_keywords) ? rejection.judgment_keywords : []
+  const runUncertain = judgment.includes(OFFERING_UNCERTAIN_KEYWORD) || unverifiedOffering.length > 0
+  const aiWritten = rejection.status === 'gemini'
   const stored = Array.isArray(rejection.suggested_reasons) ? rejection.suggested_reasons : []
   const reasons = SUGGESTION_TONES.flatMap(({ tone, label }) => {
     const found = stored.find((r) => r?.tone === tone && typeof r.text === 'string' && r.text.trim() !== '')
-    return found ? [{ tone, label, text: found.text.trim() }] : []
+    if (!found) return []
+    const text = found.text.trim()
+    const addresses = Array.isArray(found.addresses_keywords) ? found.addresses_keywords : []
+    const uncertainOffering =
+      addresses.includes(OFFERING_UNCERTAIN_KEYWORD) || (runUncertain && aiWritten && OFFERING_WORDS.test(text))
+    return [{ tone, label, text, uncertainOffering }]
   })
   const policyReasons = (Array.isArray(rejection.deterministic_keywords) ? rejection.deterministic_keywords : [])
     .map((k) => k?.label)
     .filter((label): label is string => typeof label === 'string' && label !== '')
   // Only known judgment keywords are shown (by label, never the raw id), once each.
   const assessedReasons = [...new Set(
-    (Array.isArray(rejection.judgment_keywords) ? rejection.judgment_keywords : [])
+    judgment
       .map((id) => (typeof id === 'string' ? JUDGMENT_REASON_LABELS[id] : undefined))
       .filter((label): label is string => Boolean(label) && !policyReasons.includes(label as string)),
   )]
@@ -230,6 +315,7 @@ export function rejectionSuggestions(run: CourseSubstitutionRun | null | undefin
     reasons,
     policyReasons,
     assessedReasons,
+    unverifiedOffering,
     conflictNote: rejection.conflict_note?.trim() || null,
     message: status === 'ok' ? null : SUGGESTION_MESSAGES[status],
   }

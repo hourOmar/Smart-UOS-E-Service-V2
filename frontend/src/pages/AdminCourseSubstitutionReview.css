@@ -27,6 +27,33 @@
   color: var(--proto-heading);
 }
 
+/* Why a result is Manual review, and the warning on a suggested explanation
+   that may rely on unverified course offerings (both use .pcr-warning). */
+.csr-review-summary,
+.csr-uncertain {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.csr-uncertain {
+  align-self: stretch;
+}
+
+.csr-review-summary__intro,
+.csr-uncertain__text {
+  margin: 0;
+}
+
+.csr-note-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding-left: 18px;
+  overflow-wrap: anywhere;
+}
+
 .csr-gemini {
   margin: 0;
   font-size: 12.5px;
