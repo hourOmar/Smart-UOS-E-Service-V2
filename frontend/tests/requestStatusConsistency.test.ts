@@ -11,6 +11,8 @@ const STUDENT_SERVICE = source('../src/services/studentRequests.ts')
 const ADMIN_SERVICE = source('../src/services/adminRequests.ts')
 const REQUEST_LIST = source('../src/components/requests/RequestList.tsx')
 const ADMIN_SEARCH = source('../src/components/admin/AdminSearch.tsx')
+const STUDENT_PROFILE = source('../src/pages/AdminStudentProfile.tsx')
+const PROFILE_SERVICE = source('../src/services/adminStudentProfile.ts')
 const PENDING = source('../src/components/admin/PendingRequests.tsx')
 const TYPE_REQUESTS = source('../src/pages/AdminTypeRequests.tsx')
 const BADGE = source('../src/components/requests/RequestStatusBadge.tsx')
@@ -19,10 +21,12 @@ const BADGE_WITH_FLAG = /<RequestStatusBadge\s+status=\{(\w+)\.status\}\s+reques
 
 test('every list badge passes the row\'s recorded approval, like the details pages', () => {
   assert.equal(REQUEST_LIST.match(BADGE_WITH_FLAG)?.length, 2)   // table and narrow-screen cards
-  assert.equal(ADMIN_SEARCH.match(BADGE_WITH_FLAG)?.length, 1)
+  assert.equal(STUDENT_PROFILE.match(BADGE_WITH_FLAG)?.length, 1)
+  // The admin search opens the request's own page; it shows no status itself.
+  assert.doesNotMatch(ADMIN_SEARCH, /RequestStatusBadge/)
   assert.equal(PENDING.match(BADGE_WITH_FLAG)?.length, 1)
   assert.equal(TYPE_REQUESTS.match(/<RequestStatusBadge\s+status=\{row\.status\}\s+requestType=\{type\}\s+approvalRecorded=\{row\.approvalRecorded\}\s+\/>/g)?.length, 1)
-  for (const file of [REQUEST_LIST, ADMIN_SEARCH, PENDING, TYPE_REQUESTS]) {
+  for (const file of [REQUEST_LIST, STUDENT_PROFILE, PENDING, TYPE_REQUESTS]) {
     assert.doesNotMatch(file, /<RequestStatusBadge status=\{[\w.]+\} requestType=\{[\w.]+\} \/>/)
   }
   // One badge and one label rule everywhere: the colour follows the stored status.
@@ -48,7 +52,12 @@ test('admin lists read the approval decisions once per page, and fall back to th
   assert.match(helper, /recordedApprovalIds\(/)
   assert.match(ADMIN_SERVICE, /approvalRecorded: false,/)
   assert.match(ADMIN_SERVICE, /rows: await withRecordedApprovals\(/)
-  assert.match(ADMIN_SERVICE, /const \[row\] = await withRecordedApprovals\(\[toAdminRow\(r\)\]\)/)
+  // The Student Profile reads the same records, for the same rows only, and
+  // keeps the stored status when they cannot be read.
+  assert.match(PROFILE_SERVICE, /base\.filter\(\(r\) => needsApprovalRecord\(r\.status, r\.type\)\)/)
+  assert.match(PROFILE_SERVICE, /\.from\('Decision'\)\s+\.select\('Request_ID, Decision_Type'\)\s+\.in\('Request_ID', needed\.map\(\(r\) => r\.id\)\)\s+\.in\('Decision_Type', Object\.values\(APPROVAL_DECISION_TYPES\)\)/)
+  assert.match(PROFILE_SERVICE, /if \(decisions\.error\) \{\s+approvalsKnown = false/)
+  assert.doesNotMatch(PROFILE_SERVICE, /\.(update|insert|upsert|delete)\(/)
   // Statuses are only read and labelled, never written.
   assert.doesNotMatch(ADMIN_SERVICE, /\.(update|insert|upsert|delete)\(/)
   assert.doesNotMatch(STUDENT_SERVICE, /\.(update|insert|upsert|delete)\(/)

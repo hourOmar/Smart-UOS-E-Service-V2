@@ -404,85 +404,29 @@ export async function fetchTypeRequests({ type, status, search, page }: TypeRequ
 }
 
 // ---------------------------------------------------------------------------
-// Search by exact student ID or request ID
+// Search by exact student ID or request ID (admin home). The admin home
+// opens the result's page directly; nothing is previewed.
 
-export interface StudentMatch {
-  kind: 'student'
-  studentId: string
-  name: string | null
-  email: string | null
-  program: string | null
-  totalRequests: number
-  inProgress: number
-}
+export type SearchTarget =
+  | { kind: 'student'; studentId: string }
+  | { kind: 'request'; requestId: string; type: string }
 
-export interface RequestMatch {
-  kind: 'request'
-  request: AdminRequestRow
-  summary: string | null
-}
-
-export type SearchResult = StudentMatch | RequestMatch | null
-
-async function countStudentRequests(studentId: string, status?: string) {
-  let query = supabase
+/** The student or request with exactly this ID (already trimmed, upper-cased
+ *  and classified by utils/adminSearch.ts), or null when none exists. Throws
+ *  when it cannot be read, so a failure is never reported as "not found". */
+export async function findSearchTarget(input: { kind: 'student' | 'request'; id: string }): Promise<SearchTarget | null> {
+  if (input.kind === 'student') {
+    const { data, error } = await supabase.from('Student').select('Student_ID').eq('Student_ID', input.id).maybeSingle()
+    if (error) throw error
+    return data ? { kind: 'student', studentId: String((data as { Student_ID: unknown }).Student_ID) } : null
+  }
+  const { data, error } = await supabase
     .from('Request')
-    .select('Request_ID', { count: 'exact', head: true })
-    .eq('Student_ID', studentId)
-  if (status) query = query.eq('Current_Status', status)
-  const { count, error } = await query
+    .select('Request_ID, Request_Type')
+    .eq('Request_ID', input.id)
+    .maybeSingle()
   if (error) throw error
-  return count ?? 0
-}
-
-// IDs are stored in upper case (U21…, STUD_…), so the query is matched
-// exactly after trimming and upper-casing. Returns null when nothing matches.
-export async function searchStudentOrRequest(rawQuery: string): Promise<SearchResult> {
-  const q = rawQuery.trim().toUpperCase()
-
-  const [student, request] = await Promise.all([
-    supabase
-      .from('Student')
-      .select('Student_ID, Student_Name, Student_Email, Program_ID, Program_Name')
-      .eq('Student_ID', q)
-      .maybeSingle(),
-    supabase
-      .from('Request')
-      .select(`${REQUEST_WITH_STUDENT}, Description`)
-      .eq('Request_ID', q)
-      .maybeSingle(),
-  ])
-  if (student.error) throw student.error
-  if (request.error) throw request.error
-
-  if (student.data) {
-    const s = student.data as {
-      Student_ID: string
-      Student_Name: string | null
-      Student_Email: string | null
-      Program_ID: string | null
-      Program_Name: string | null
-    }
-    const [totalRequests, inProgress] = await Promise.all([
-      countStudentRequests(s.Student_ID),
-      countStudentRequests(s.Student_ID, IN_PROGRESS),
-    ])
-    return {
-      kind: 'student',
-      studentId: String(s.Student_ID),
-      name: s.Student_Name?.trim() || null,
-      email: s.Student_Email?.trim() || null,
-      program: [s.Program_ID, s.Program_Name].filter(Boolean).join(' · ') || null,
-      totalRequests,
-      inProgress,
-    }
-  }
-
-  if (request.data) {
-    const r = request.data as unknown as RequestWithStudent & { Description: string | null }
-    const [row] = await withRecordedApprovals([toAdminRow(r)])
-    return { kind: 'request', request: row, summary: r.Description?.trim() || null }
-  }
-
-  return null
+  if (!data) return null
+  const row = data as { Request_ID: unknown; Request_Type: unknown }
+  return { kind: 'request', requestId: String(row.Request_ID), type: String(row.Request_Type) }
 }

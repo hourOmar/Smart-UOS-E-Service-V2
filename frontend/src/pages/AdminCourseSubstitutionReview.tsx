@@ -5,7 +5,7 @@ import useStaffIdentity from '../hooks/useStaffIdentity'
 import useCourseSubstitutionRecord from '../hooks/useCourseSubstitutionRecord'
 import useCourseSubstitutionEvaluation from '../hooks/useCourseSubstitutionEvaluation'
 import { formatDate } from '../services/studentRequests'
-import { ADMIN_HOME_ITEM, ADMIN_HOME_PATH, adminTypePath, type ReviewOrigin } from '../utils/adminPaths'
+import { ADMIN_HOME_ITEM, ADMIN_HOME_PATH, adminTypePath, studentProfilePath, type ReviewOrigin } from '../utils/adminPaths'
 import { EXPLANATION_FIELD_ID, type CourseSubstitutionEvaluationSummary } from '../utils/courseSubstitutionDecision'
 import {
   courseTitle,
@@ -64,7 +64,15 @@ function StudentPanel({ record }: { record: CourseSubstitutionReviewRecord }) {
         {s ? (
           <dl className="req-fields">
             <Field label="Name" value={s.name} />
-            <Field label="Student ID" value={<span className="adm-mono">{s.id}</span>} />
+            <Field
+              label="Student ID"
+              value={
+                <Link to={studentProfilePath(s.id)} className="adm-mono rv-student-link">
+                  {s.id}
+                  <span className="student-visually-hidden"> (open student profile)</span>
+                </Link>
+              }
+            />
             <Field label="Program" value={s.program} />
             <Field label="College" value={s.college} />
             <Field label="CGPA" value={s.cgpa == null ? null : s.cgpa.toFixed(2)} />

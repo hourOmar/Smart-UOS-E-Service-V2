@@ -7,7 +7,7 @@ import useCourseNames from '../hooks/useCourseNames'
 import useRaiseCapacityPriority from '../hooks/useRaiseCapacityPriority'
 import { formatDate } from '../services/studentRequests'
 import type { ReviewRecord } from '../services/raiseCapacityReview'
-import { ADMIN_HOME_ITEM, ADMIN_HOME_PATH, adminTypePath, type ReviewOrigin } from '../utils/adminPaths'
+import { ADMIN_HOME_ITEM, ADMIN_HOME_PATH, adminTypePath, studentProfilePath, type ReviewOrigin } from '../utils/adminPaths'
 import StudentLayout from '../components/student/StudentLayout'
 import ReviewBreadcrumb from '../components/admin/ReviewBreadcrumb'
 import RequestStatusBadge from '../components/requests/RequestStatusBadge'
@@ -81,7 +81,15 @@ function StudentPanel({ record }: { record: ReviewRecord }) {
         {s ? (
           <dl className="req-fields">
             <Field label="Name" value={s.name} />
-            <Field label="Student ID" value={<span className="adm-mono">{s.id}</span>} />
+            <Field
+              label="Student ID"
+              value={
+                <Link to={studentProfilePath(s.id)} className="adm-mono rv-student-link">
+                  {s.id}
+                  <span className="student-visually-hidden"> (open student profile)</span>
+                </Link>
+              }
+            />
             <Field label="Email" value={s.email} />
             <Field label="Program" value={s.program} />
             <Field label="College" value={s.college} />

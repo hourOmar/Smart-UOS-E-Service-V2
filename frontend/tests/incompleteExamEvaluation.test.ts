@@ -195,7 +195,9 @@ test('"Use this reason" only fills the editable explanation; staff still choose 
 
 test('the review link is enabled for Incomplete Exam with the back-navigation origin', () => {
   const REVIEW_ACTION = source('../src/components/admin/ReviewAction.tsx')
-  assert.match(REVIEW_ACTION, /'Incomplete Exam': incompleteExamReviewPath/)
+  const ADMIN_PATHS = source('../src/utils/adminPaths.ts')
+  assert.match(ADMIN_PATHS, /'Incomplete Exam': incompleteExamReviewPath/)
+  assert.match(REVIEW_ACTION, /reviewPathFor\(requestType, requestId\)/)
   assert.match(REVIEW_ACTION, /state=\{\{ from: origin \}\}/)
   assert.match(PAGE, /origin === 'dashboard'\s+\? \{ to: ADMIN_HOME_PATH, label: 'Admin home' \}\s+: \{ to: adminTypePath\('incomplete-exam'\), label: 'Incomplete Exam requests' \}/)
 })

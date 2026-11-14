@@ -157,73 +157,17 @@
   font-weight: 700;
 }
 
-/* The match found by the search. */
+/* The Student ID on review pages opens the admin Student Profile. */
 
-.adm-match {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
-  box-sizing: border-box;
-  padding: 20px 22px;
-  border: 1px solid #d5ded9;
-  border-radius: 8px;
-  background: #ffffff;
-  box-shadow: 0 10px 28px rgb(11 77 58 / 0.14);
-  color: #17211c;
-  text-align: left;
-}
-
-.adm-match__kind {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.rv-student-link {
   color: var(--proto-green);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
-.adm-match__row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
-}
-
-.student .adm-match__title {
-  margin: 0;
-  font-family: inherit;
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--proto-heading);
-  overflow-wrap: anywhere;
-}
-
-.student .adm-match__title.adm-mono {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 17px;
-}
-
-.adm-match__fields {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-  gap: 12px 20px;
-  margin: 0;
-}
-
-.adm-match__fields dt {
-  font-size: 12.5px;
-  color: var(--proto-muted);
-}
-
-.adm-match__fields dd {
-  margin: 2px 0 0;
-  font-size: 14.5px;
-  font-weight: 500;
-  overflow-wrap: anywhere;
-}
-
-.adm-match__wide {
-  grid-column: 1 / -1;
+.rv-student-link:hover {
+  text-decoration-thickness: 2px;
 }
 
 /* Academic Requests type cards */

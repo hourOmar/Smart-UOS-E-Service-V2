@@ -1,19 +1,5 @@
 import { Link } from 'react-router-dom'
-import {
-  courseSubstitutionReviewPath,
-  incompleteExamReviewPath,
-  programChangeReviewPath,
-  raiseCapacityReviewPath,
-  type ReviewOrigin,
-} from '../../utils/adminPaths'
-
-// Request types with a staff review page.
-const REVIEW_PATHS: Record<string, (requestId: string) => string> = {
-  'Raise Capacity': raiseCapacityReviewPath,
-  'Program Change': programChangeReviewPath,
-  'Incomplete Exam': incompleteExamReviewPath,
-  'Course Substitution': courseSubstitutionReviewPath,
-}
+import { reviewPathFor, type ReviewOrigin } from '../../utils/adminPaths'
 
 interface ReviewActionProps {
   requestId: string
@@ -26,10 +12,10 @@ interface ReviewActionProps {
 // (Raise Capacity, Program Change, Incomplete Exam, Course Substitution); a disabled button for every other type
 // until theirs exists.
 function ReviewAction({ requestId, requestType, origin }: ReviewActionProps) {
-  const reviewPath = REVIEW_PATHS[requestType]
+  const reviewPath = reviewPathFor(requestType, requestId)
   if (reviewPath) {
     return (
-      <Link to={reviewPath(requestId)} state={{ from: origin }} className="adm-review">
+      <Link to={reviewPath} state={{ from: origin }} className="adm-review">
         Review
         <span className="student-visually-hidden"> request {requestId}</span>
       </Link>

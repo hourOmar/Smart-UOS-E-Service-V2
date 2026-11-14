@@ -6,7 +6,7 @@ import useProgramChangeRecord from '../hooks/useProgramChangeRecord'
 import useProgramChangeEvaluation from '../hooks/useProgramChangeEvaluation'
 import { formatDate } from '../services/studentRequests'
 import { programLabel, type ProgramChangeReviewRecord } from '../services/programChangeReview'
-import { ADMIN_HOME_ITEM, ADMIN_HOME_PATH, adminTypePath, type ReviewOrigin } from '../utils/adminPaths'
+import { ADMIN_HOME_ITEM, ADMIN_HOME_PATH, adminTypePath, studentProfilePath, type ReviewOrigin } from '../utils/adminPaths'
 import StudentLayout from '../components/student/StudentLayout'
 import ReviewBreadcrumb from '../components/admin/ReviewBreadcrumb'
 import RequestStatusBadge from '../components/requests/RequestStatusBadge'
@@ -45,7 +45,15 @@ function StudentPanel({ record }: { record: ProgramChangeReviewRecord }) {
         {s ? (
           <dl className="req-fields">
             <Field label="Name" value={s.name} />
-            <Field label="Student ID" value={<span className="adm-mono">{s.id}</span>} />
+            <Field
+              label="Student ID"
+              value={
+                <Link to={studentProfilePath(s.id)} className="adm-mono rv-student-link">
+                  {s.id}
+                  <span className="student-visually-hidden"> (open student profile)</span>
+                </Link>
+              }
+            />
             <Field label="Program" value={s.program} />
             <Field label="College" value={s.college} />
             <Field label="CGPA" value={s.cgpa == null ? null : s.cgpa.toFixed(2)} />

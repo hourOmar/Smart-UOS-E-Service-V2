@@ -1,52 +1,80 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import {
-  searchStudentOrRequest,
-  type SearchResult,
-} from '../../services/adminRequests'
-import { formatDate } from '../../services/studentRequests'
-import RequestStatusBadge from '../requests/RequestStatusBadge'
+import { useNavigate } from 'react-router-dom'
+import { findSearchTarget } from '../../services/adminRequests'
+import { SEARCH_MESSAGES, classifySearchInput, isSignedOutError } from '../../utils/adminSearch'
+import { reviewPathFor, studentProfilePath } from '../../utils/adminPaths'
 import HeroBackdrop from '../student/HeroBackdrop'
 
-type SearchState =
-  | { kind: 'idle' }
-  | { kind: 'searching' }
-  | { kind: 'message'; text: string }
-  | { kind: 'found'; result: Exclude<SearchResult, null> }
+type SearchState = { kind: 'idle' } | { kind: 'searching' } | { kind: 'message'; text: string }
 
 // Admin home hero (light design of prototype v3): find a student or a
-// request by its exact ID. The match is shown here; its own page will be
-// linked once that page exists.
+// request by its exact ID and open its page directly: a request opens its
+// existing review page, a student opens the Student Profile. Nothing is
+// previewed here; only problems are shown under the search bar.
 function AdminSearch() {
+  const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [state, setState] = useState<SearchState>({ kind: 'idle' })
-  const searchId = useRef(0)
+  // Guards against a second submission before React re-renders the disabled
+  // button, and ignores a result that arrives after the page was left.
+  const busyRef = useRef(false)
+  const mountedRef = useRef(true)
+
+  useEffect(() => {
+    mountedRef.current = true
+    return () => {
+      mountedRef.current = false
+    }
+  }, [])
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const q = query.trim()
-    if (!q) {
-      setState({ kind: 'message', text: 'Enter a student ID or a request ID.' })
+    if (busyRef.current) return
+
+    const input = classifySearchInput(query)
+    if (input.kind === 'empty') {
+      setState({ kind: 'message', text: SEARCH_MESSAGES.empty })
+      return
+    }
+    if (input.kind === 'invalid') {
+      setState({ kind: 'message', text: SEARCH_MESSAGES.invalid })
       return
     }
 
-    const id = ++searchId.current
+    busyRef.current = true
     setState({ kind: 'searching' })
     try {
-      const result = await searchStudentOrRequest(q)
-      if (id !== searchId.current) return
-      setState(
-        result
-          ? { kind: 'found', result }
-          : { kind: 'message', text: `No student or request matches “${q}”. Check the ID and try again.` },
-      )
-    } catch {
-      if (id !== searchId.current) return
-      setState({ kind: 'message', text: 'The search couldn’t be completed. Check your connection and try again.' })
+      const target = await findSearchTarget(input)
+      if (!mountedRef.current) return
+      if (!target) {
+        setState({
+          kind: 'message',
+          text: input.kind === 'student' ? SEARCH_MESSAGES.studentNotFound(input.id) : SEARCH_MESSAGES.requestNotFound(input.id),
+        })
+        return
+      }
+      if (target.kind === 'student') {
+        navigate(studentProfilePath(target.studentId))
+        return
+      }
+      const path = reviewPathFor(target.type, target.requestId)
+      if (!path) {
+        setState({ kind: 'message', text: SEARCH_MESSAGES.noReviewPage(target.requestId, target.type) })
+        return
+      }
+      navigate(path, { state: { from: 'dashboard' } })
+    } catch (error) {
+      if (!mountedRef.current) return
+      setState({ kind: 'message', text: isSignedOutError(error) ? SEARCH_MESSAGES.signedOut : SEARCH_MESSAGES.failed })
+    } finally {
+      busyRef.current = false
+      if (mountedRef.current) setState((current) => (current.kind === 'searching' ? { kind: 'idle' } : current))
     }
   }
 
   const message = state.kind === 'message' ? state.text : null
+  const searching = state.kind === 'searching'
 
   return (
     <section className="adm-hero" aria-labelledby="adm-hero-title">
@@ -58,7 +86,7 @@ function AdminSearch() {
           Find a student or request
         </h1>
 
-        <form role="search" className="adm-search" onSubmit={handleSubmit} noValidate>
+        <form role="search" className="adm-search" onSubmit={handleSubmit} noValidate aria-busy={searching}>
           <label htmlFor="adm-search-input" className="student-visually-hidden">
             Student ID or request ID
           </label>
@@ -79,99 +107,33 @@ function AdminSearch() {
             autoComplete="off"
             placeholder="Enter student ID or request ID"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => {
+              setQuery(event.target.value)
+              if (state.kind === 'message') setState({ kind: 'idle' })
+            }}
             aria-invalid={message ? true : undefined}
             aria-describedby={message ? 'adm-search-msg' : undefined}
           />
-          <button type="submit" disabled={state.kind === 'searching'}>
-            {state.kind === 'searching' ? 'Searching…' : 'Search'}
+          <button type="submit" disabled={searching}>
+            {searching ? 'Searching…' : 'Search'}
           </button>
         </form>
 
         <div className="adm-search__outcome" aria-live="polite">
+          {searching && (
+            <span className="student-visually-hidden" role="status">
+              Searching…
+            </span>
+          )}
           {message && (
             <div id="adm-search-msg" className="adm-search__msg" role="alert">
               <span aria-hidden="true">✕</span>
               <span>{message}</span>
             </div>
           )}
-          {state.kind === 'found' && <SearchMatch result={state.result} />}
         </div>
       </div>
     </section>
-  )
-}
-
-function SearchMatch({ result }: { result: Exclude<SearchResult, null> }) {
-  if (result.kind === 'student') {
-    return (
-      <article className="adm-match" aria-label="Matching student">
-        <span className="adm-match__kind">Student</span>
-        <h2 className="adm-match__title">{result.name ?? '—'}</h2>
-        <dl className="adm-match__fields">
-          <div>
-            <dt>Student ID</dt>
-            <dd className="adm-mono">{result.studentId}</dd>
-          </div>
-          {result.email && (
-            <div>
-              <dt>Email</dt>
-              <dd>{result.email}</dd>
-            </div>
-          )}
-          {result.program && (
-            <div>
-              <dt>Program</dt>
-              <dd>{result.program}</dd>
-            </div>
-          )}
-          <div>
-            <dt>Requests</dt>
-            <dd>
-              {result.totalRequests} total · {result.inProgress} In Progress
-            </dd>
-          </div>
-        </dl>
-      </article>
-    )
-  }
-
-  const { request, summary } = result
-  return (
-    <article className="adm-match" aria-label="Matching request">
-      <span className="adm-match__kind">Request</span>
-      <div className="adm-match__row">
-        <h2 className="adm-match__title adm-mono">{request.id}</h2>
-        <RequestStatusBadge
-          status={request.status}
-          requestType={request.type}
-          approvalRecorded={request.approvalRecorded}
-        />
-      </div>
-      <dl className="adm-match__fields">
-        <div>
-          <dt>Request type</dt>
-          <dd>{request.type}</dd>
-        </div>
-        <div>
-          <dt>Student</dt>
-          <dd>
-            {request.studentName ?? '—'} ·{' '}
-            <span className="adm-mono">{request.studentId}</span>
-          </dd>
-        </div>
-        <div>
-          <dt>Submitted</dt>
-          <dd>{formatDate(request.date)}</dd>
-        </div>
-        {summary && (
-          <div className="adm-match__wide">
-            <dt>Summary</dt>
-            <dd>{summary}</dd>
-          </div>
-        )}
-      </dl>
-    </article>
   )
 }
 

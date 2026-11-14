@@ -428,7 +428,9 @@ test('"Approved" on the review page comes only from a recorded approval decision
 
 test('the review link and the staff-only route exist, and every other route is kept', () => {
   const REVIEW_ACTION = source('../src/components/admin/ReviewAction.tsx')
-  assert.match(REVIEW_ACTION, /'Course Substitution': courseSubstitutionReviewPath/)
+  const ADMIN_PATHS = source('../src/utils/adminPaths.ts')
+  assert.match(ADMIN_PATHS, /'Course Substitution': courseSubstitutionReviewPath/)
+  assert.match(REVIEW_ACTION, /reviewPathFor\(requestType, requestId\)/)
   assert.match(PAGE, /: \{ to: adminTypePath\('course-substitution'\), label: 'Course Substitution requests' \}/)
   assert.match(APP, /path="\/admin\/requests\/course-substitution\/:requestId"\s+element=\{\s+<ProtectedRoute requiredRole="admin">\s+<AdminCourseSubstitutionReview \/>/)
   for (const route of ['/admin', '/admin/requests/raise-capacity/:requestId', '/admin/requests/program-change/:requestId',
