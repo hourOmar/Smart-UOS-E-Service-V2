@@ -1,9 +1,14 @@
 // Rules for the administrator's final Program Change decision, kept free of
 // imports so they can be tested on their own (tests/programChangeDecision.test.ts).
 // The database function decide_program_change_request enforces the same rules;
-// these only give the administrator immediate feedback.
+// these only give the administrator immediate feedback. A Program Change
+// decision is only Approve or Reject: no explanation is entered or sent.
 
 export type DecisionChoice = 'approve' | 'reject'
+
+// -- Explanation rules shared by the Incomplete Exam and Course Substitution
+//    decisions (re-exported by incompleteExamDecision.ts and
+//    courseSubstitutionDecision.ts). Program Change does not use them.
 
 export const MAX_EXPLANATION = 2000
 
@@ -27,8 +32,10 @@ export function explanationError(value: string, attempted: boolean): string | nu
 export const DECISION_MESSAGES: Record<string, string> = {
   not_staff: 'Only staff members linked in Authorized_Staff can decide requests.',
   invalid_decision: 'Choose Approve or Reject.',
-  explanation_required: 'Enter an explanation for the student.',
-  explanation_too_long: `The explanation can be at most ${MAX_EXPLANATION.toLocaleString('en-US')} characters.`,
+  // Only while the database still requires an explanation (before
+  // program-change-decision/07_install_no_explanation.sql is applied).
+  explanation_required:
+    'The database still requires an explanation for Program Change decisions, so nothing was saved. Ask the system administrator to apply the Program Change decision update.',
   request_not_found: 'This request no longer exists.',
   not_program_change: 'Only Program Change requests can be decided here.',
   program_change_details_missing:

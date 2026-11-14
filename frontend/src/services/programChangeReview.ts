@@ -45,7 +45,6 @@ export interface ProgramChangeReviewRequest {
 export interface ProgramChangeDecision {
   id: number
   choice: DecisionChoice
-  explanation: string
   staffId: number
   /** Only readable for the signed-in staff member's own decisions. */
   staffName: string | null
@@ -117,7 +116,7 @@ export async function fetchProgramChangeReviewRecord(requestId: string): Promise
       .maybeSingle(),
     supabase
       .from('Decision')
-      .select('Decision_ID, Decision_Type, Decision_Comment, Decision_Date, Staff_ID, Authorized_Staff(Staff_Name)')
+      .select('Decision_ID, Decision_Type, Decision_Date, Staff_ID, Authorized_Staff(Staff_Name)')
       .eq('Request_ID', requestId)
       .in('Decision_Type', Object.values(PROGRAM_CHANGE_DECISION_TYPES))
       .order('Decision_Date', { ascending: false })
@@ -177,7 +176,6 @@ export async function fetchProgramChangeReviewRecord(requestId: string): Promise
         ? {
             id: Number(d.Decision_ID),
             choice: d.Decision_Type === PROGRAM_CHANGE_DECISION_TYPES.approve ? 'approve' : 'reject',
-            explanation: String(d.Decision_Comment ?? ''),
             staffId: Number(d.Staff_ID),
             staffName: text(decider?.Staff_Name),
             date: utc(d.Decision_Date),
@@ -194,6 +192,7 @@ export async function fetchProgramChangeReviewRecord(requestId: string): Promise
 // Administrator final decision (database function, signed-in staff session).
 // The staff member is identified by the database from the session; nothing
 // here sends a staff ID. Approval never changes the student's program.
+// The decision is Approve or Reject only; no explanation is sent (NULL).
 
 export class ProgramChangeDecisionError extends Error {
   /** The database's refusal code (e.g. already_decided), or 'unknown'. */
@@ -214,14 +213,13 @@ export interface ProgramChangeDecisionResult {
 export async function decideProgramChangeRequest(
   requestId: string,
   choice: DecisionChoice,
-  explanation: string,
 ): Promise<ProgramChangeDecisionResult> {
   let result
   try {
     result = await supabase.rpc('decide_program_change_request', {
       p_request_id: requestId,
       p_decision: choice,
-      p_explanation: explanation.trim(),
+      p_explanation: null,
     })
   } catch {
     throw new ProgramChangeDecisionError('unknown', CONNECTION_DECISION_MESSAGE)

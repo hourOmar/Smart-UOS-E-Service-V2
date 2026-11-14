@@ -12,10 +12,9 @@ import RequestStatusBadge from '../components/requests/RequestStatusBadge'
 import StudentProofDocuments from '../components/requests/StudentProofDocuments'
 import { CopyRequestId, DetailIcon } from '../components/requests/RequestDetailParts'
 import useRejectionReason from '../hooks/useRejectionReason'
-import useProgramChangeDecision from '../hooks/useProgramChangeDecision'
 import useIncompleteExamDecision from '../hooks/useIncompleteExamDecision'
 import useCourseSubstitutionDecision from '../hooks/useCourseSubstitutionDecision'
-import { COURSE_SUBSTITUTION, INCOMPLETE_EXAM, PROGRAM_CHANGE, RAISE_CAPACITY, statusLabel } from '../utils/statusLabels'
+import { COURSE_SUBSTITUTION, INCOMPLETE_EXAM, RAISE_CAPACITY, statusLabel } from '../utils/statusLabels'
 import '../components/requests/Requests.css'
 
 // Final outcomes use the same wording as the student notifications; a request
@@ -69,12 +68,6 @@ function DecisionExplanation({
         ))}
     </div>
   )
-}
-
-// A decided Program Change request (get_my_program_change_decision).
-function ProgramChangeDecisionText({ requestId, rejected }: { requestId: string; rejected: boolean }) {
-  const { status, decision, retry } = useProgramChangeDecision(requestId, true)
-  return <DecisionExplanation status={status} explanation={decision?.explanation} retry={retry} rejected={rejected} />
 }
 
 // The explanation staff saved when rejecting a Raise Capacity request. A
@@ -170,7 +163,6 @@ function Progress({ request, approvalRecorded }: { request: Details; approvalRec
 function RequestBody({ request }: { request: Details }) {
   const showRejectionReason = request.type === RAISE_CAPACITY && request.status === 'Rejected'
   const decided = request.status === 'Completed' || request.status === 'Rejected'
-  const showProgramChangeDecision = request.type === PROGRAM_CHANGE && decided
   const showIncompleteExamDecision = request.type === INCOMPLETE_EXAM && decided
   // A decided Incomplete Exam request (get_my_incomplete_exam_decision, which
   // returns only the signed-in student's own decided request). Its 'Completed'
@@ -186,9 +178,9 @@ function RequestBody({ request }: { request: Details }) {
   const approvalRecorded =
     incompleteExam.decision?.decision === 'approve' && incompleteExam.decision.hasDecisionRecord || courseSubstitutionApproved
   const decision = decisionHeading(request, approvalRecorded)
-  // Whether this type has an administrator's explanation to show.
-  const hasExplanation =
-    showRejectionReason || showProgramChangeDecision || showIncompleteExamDecision || showCourseSubstitutionDecision
+  // Whether this type has an administrator's explanation to show. Program
+  // Change decisions have none: the card shows the outcome and date only.
+  const hasExplanation = showRejectionReason || showIncompleteExamDecision || showCourseSubstitutionDecision
 
   return (
     <>
@@ -281,9 +273,6 @@ function RequestBody({ request }: { request: Details }) {
           {hasExplanation && (
             <div className="req-decision__explanation">
               {showRejectionReason && <RejectionReasonText requestId={request.id} />}
-              {showProgramChangeDecision && (
-                <ProgramChangeDecisionText requestId={request.id} rejected={request.status === 'Rejected'} />
-              )}
               {showIncompleteExamDecision && (
                 <DecisionExplanation
                   status={incompleteExam.status}

@@ -11,7 +11,7 @@ interface Loaded {
 
 // The final decision and explanation of the signed-in student's own decided
 // Incomplete Exam request, loaded only when `enabled`, with a retry after a
-// loading failure (as useProgramChangeDecision).
+// loading failure.
 function useIncompleteExamDecision(requestId: string | undefined, enabled: boolean) {
   const [loaded, setLoaded] = useState<Loaded | null>(null)
   const [attempt, setAttempt] = useState(0)

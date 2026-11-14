@@ -6,12 +6,9 @@ import {
   type ProgramChangeReviewRecord,
 } from '../../services/programChangeReview'
 import {
-  MAX_EXPLANATION,
   UNKNOWN_DECISION_MESSAGE,
   differsFromRecommendation,
   evaluationWarning,
-  explanationError,
-  explanationLength,
   type AgentRecommendation,
   type DecisionChoice,
   type EvaluationSummary,
@@ -26,7 +23,7 @@ const OPTIONS: { value: DecisionChoice; label: string; description: string }[] =
     description:
       'Approve the request. Any change to the student’s program is processed separately by the Registrar’s Office.',
   },
-  { value: 'reject', label: 'Reject', description: 'Decline the request. Explain why and any next steps.' },
+  { value: 'reject', label: 'Reject', description: 'Decline the request.' },
 ]
 
 const OUTCOME: Record<DecisionChoice, { tone: string; glyph: string; label: string }> = {
@@ -68,7 +65,6 @@ function RecordedDecision({ record }: { record: ProgramChangeReviewRecord }) {
             {outcome.label}
           </span>
         </div>
-        <p className="pcr-recorded__note">{d.explanation}</p>
         <span className="pcr-recorded__meta">
           {decider(d.staffId, d.staffName)} · {formatDateTime(d.date) ?? 'Date not recorded'}
         </span>
@@ -83,21 +79,20 @@ function RecordedDecision({ record }: { record: ProgramChangeReviewRecord }) {
         This request is {statusLabel(record.request.status, record.request.type)}.
       </p>
       <p className="rv-alert__body">
-        No decision record exists for it, so no explanation is available.
+        No decision record exists for it.
         {h ? ` Finalized ${formatDateTime(h.date) ?? 'on an unrecorded date'} by ${decider(h.staffId, null)}.` : ''}
       </p>
     </div>
   )
 }
 
-// The administrator's final decision on a Program Change request, following
-// the approved design: outcome, explanation to the student, then an explicit
-// confirmation. Saved only through decide_program_change_request, which
-// identifies the staff member from the session. The agent's recommendation is
+// The administrator's final decision on a Program Change request: Approve or
+// Reject (no explanation), then an explicit confirmation. Saved only through
+// decide_program_change_request, which identifies the staff member from the
+// session. The agent's recommendation is
 // advisory: the administrator may decide differently.
 function DecisionPanel({ record, recommendation, evaluation, onChanged }: DecisionPanelProps) {
   const [choice, setChoice] = useState<DecisionChoice | null>(null)
-  const [explanation, setExplanation] = useState('')
   const [step, setStep] = useState<'form' | 'confirm'>('form')
   const [attempted, setAttempted] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -108,9 +103,7 @@ function DecisionPanel({ record, recommendation, evaluation, onChanged }: Decisi
 
   const { request, student } = record
   const finalized = request.status !== 'In Progress'
-  const length = explanationLength(explanation)
   const choiceError = attempted && !choice ? 'Choose Approve or Reject.' : null
-  const noteError = explanationError(explanation, attempted)
   const warning = evaluationWarning(evaluation)
   const disagrees = differsFromRecommendation(choice, recommendation)
   const studentName = student?.name ?? 'The student'
@@ -119,7 +112,7 @@ function DecisionPanel({ record, recommendation, evaluation, onChanged }: Decisi
     event.preventDefault()
     setAttempted(true)
     setError(null)
-    if (!choice || explanationError(explanation, true) !== null) return
+    if (!choice) return
     setStep('confirm')
   }
 
@@ -129,7 +122,7 @@ function DecisionPanel({ record, recommendation, evaluation, onChanged }: Decisi
     setSaving(true)
     setError(null)
     try {
-      const result = await decideProgramChangeRequest(request.id, choice, explanation)
+      const result = await decideProgramChangeRequest(request.id, choice)
       setNotice(
         `Decision saved: ${statusLabel(result.status || (choice === 'approve' ? 'Completed' : 'Rejected'), request.type)}. ` +
           `${studentName} has been notified.`,
@@ -217,34 +210,9 @@ function DecisionPanel({ record, recommendation, evaluation, onChanged }: Decisi
             {disagrees && recommendation && (
               <p className="pcr-disagree" role="note">
                 Your decision differs from the agent’s advisory recommendation (
-                {RECOMMENDATION_LABELS[recommendation]}). That is allowed: explain your reasons to the student.
+                {RECOMMENDATION_LABELS[recommendation]}). That is allowed: the recommendation is advisory.
               </p>
             )}
-
-            <div className="pcr-note">
-              <label htmlFor="pcr-note" className="pcr-decision__label">
-                Explanation to student <span className="pcr-required" aria-hidden="true">*</span>
-                <span className="student-visually-hidden">(required)</span>
-              </label>
-              <textarea
-                id="pcr-note"
-                className="pcr-note__input"
-                rows={5}
-                value={explanation}
-                onChange={(event) => {
-                  setExplanation(event.target.value)
-                  setError(null)
-                }}
-                placeholder="Explain the outcome in plain language. The student will see this."
-                aria-invalid={noteError ? true : undefined}
-                aria-describedby="pcr-note-hint"
-              />
-              <span id="pcr-note-hint" className={noteError ? 'rv-field-error' : 'pcr-note__hint'}>
-                {noteError
-                  ? `✕ ${noteError}`
-                  : `${length.toLocaleString('en-US')} / ${MAX_EXPLANATION.toLocaleString('en-US')} characters. Shown to the student with the outcome.`}
-              </span>
-            </div>
 
             <div className="pcr-decision__actions">
               <button type="submit" className="pcr-submit">
@@ -260,16 +228,12 @@ function DecisionPanel({ record, recommendation, evaluation, onChanged }: Decisi
             </strong>
             <p id="pcr-confirm-body" className="pcr-confirm__body">
               This is your final administrative decision and cannot be changed afterwards. The status will
-              change to {choice === 'approve' ? 'Approved' : 'Rejected'} and {studentName} will be notified and
-              will see your explanation. AI recommendations are not applied automatically.
+              change to {choice === 'approve' ? 'Approved' : 'Rejected'} and {studentName} will be notified. AI
+              recommendations are not applied automatically.
               {choice === 'approve'
                 ? ' Approval does not change the student’s program in the system; the Registrar’s Office processes the transfer separately.'
                 : ''}
             </p>
-            <div className="pcr-confirm__explanation">
-              <span className="req-text__label">Explanation to student</span>
-              <p className="req-text__body">{explanation.trim()}</p>
-            </div>
             <div className="pcr-decision__actions">
               <button
                 type="button"

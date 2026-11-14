@@ -59,10 +59,13 @@ test('the Final Decision card appears only for a decided request, with the saved
   assert.match(card, /Final Decision/)
   assert.match(card, /\{decision\.heading\}/)
   assert.match(card, /Decided on \{formatDate\(request\.decision\.date\)\}/)
-  // Every type's explanation is inside the card, shown exactly as loaded.
-  for (const part of ['<RejectionReasonText', '<ProgramChangeDecisionText', 'explanation={incompleteExam.decision?.explanation}', 'explanation={courseSubstitution.decision?.explanation}']) {
+  // Every explained type's explanation is inside the card, shown exactly as
+  // loaded. Program Change decisions have no explanation: outcome and date only.
+  for (const part of ['<RejectionReasonText', 'explanation={incompleteExam.decision?.explanation}', 'explanation={courseSubstitution.decision?.explanation}']) {
     assert.ok(card.includes(part), part)
   }
+  assert.ok(!PAGE.includes('ProgramChangeDecisionText'))
+  assert.match(PAGE, /const hasExplanation = showRejectionReason \|\| showIncompleteExamDecision \|\| showCourseSubstitutionDecision\n/)
   assert.match(PAGE, /<p className="req-text__body">\{explanation\}<\/p>/)
   assert.match(PAGE, /<p className="req-text__body">\{reason\.explanation\}<\/p>/)
   // Light green for an approval, light red for a rejection.

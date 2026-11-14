@@ -44,11 +44,20 @@ test('characters are counted as code points, as the database does', () => {
 // -- database refusals --------------------------------------------------------------
 
 test('every refusal of decide_program_change_request has a safe message', () => {
-  for (const code of ['not_staff', 'invalid_decision', 'explanation_required', 'explanation_too_long',
+  for (const code of ['not_staff', 'invalid_decision', 'explanation_required',
     'request_not_found', 'not_program_change', 'program_change_details_missing', 'already_decided']) {
     assert.equal(decisionErrorCode({ message: code, code: 'P0001' }), code)
     assert.equal(decisionErrorMessage(code), DECISION_MESSAGES[code])
   }
+  // No explanation is sent, so an over-long one cannot occur.
+  assert.equal(Object.hasOwn(DECISION_MESSAGES, 'explanation_too_long'), false)
+})
+
+test('a database that still requires an explanation is reported as a missing update, not as a staff mistake', () => {
+  const message = decisionErrorMessage('explanation_required')
+  assert.match(message, /database still requires an explanation/)
+  assert.match(message, /nothing was saved/)
+  assert.doesNotMatch(message, /^Enter an explanation/)
 })
 
 test('staff-only access: a non-staff caller is refused with a staff-facing message', () => {
