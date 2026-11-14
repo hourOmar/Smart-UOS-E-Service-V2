@@ -1,21 +1,233 @@
-/* My Profile: two read-only panels side by side, stacked on narrow
-   screens. Page, panel and field styles come from
+/* My Profile: profile header, three academic summary cards, then the
+   Personal and Academic Information cards side by side (stacked on narrow
+   screens). Page, panel and state styles come from
    components/requests/Requests.css. */
 
-.profile-panels {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: stretch;
-  gap: 20px;
+.profile-page {
+  --profile-tint: #e8f2ed;
+  --profile-border: #e2e6e0;
+  max-width: calc(980px + 2 * clamp(16px, 4vw, 32px));
 }
 
-.profile-panels > .req-panel {
-  flex: 1 1 340px;
+/* Profile header */
+
+.profile-hero {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 22px 24px;
+  border: 1px solid var(--profile-border);
+  border-left: 4px solid var(--proto-green);
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.profile-hero__avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--profile-tint);
+  color: var(--proto-green);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.profile-hero__avatar svg {
+  width: 28px;
+  height: 28px;
+}
+
+.profile-hero__text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   min-width: 0;
 }
 
-/* Values not recorded in the database. */
-.req-fields__item dd.profile-missing {
+.student .profile-hero__name {
+  margin: 0;
+  font-family: inherit;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: var(--proto-heading);
+  overflow-wrap: anywhere;
+}
+
+.profile-hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin: 0;
+  font-size: 14.5px;
+  color: var(--proto-body);
+}
+
+.profile-hero__meta-label {
+  color: var(--proto-muted);
+}
+
+.profile-hero__dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #b5bdb8;
+}
+
+/* Academic overview */
+
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.profile-stat {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  border: 1px solid var(--profile-border);
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.profile-stat__icon {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--profile-tint);
+  color: var(--proto-green);
+}
+
+.profile-stat__icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.profile-stat__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  margin: 0;
+}
+
+.profile-stat__label {
+  font-size: 12.5px;
+  color: var(--proto-muted);
+}
+
+.profile-stat__value {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--proto-heading);
+  overflow-wrap: anywhere;
+}
+
+.profile-stat__value--missing {
+  font-size: 15px;
   font-weight: 400;
   color: var(--proto-muted);
+}
+
+/* Personal and Academic Information */
+
+.profile-panels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 16px;
+}
+
+.student .profile-info__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-info__title > svg {
+  flex: none;
+  width: 17px;
+  height: 17px;
+  color: var(--proto-green);
+}
+
+.profile-info__list {
+  margin: 0;
+  padding: 4px 20px;
+}
+
+.profile-info__row {
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr);
+  gap: 16px;
+  padding: 12px 0;
+}
+
+.profile-info__row + .profile-info__row {
+  border-top: 1px solid #edf0eb;
+}
+
+.profile-info__row dt {
+  font-size: 13.5px;
+  color: var(--proto-muted);
+}
+
+.profile-info__row dd {
+  margin: 0;
+  font-size: 14.5px;
+  font-weight: 500;
+  color: #17211c;
+  overflow-wrap: anywhere;
+}
+
+/* Values not recorded in the database. */
+.profile-info__row dd.profile-missing {
+  font-weight: 400;
+  color: var(--proto-muted);
+}
+
+/* Responsive */
+
+@media (max-width: 860px) {
+  .profile-panels {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .profile-stats {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .profile-hero {
+    gap: 16px;
+    padding: 18px;
+  }
+
+  .profile-hero__avatar {
+    width: 56px;
+    height: 56px;
+    font-size: 19px;
+  }
+}
+
+@media (max-width: 420px) {
+  .profile-info__row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3px;
+  }
 }
