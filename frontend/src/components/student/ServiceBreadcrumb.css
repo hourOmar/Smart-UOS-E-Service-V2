@@ -1,0 +1,44 @@
+/* Breadcrumb of the service-details pages and the request forms
+   (Academic Requests › Service › New Request). */
+
+.service-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+}
+
+.service-breadcrumb__back,
+.service-breadcrumb__link {
+  padding: 2px 0;
+  color: var(--proto-green);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.service-breadcrumb__back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+}
+
+.service-breadcrumb__back:hover,
+.service-breadcrumb__link:hover {
+  text-decoration: underline;
+}
+
+.service-breadcrumb__back svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+.service-breadcrumb__separator {
+  color: #8e9a92;
+}
+
+.service-breadcrumb__current {
+  color: var(--proto-body);
+}

@@ -12,6 +12,7 @@ import {
 } from '../utils/courseSubstitutionSubmission'
 import { requestDetailsPath } from '../utils/requestPaths'
 import StudentLayout from '../components/student/StudentLayout'
+import ServiceBreadcrumb from '../components/student/ServiceBreadcrumb'
 import CoursePicker from '../components/courseSubstitution/CoursePicker'
 import './RaiseCapacityForm.css'
 import './ProgramChangeForm.css'
@@ -50,12 +51,12 @@ function CourseSubstitutionForm() {
   const errors = validateCourseSubstitutionForm({ originalCourseId: originalId, proposedCourseId: proposedId, reason })
   const reasonShown = attempted || reasonTouched ? (errors.reason ?? null) : null
 
-  // Leaving the form returns to where the student came from: the Course
+  // Cancel returns to where the student came from: the Course
   // Substitution details page, or otherwise the Academic Requests section.
   const fromDetails = (location.state as { from?: string } | null)?.from === 'details'
   const exit = fromDetails
-    ? { to: serviceDetailsPath('course-substitution'), state: undefined, label: 'Back to Course Substitution details' }
-    : { to: '/student', state: { scrollTo: CATALOG_ANCHOR_ID }, label: 'Back to Dashboard' }
+    ? { to: serviceDetailsPath('course-substitution'), state: undefined }
+    : { to: '/student', state: { scrollTo: CATALOG_ANCHOR_ID } }
 
   useEffect(() => {
     if (submitted) doneHeadingRef.current?.focus()
@@ -104,13 +105,7 @@ function CourseSubstitutionForm() {
   return (
     <StudentLayout profile={profile} solidHeader>
       <div className="rc-page pc-page csf-page">
-        <Link to={exit.to} state={exit.state} className="rc-page__back">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="9" />
-            <path d="M13.5 8.5 10 12l3.5 3.5" />
-          </svg>
-          {exit.label}
-        </Link>
+        <ServiceBreadcrumb serviceId="course-substitution" current="New Request" />
 
         <div className="rc-page__intro">
           <h1 className="rc-page__title pc-page__title">Course Substitution Request</h1>

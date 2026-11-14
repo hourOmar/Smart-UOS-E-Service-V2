@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { CATALOG_ANCHOR_ID, serviceDetailsPath } from '../data/academicRequests'
 import useStudentProfile from '../hooks/useStudentProfile'
 import useIncompleteExamEnrollments from '../hooks/useIncompleteExamEnrollments'
@@ -30,6 +30,7 @@ import {
 import { submissionBlocker } from '../utils/incompleteExamSubmissionFlow'
 import { requestDetailsPath } from '../utils/requestPaths'
 import StudentLayout from '../components/student/StudentLayout'
+import ServiceBreadcrumb from '../components/student/ServiceBreadcrumb'
 import EnrollmentPicker from '../components/incompleteExam/EnrollmentPicker'
 import ProofFilesField from '../components/incompleteExam/ProofFilesField'
 import './RaiseCapacityForm.css'
@@ -95,8 +96,8 @@ function IncompleteExamForm() {
 
   const fromDetails = (location.state as { from?: string } | null)?.from === 'details'
   const back = fromDetails
-    ? { to: serviceDetailsPath('incomplete-exam'), state: undefined, label: 'Back to Incomplete Exam details' }
-    : { to: '/student', state: { scrollTo: CATALOG_ANCHOR_ID }, label: 'Back to Academic Requests' }
+    ? { to: serviceDetailsPath('incomplete-exam'), state: undefined }
+    : { to: '/student', state: { scrollTo: CATALOG_ANCHOR_ID } }
 
   const values: Partial<IncompleteExamFormValues> = {
     courseId: selected?.courseId ?? '',
@@ -230,14 +231,7 @@ function IncompleteExamForm() {
   return (
     <StudentLayout profile={profile} solidHeader>
       <div className="rc-page ie-page">
-        <Link to={back.to} state={back.state} className="rc-page__back">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"
-            strokeLinejoin="round" aria-hidden="true">
-            <circle cx="12" cy="12" r="9" />
-            <path d="M13.5 8.5 10 12l3.5 3.5" />
-          </svg>
-          {back.label}
-        </Link>
+        <ServiceBreadcrumb serviceId="incomplete-exam" current="New Request" />
 
         <div className="rc-page__intro">
           <h1 className="rc-page__title">Incomplete Exam Request</h1>

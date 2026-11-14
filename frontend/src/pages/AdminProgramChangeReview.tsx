@@ -8,6 +8,7 @@ import { formatDate } from '../services/studentRequests'
 import { programLabel, type ProgramChangeReviewRecord } from '../services/programChangeReview'
 import { ADMIN_HOME_ITEM, ADMIN_HOME_PATH, adminTypePath, type ReviewOrigin } from '../utils/adminPaths'
 import StudentLayout from '../components/student/StudentLayout'
+import ReviewBreadcrumb from '../components/admin/ReviewBreadcrumb'
 import RequestStatusBadge from '../components/requests/RequestStatusBadge'
 import EvaluationPanel from '../components/programChangeReview/EvaluationPanel'
 import DecisionPanel from '../components/programChangeReview/DecisionPanel'
@@ -137,21 +138,7 @@ function AdminProgramChangeReview() {
   return (
     <StudentLayout profile={identity} solidHeader homePath={ADMIN_HOME_PATH} menuItems={[ADMIN_HOME_ITEM]}>
       <div className="adm-page rv-page pcr-page">
-        <Link to={back.to} className="req-page__back">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <circle cx="12" cy="12" r="9" />
-            <path d="M13.5 8.5 10 12l3.5 3.5" />
-          </svg>
-          {back.label}
-        </Link>
+        <ReviewBreadcrumb typeId="program-change" />
 
         {record.status === 'ready' && record.result?.kind === 'not-found' && (
           <div className="req-state">

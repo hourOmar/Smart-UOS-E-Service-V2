@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   CATALOG_ANCHOR_ID,
   serviceDetailsPath,
@@ -12,6 +12,7 @@ import {
   submitRaiseCapacityRequest,
 } from '../services/raiseCapacity'
 import StudentLayout from '../components/student/StudentLayout'
+import ServiceBreadcrumb from '../components/student/ServiceBreadcrumb'
 import SectionPicker from '../components/raiseCapacity/SectionPicker'
 import SelectedSection from '../components/raiseCapacity/SelectedSection'
 import JustificationField from '../components/raiseCapacity/JustificationField'
@@ -52,13 +53,13 @@ function RaiseCapacityForm() {
 
   const selected = sections.find((section) => section.key === selectedKey) ?? null
 
-  // Back and Cancel return to where the student came from: the Raise
+  // Cancel returns to where the student came from: the Raise
   // Capacity details page, or otherwise the Academic Requests section.
   const fromDetails =
     (location.state as { from?: string } | null)?.from === 'details'
   const back = fromDetails
-    ? { to: serviceDetailsPath('raise-capacity'), state: undefined, label: 'Back to Raise Capacity details' }
-    : { to: '/student', state: { scrollTo: CATALOG_ANCHOR_ID }, label: 'Back to Academic Requests' }
+    ? { to: serviceDetailsPath('raise-capacity'), state: undefined }
+    : { to: '/student', state: { scrollTo: CATALOG_ANCHOR_ID } }
 
   useEffect(() => {
     if (submitted) doneHeadingRef.current?.focus()
@@ -122,21 +123,7 @@ function RaiseCapacityForm() {
   return (
     <StudentLayout profile={profile} solidHeader>
       <div className="rc-page">
-        <Link to={back.to} state={back.state} className="rc-page__back">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.8"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden="true"
-          >
-            <circle cx="12" cy="12" r="9" />
-            <path d="M13.5 8.5 10 12l3.5 3.5" />
-          </svg>
-          {back.label}
-        </Link>
+        <ServiceBreadcrumb serviceId="raise-capacity" current="New Request" />
 
         <div className="rc-page__intro">
           <h1 className="rc-page__title">Raise Capacity Request</h1>

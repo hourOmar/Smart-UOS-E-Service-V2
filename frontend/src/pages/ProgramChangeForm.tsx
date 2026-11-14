@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { CATALOG_ANCHOR_ID, serviceDetailsPath } from '../data/academicRequests'
+import { useNavigate } from 'react-router-dom'
 import useStudentProfile from '../hooks/useStudentProfile'
 import useProgramChangeData from '../hooks/useProgramChangeData'
 import {
@@ -12,6 +11,7 @@ import {
 } from '../services/programChange'
 import { requestDetailsPath } from '../utils/requestPaths'
 import StudentLayout from '../components/student/StudentLayout'
+import ServiceBreadcrumb from '../components/student/ServiceBreadcrumb'
 import CurrentProgramCard from '../components/programChange/CurrentProgramCard'
 import CollegePicker from '../components/programChange/CollegePicker'
 import ProgramPicker from '../components/programChange/ProgramPicker'
@@ -30,7 +30,6 @@ interface SubmittedRequest {
 // the current program from the student's own record. Submit Request saves
 // the request through public.submit_program_change_request.
 function ProgramChangeForm() {
-  const location = useLocation()
   const navigate = useNavigate()
   const profile = useStudentProfile()
   const { status, colleges, current, retry } = useProgramChangeData()
@@ -50,13 +49,6 @@ function ProgramChangeForm() {
   const college = colleges.find((entry) => entry.name === collegeName) ?? null
   const selected = college?.programs.find((program) => program.key === programKey) ?? null
   const canSubmit = selected !== null && reasonError(reason) === null && !submitting
-
-  // Leaving the form returns to where the student came from: the Program
-  // Change details page, or otherwise the Academic Requests section.
-  const fromDetails = (location.state as { from?: string } | null)?.from === 'details'
-  const exit = fromDetails
-    ? { to: serviceDetailsPath('program-change'), state: undefined, label: 'Back to Program Change details' }
-    : { to: '/student', state: { scrollTo: CATALOG_ANCHOR_ID }, label: 'Back to Dashboard' }
 
   useEffect(() => {
     if (submitted) doneHeadingRef.current?.focus()
@@ -130,7 +122,9 @@ function ProgramChangeForm() {
   return (
     <StudentLayout profile={profile} solidHeader>
       <div className="rc-page pc-page">
-        {college && !submitted ? (
+        <ServiceBreadcrumb serviceId="program-change" current="New Request" />
+
+        {college && !submitted && (
           <button
             type="button"
             className="rc-page__back pc-page__back-button"
@@ -140,11 +134,6 @@ function ProgramChangeForm() {
             {backIcon}
             Back to Colleges
           </button>
-        ) : (
-          <Link to={exit.to} state={exit.state} className="rc-page__back">
-            {backIcon}
-            {exit.label}
-          </Link>
         )}
 
         <div className="rc-page__intro">
