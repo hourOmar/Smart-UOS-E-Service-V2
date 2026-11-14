@@ -4,6 +4,7 @@ import useStaffIdentity from '../hooks/useStaffIdentity'
 import useReviewRecord from '../hooks/useReviewRecord'
 import useEligibilityEvaluation from '../hooks/useEligibilityEvaluation'
 import useCourseNames from '../hooks/useCourseNames'
+import useRaiseCapacityPriority from '../hooks/useRaiseCapacityPriority'
 import { formatDate } from '../services/studentRequests'
 import type { ReviewRecord } from '../services/raiseCapacityReview'
 import { ADMIN_HOME_ITEM, ADMIN_HOME_PATH, adminTypePath, type ReviewOrigin } from '../utils/adminPaths'
@@ -11,6 +12,7 @@ import StudentLayout from '../components/student/StudentLayout'
 import ReviewBreadcrumb from '../components/admin/ReviewBreadcrumb'
 import RequestStatusBadge from '../components/requests/RequestStatusBadge'
 import EligibilityPanel from '../components/review/EligibilityPanel'
+import PriorityPanel from '../components/review/PriorityPanel'
 import EvidencePanel from '../components/review/EvidencePanel'
 import DecisionPanel from '../components/review/DecisionPanel'
 import { NOT_RECORDED } from '../components/review/format'
@@ -114,6 +116,8 @@ function AdminRaiseCapacityReview() {
   const recordFound = record.status === 'ready' && record.result?.kind === 'found' ? record.result.record : null
   const autoRun = recordFound ? recordFound.request.status === 'In Progress' : null
   const evaluation = useEligibilityEvaluation(requestId, autoRun)
+  // The saved priority, as in the requests table; read only, never run here.
+  const priority = useRaiseCapacityPriority(requestId)
 
   const origin = (location.state as { from?: ReviewOrigin } | null)?.from
   const back =
@@ -187,6 +191,13 @@ function AdminRaiseCapacityReview() {
                 <StudentPanel record={found} />
               </div>
             )}
+
+            <PriorityPanel
+              status={priority.status}
+              data={priority.data}
+              error={priority.error}
+              onRetry={priority.retry}
+            />
 
             <EligibilityPanel
               status={evaluation.status}

@@ -260,6 +260,45 @@ p.rv-missing {
   color: var(--proto-muted);
 }
 
+/* Priority assessment: the same card as the recommendation, with the
+   requests table's priority pill (AdminDashboard.css) in its neutral head. */
+
+.rv-prio .rv-rec__head {
+  background: #f4f6f4;
+  color: var(--proto-heading);
+}
+
+.rv-prio .adm-prio-pill {
+  font-size: 13px;
+}
+
+.rv-prio__evidence {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 12px;
+  border-top: 1px solid #edf0eb;
+}
+
+.rv-prio__evidence-title {
+  margin: 0;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--proto-muted);
+}
+
+.rv-prio__evidence-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding-left: 18px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: #2b3731;
+  overflow-wrap: anywhere;
+}
+
 /* Technical problems: visually distinct from any recommendation. */
 .rv-alert {
   display: flex;

@@ -1,14 +1,7 @@
 import type { RaiseCapacityPriorities } from '../../hooks/useRaiseCapacityPriorities'
-import type { PriorityLevel } from '../../services/raiseCapacityPriority'
+import { PRIORITY_LABELS } from '../../services/raiseCapacityPriority'
 
 const RAISE_CAPACITY = 'Raise Capacity'
-
-const PRIORITY_LABELS: Record<PriorityLevel, string> = {
-  HIGH: 'High',
-  MEDIUM: 'Medium',
-  LOW: 'Low',
-  MANUAL_REVIEW: 'Manual review',
-}
 
 interface PriorityCellProps {
   requestId: string

@@ -5,6 +5,14 @@ import { callBackend } from './backendApi'
 
 export type PriorityLevel = 'HIGH' | 'MEDIUM' | 'LOW' | 'MANUAL_REVIEW'
 
+/** Shared by the Priority column and the review page's Priority assessment. */
+export const PRIORITY_LABELS: Record<PriorityLevel, string> = {
+  HIGH: 'High',
+  MEDIUM: 'Medium',
+  LOW: 'Low',
+  MANUAL_REVIEW: 'Manual review',
+}
+
 export type PriorityStateName =
   | 'saved'
   | 'needs_attention'
@@ -24,12 +32,32 @@ export interface PriorityRun {
   agent_version: string
 }
 
+/** The agent's explanation of each factor, as saved with its result. */
+export interface FactorExplanations {
+  graduation: string
+  degree_progress: string
+  course_requirement: string
+  course_availability: string
+  previous_attempts: string
+  prerequisite: string
+  progression: string
+}
+
+/** The saved result (Raise_Capacity.Priority_Result), exactly as the agent stored it. */
+export interface PriorityResult {
+  request_id?: string
+  priority?: PriorityLevel
+  reasoning?: string
+  factor_explanations?: FactorExplanations
+  key_evidence?: string[]
+}
+
 export interface PriorityState {
   request_id: string
   state: PriorityStateName
   priority: PriorityLevel | null
   /** The saved result (reasoning, factor explanations, key evidence). */
-  result: { reasoning?: string } | null
+  result: PriorityResult | null
   attention_reason: string | null
   request_status: string | null
   can_retry: boolean
