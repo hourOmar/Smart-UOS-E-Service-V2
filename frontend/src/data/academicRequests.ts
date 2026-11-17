@@ -148,9 +148,10 @@ export const academicRequestTypes: AcademicRequestType[] = [
     id: 'course-equivalency',
     name: 'Course Equivalency',
     description:
-      'Request credit for a course you completed at another institution.',
-    keywords: 'equivalency transfer credit exchange external',
+      'After an approved program change, request that a course you completed count as a course in your new program’s study plan.',
+    keywords: 'equivalency equivalent credit completed course new program change study plan',
     details: notYetProvided(),
+    startPath: '/student/services/course-equivalency/new',
   },
   {
     id: 'course-substitution',

@@ -127,8 +127,13 @@ def test_not_configured_or_no_token_makes_no_request(configured, monkeypatch):
     assert "url" not in seen
 
 
-def test_only_get_is_used():
+def test_only_download_and_non_overwriting_upload_are_used():
+    """GET for downloads; POST only for uploads that never overwrite (x-upsert false,
+    Course Equivalency syllabi, Phase 3B); never PUT / PATCH / DELETE."""
     source = inspect.getsource(storage)
-    assert "requests.get(" in source
-    for verb in ("requests.post", "requests.put", "requests.delete", "requests.patch"):
+    assert "requests.get(" in inspect.getsource(storage.download_object)
+    upload = inspect.getsource(storage.upload_object)
+    assert "requests.post(" in upload and '"x-upsert": "false"' in upload
+    assert source.count("requests.post(") == 1 and source.count("requests.get(") == 1
+    for verb in ("requests.put", "requests.delete", "requests.patch"):
         assert verb not in source

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { supabase } from '../services/supabase'
+import { resolveAccountRole, type RoleLookupClient } from '../utils/loginFlow'
 
 type Role = 'student' | 'admin'
 
@@ -28,25 +29,15 @@ function ProtectedRoute({
         return
       }
 
-      const { data: staff } = await supabase
-        .from('Authorized_Staff')
-        .select('Staff_ID')
-        .eq('Auth_User_ID', user.id)
-        .maybeSingle()
+      // Staff first, then student -- both by the signed-in user's Auth UID,
+      // as on the login page (utils/loginFlow.ts) and in the database policies.
+      // (The full Supabase client type is too deep to compare with
+      // RoleLookupClient structurally; it provides exactly the calls listed.)
+      const account = await resolveAccountRole(supabase as unknown as RoleLookupClient, user.id)
 
-      if (staff) {
+      if (account === 'staff') {
         setRole('admin')
-        setLoading(false)
-        return
-      }
-
-      const { data: student } = await supabase
-        .from('Student')
-        .select('Student_ID')
-        .eq('Student_Email', user.email)
-        .maybeSingle()
-
-      if (student) {
+      } else if (account === 'student') {
         setRole('student')
       }
 

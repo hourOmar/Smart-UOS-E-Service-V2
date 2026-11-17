@@ -1,7 +1,9 @@
 import { supabase } from './supabase'
 import { fetchCourseSubstitutionDecision } from './courseSubstitutionStudent'
+import { fetchCourseEquivalencyDecision } from './courseEquivalencyStudent'
 import { fetchIncompleteExamDecision } from './incompleteExamStudent'
-import { COURSE_SUBSTITUTION, INCOMPLETE_EXAM, needsApprovalRecord } from '../utils/statusLabels'
+import { COURSE_EQUIVALENCY, COURSE_SUBSTITUTION, INCOMPLETE_EXAM, needsApprovalRecord } from '../utils/statusLabels'
+import { courseEquivalencyContextFields } from '../utils/courseEquivalencySubmission'
 
 // Every query here runs with the signed-in student's session. The database
 // policies return only that student's own requests and details, so another
@@ -80,9 +82,10 @@ export async function fetchStudentRequests(limit?: number): Promise<StudentReque
 const OWN_DECISION: Record<string, (requestId: string) => Promise<{ decision: 'approve' | 'reject' } | null>> = {
   [INCOMPLETE_EXAM]: fetchIncompleteExamDecision,
   [COURSE_SUBSTITUTION]: fetchCourseSubstitutionDecision,
+  [COURSE_EQUIVALENCY]: fetchCourseEquivalencyDecision,
 }
 
-// Marks the Completed Incomplete Exam / Course Substitution rows that have a
+// Marks the Completed Incomplete Exam / Course Substitution / Course Equivalency rows that have a
 // recorded approval, with the same function the details page uses, so both
 // show the same status. Only those rows are looked up. A row whose decision
 // cannot be loaded keeps its stored status ('Completed'), never a guessed
@@ -249,7 +252,11 @@ async function fetchTypeDetails(type: string, requestId: string): Promise<TypeDe
       }
     }
     case 'Course Equivalency': {
-      const row = await one('Course_Equivalency', 'Old_Course_ID, New_Course_ID, Reason')
+      const row = await one(
+        'Course_Equivalency',
+        'Old_Course_ID, New_Course_ID, Reason, Program_Change_Request_ID, Old_Program_ID, Old_Program_Name, '
+          + 'New_Program_ID, New_Program_Name, Plan_Version, Old_Course_Grade, Old_Course_Term',
+      )
       if (!row) break
       const oldId = text(row.Old_Course_ID)
       const newId = text(row.New_Course_ID)
@@ -259,6 +266,8 @@ async function fetchTypeDetails(type: string, requestId: string): Promise<TypeDe
         fields: [
           { label: 'Course taken', value: courseLabel(oldId, names) },
           { label: 'Equivalent course', value: courseLabel(newId, names) },
+          // Program context stored at submission; none on older requests.
+          ...courseEquivalencyContextFields(row),
         ],
         reason: reasonOf(row),
       }

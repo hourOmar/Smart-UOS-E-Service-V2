@@ -8,6 +8,7 @@ import RaiseCapacityForm from './pages/RaiseCapacityForm'
 import ProgramChangeForm from './pages/ProgramChangeForm'
 import IncompleteExamForm from './pages/IncompleteExamForm'
 import CourseSubstitutionForm from './pages/CourseSubstitutionForm'
+import CourseEquivalencyForm from './pages/CourseEquivalencyForm'
 import MyRequests from './pages/MyRequests'
 import MyProfile from './pages/MyProfile'
 import StudentRequestDetails from './pages/StudentRequestDetails'
@@ -17,6 +18,7 @@ import AdminRaiseCapacityReview from './pages/AdminRaiseCapacityReview'
 import AdminProgramChangeReview from './pages/AdminProgramChangeReview'
 import AdminIncompleteExamReview from './pages/AdminIncompleteExamReview'
 import AdminCourseSubstitutionReview from './pages/AdminCourseSubstitutionReview'
+import AdminCourseEquivalencyReview from './pages/AdminCourseEquivalencyReview'
 import AdminStudentProfile from './pages/AdminStudentProfile'
 
 function App() {
@@ -66,6 +68,15 @@ function App() {
           element={
             <ProtectedRoute requiredRole="student">
               <CourseSubstitutionForm />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/student/services/course-equivalency/new"
+          element={
+            <ProtectedRoute requiredRole="student">
+              <CourseEquivalencyForm />
             </ProtectedRoute>
           }
         />
@@ -147,6 +158,15 @@ function App() {
           element={
             <ProtectedRoute requiredRole="admin">
               <AdminCourseSubstitutionReview />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/requests/course-equivalency/:requestId"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminCourseEquivalencyReview />
             </ProtectedRoute>
           }
         />

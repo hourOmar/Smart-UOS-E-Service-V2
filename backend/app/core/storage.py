@@ -1,14 +1,16 @@
-"""Supabase Storage downloads made AS THE SIGNED-IN STAFF MEMBER.
+"""Supabase Storage calls made AS THE SIGNED-IN STAFF MEMBER.
 
-Each download sends the staff member's own Supabase access token
+Each call sends the staff member's own Supabase access token
 (Authorization: Bearer <token>) with the public anon key (apikey), so Storage
 applies that user's policies: for incomplete-exam-proofs only staff
-(app_private.is_staff) and the owning student may read. The backend holds no
-service_role key and has no Storage grants of its own.
+(app_private.is_staff) and the owning student may read; for course-syllabi only
+staff may read and only staff may upload, to an exact path
+(app_private.can_upload_course_syllabus). The backend holds no service_role key
+and has no Storage grants of its own.
 
-The token is used for this one call only: it is never stored, logged or put in
-an exception message. Downloads are streamed with a size cap and timeouts.
-Read-only: nothing here uploads, overwrites or deletes.
+The token is used for one call only: it is never stored, logged or put in an
+exception message. Downloads are streamed with a size cap and timeouts. Uploads
+never overwrite (x-upsert: false); nothing here deletes.
 """
 
 from urllib.parse import quote
@@ -45,9 +47,97 @@ class StorageUnavailableError(StorageError):
     """Storage could not be reached or answered unexpectedly."""
 
 
+class StorageConflictError(StorageError):
+    """An object already exists at that path (uploads never overwrite)."""
+
+
+class StorageRejectedError(StorageError):
+    """Storage refused the upload itself. `reason` is 'too_large', 'type' or 'rejected'."""
+
+    def __init__(self, message: str, reason: str = "rejected") -> None:
+        super().__init__(message)
+        self.reason = reason
+
+
 def object_url(supabase_url: str, bucket: str, path: str) -> str:
     """The authenticated-download endpoint; each path segment is URL-encoded."""
     return f"{supabase_url}/storage/v1/object/authenticated/{quote(bucket, safe='')}/{quote(path, safe='/')}"
+
+
+def upload_url(supabase_url: str, bucket: str, path: str) -> str:
+    """The upload endpoint; each path segment is URL-encoded."""
+    return f"{supabase_url}/storage/v1/object/{quote(bucket, safe='')}/{quote(path, safe='/')}"
+
+
+def _error_code(response) -> str:
+    """The status Storage reports. Storage sometimes answers HTTP 400 with the real
+    status in the JSON body ({"statusCode": "403", "error": ..., "message": ...})."""
+    try:
+        body = response.json()
+    except ValueError:
+        body = None
+    if isinstance(body, dict):
+        embedded = str(body.get("statusCode") or "").strip()
+        if embedded.isdigit():
+            return embedded
+        error = str(body.get("error") or "").strip().lower().replace(" ", "_")
+        if error in ("duplicate", "already_exists", "resourcealreadyexists"):
+            return "409"
+        if error in ("invalid_mime_type", "invalidmimetype"):
+            return "415"
+        if error in ("payload_too_large", "entitytoolarge", "entity_too_large"):
+            return "413"
+    return str(response.status_code)
+
+
+def upload_object(bucket: str, path: str, data: bytes, content_type: str, access_token: str) -> None:
+    """Uploads `data` to `bucket`/`path` with the staff member's session; never overwrites.
+
+    Raises StorageConflictError (object exists), StorageAccessDeniedError (session or
+    upload policy refused), StorageRejectedError (size / type / other refusal),
+    StorageNotConfiguredError or StorageUnavailableError. A timeout is reported as
+    unavailable: the object may or may not have been stored (it is then simply never
+    registered)."""
+    settings = get_settings()
+    if not settings.supabase_url or not settings.supabase_anon_key:
+        raise StorageNotConfiguredError("Supabase Storage is not configured.")
+    if not isinstance(access_token, str) or not access_token.strip():
+        raise StorageAccessDeniedError("No staff session was provided for the upload.")
+    timeout = settings.storage_timeout_seconds
+    try:
+        response = requests.post(
+            upload_url(settings.supabase_url, bucket, path),
+            data=data,
+            headers={
+                "apikey": settings.supabase_anon_key,
+                "Authorization": f"Bearer {access_token.strip()}",
+                "Content-Type": content_type,
+                "x-upsert": "false",
+                "cache-control": "no-cache",
+            },
+            timeout=(timeout, timeout),
+            allow_redirects=False,
+        )
+    except requests.RequestException as exc:
+        raise StorageUnavailableError(f"Supabase Storage could not be reached ({type(exc).__name__}).") from None
+
+    try:
+        if response.status_code == 200:
+            return
+        code = _error_code(response)
+        if code == "409":
+            raise StorageConflictError("An object already exists at that path.")
+        if code in ("401", "403"):
+            raise StorageAccessDeniedError(f"Supabase Storage refused the upload ({code}).")
+        if code == "413":
+            raise StorageRejectedError("Supabase Storage refused the file size.", "too_large")
+        if code == "415":
+            raise StorageRejectedError("Supabase Storage refused the file type.", "type")
+        if code == "400":
+            raise StorageRejectedError("Supabase Storage refused the upload (400).")
+        raise StorageUnavailableError(f"Supabase Storage returned {code}.")
+    finally:
+        response.close()
 
 
 def _is_not_found(response) -> bool:

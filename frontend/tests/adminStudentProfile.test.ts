@@ -54,7 +54,8 @@ test('each request type opens its existing review page; others have none', () =>
   assert.equal(reviewPathFor('Raise Capacity', 'R1'), '/admin/requests/raise-capacity/R1')
   assert.equal(reviewPathFor('Program Change', 'R2'), '/admin/requests/program-change/R2')
   assert.equal(reviewPathFor('Course Substitution', 'R3'), '/admin/requests/course-substitution/R3')
-  assert.equal(reviewPathFor('Course Equivalency', 'R4'), null)
+  assert.equal(reviewPathFor('Course Equivalency', 'R4'), '/admin/requests/course-equivalency/R4')
+  assert.equal(reviewPathFor('Appeal', 'R6'), null)       // a type without a review page
   assert.equal(reviewPathFor('toString', 'R5'), null)   // no prototype keys
   assert.equal(studentProfilePath('U21100123'), '/admin/students/U21100123')
 })

@@ -30,16 +30,21 @@ export function courseSubstitutionReviewPath(requestId: string) {
   return `${adminTypePath('course-substitution')}/${encodeURIComponent(requestId)}`
 }
 
+/** The staff review page of one Course Equivalency request. */
+export function courseEquivalencyReviewPath(requestId: string) {
+  return `${adminTypePath('course-equivalency')}/${encodeURIComponent(requestId)}`
+}
+
 /** Where a review page was opened from, for its back link. */
 export type ReviewOrigin = 'dashboard' | 'type-list'
 
-/** The review page of each request type that has one (by Request_Type).
- *  Other types (e.g. Course Equivalency) have no review page yet. */
+/** The review page of each request type that has one (by Request_Type). */
 const REVIEW_PATHS: Readonly<Record<string, (requestId: string) => string>> = {
   'Raise Capacity': raiseCapacityReviewPath,
   'Program Change': programChangeReviewPath,
   'Incomplete Exam': incompleteExamReviewPath,
   'Course Substitution': courseSubstitutionReviewPath,
+  'Course Equivalency': courseEquivalencyReviewPath,
 }
 
 /** The review page of a request, or null when its type has none. */

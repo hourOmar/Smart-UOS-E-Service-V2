@@ -11,6 +11,8 @@ export interface CourseOption {
   id: string
   name: string | null
   creditHours: number | null
+  /** Optional second line in the picker (e.g. a grade); not used by Course Substitution. */
+  detail?: string | null
 }
 
 export interface CourseSubstitutionForm {

@@ -7,3 +7,11 @@ pydantic>=2.7
 python-dotenv>=1.0
 requests>=2.32
 beautifulsoup4>=4.12
+# Multipart form parsing for staff file uploads (0.0.20+ includes the published security fixes).
+python-multipart>=0.0.20
+# Course Equivalency agent: syllabus text extraction. Pinned; checked against published
+# advisories (OSV) on 2026-11-16: no open advisory for these versions. pypdf 6.21.4 fixes
+# every published denial-of-service advisory; lxml >= 6.1.0 fixes CVE-2026-41066.
+pypdf==6.21.4
+python-docx==1.2.0
+lxml>=6.1.0,<7

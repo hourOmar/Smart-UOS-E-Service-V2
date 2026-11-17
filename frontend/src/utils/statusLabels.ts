@@ -2,34 +2,38 @@
 // stored value.
 // - Raise Capacity and Program Change: 'Completed' always means approved by
 //   staff, so it is shown as 'Approved'.
-// - Incomplete Exam and Course Substitution: 'Completed' is shown as
-//   'Approved' only when the caller knows a matching approval decision record
-//   exists (Decision_Type 'Incomplete Exam Approved' / 'Course Substitution
-//   Approved'). Requests completed before decisions were recorded, or views
-//   that do not load the decision, keep 'Completed'.
+// - Incomplete Exam, Course Substitution and Course Equivalency: 'Completed'
+//   is shown as 'Approved' only when the caller knows a matching approval
+//   decision record exists (Decision_Type '<type> Approved'). Requests
+//   completed before decisions were recorded (or finalized directly by another
+//   client), or views that do not load the decision, keep 'Completed'.
+//   A Course Equivalency approval is an administrative approval only: it does
+//   not mean the transcript was updated.
 // - Every other type and status is shown as stored.
 
 export const RAISE_CAPACITY = 'Raise Capacity'
 export const PROGRAM_CHANGE = 'Program Change'
 export const INCOMPLETE_EXAM = 'Incomplete Exam'
 export const COURSE_SUBSTITUTION = 'Course Substitution'
+export const COURSE_EQUIVALENCY = 'Course Equivalency'
 
 // Request types whose 'Completed' status always means an approval.
 const APPROVAL_TYPES: ReadonlySet<string> = new Set([RAISE_CAPACITY, PROGRAM_CHANGE])
 
 // Request types whose 'Completed' status is an approval only with a recorded approval decision.
-const RECORDED_APPROVAL_TYPES: ReadonlySet<string> = new Set([INCOMPLETE_EXAM, COURSE_SUBSTITUTION])
+const RECORDED_APPROVAL_TYPES: ReadonlySet<string> = new Set([INCOMPLETE_EXAM, COURSE_SUBSTITUTION, COURSE_EQUIVALENCY])
 
 /** The Decision_Type that records an approval, for each type whose
  *  'Completed' needs one before it reads "Approved". */
 export const APPROVAL_DECISION_TYPES: Readonly<Record<string, string>> = {
   [INCOMPLETE_EXAM]: 'Incomplete Exam Approved',
   [COURSE_SUBSTITUTION]: 'Course Substitution Approved',
+  [COURSE_EQUIVALENCY]: 'Course Equivalency Approved',
 }
 
 /** Whether a request's label depends on a recorded approval decision: a
- *  Completed request of Incomplete Exam or Course Substitution. Lists load the
- *  decision only for these rows. */
+ *  Completed request of Incomplete Exam, Course Substitution or Course
+ *  Equivalency. Lists load the decision only for these rows. */
 export function needsApprovalRecord(status: string, requestType?: string | null): boolean {
   return status === 'Completed' && requestType != null && RECORDED_APPROVAL_TYPES.has(requestType)
 }

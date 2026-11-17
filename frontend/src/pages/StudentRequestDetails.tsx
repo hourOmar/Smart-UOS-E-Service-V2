@@ -14,7 +14,8 @@ import { CopyRequestId, DetailIcon } from '../components/requests/RequestDetailP
 import useRejectionReason from '../hooks/useRejectionReason'
 import useIncompleteExamDecision from '../hooks/useIncompleteExamDecision'
 import useCourseSubstitutionDecision from '../hooks/useCourseSubstitutionDecision'
-import { COURSE_SUBSTITUTION, INCOMPLETE_EXAM, RAISE_CAPACITY, statusLabel } from '../utils/statusLabels'
+import useCourseEquivalencyDecision from '../hooks/useCourseEquivalencyDecision'
+import { COURSE_EQUIVALENCY, COURSE_SUBSTITUTION, INCOMPLETE_EXAM, RAISE_CAPACITY, statusLabel } from '../utils/statusLabels'
 import '../components/requests/Requests.css'
 
 // Final outcomes use the same wording as the student notifications; a request
@@ -175,12 +176,21 @@ function RequestBody({ request }: { request: Details }) {
   const courseSubstitution = useCourseSubstitutionDecision(request.id, showCourseSubstitutionDecision)
   const courseSubstitutionApproved =
     courseSubstitution.decision?.decision === 'approve' && courseSubstitution.decision.hasDecisionRecord
+  // A decided Course Equivalency request (get_my_course_equivalency_decision), under the
+  // same recorded-approval rule. Read only; the agent's recommendation is never shown here.
+  const showCourseEquivalencyDecision = request.type === COURSE_EQUIVALENCY && decided
+  const courseEquivalency = useCourseEquivalencyDecision(request.id, showCourseEquivalencyDecision)
+  const courseEquivalencyApproved =
+    courseEquivalency.decision?.decision === 'approve' && courseEquivalency.decision.hasDecisionRecord
   const approvalRecorded =
-    incompleteExam.decision?.decision === 'approve' && incompleteExam.decision.hasDecisionRecord || courseSubstitutionApproved
+    incompleteExam.decision?.decision === 'approve' && incompleteExam.decision.hasDecisionRecord || courseSubstitutionApproved || courseEquivalencyApproved
   const decision = decisionHeading(request, approvalRecorded)
+  // Course Equivalency: the decision record's date, shown when no history row is readable.
+  const recordDecidedAt = showCourseEquivalencyDecision ? (courseEquivalency.decision?.decidedAt ?? null) : null
   // Whether this type has an administrator's explanation to show. Program
   // Change decisions have none: the card shows the outcome and date only.
-  const hasExplanation = showRejectionReason || showIncompleteExamDecision || showCourseSubstitutionDecision
+  const hasExplanation =
+    showRejectionReason || showIncompleteExamDecision || showCourseSubstitutionDecision || showCourseEquivalencyDecision
 
   return (
     <>
@@ -269,6 +279,11 @@ function RequestBody({ request }: { request: Details }) {
                 Decided on {formatDate(request.decision.date)}
               </p>
             )}
+            {!request.decision && recordDecidedAt && (
+              <p className="req-decision__body">
+                Decided on {formatDate(recordDecidedAt)}
+              </p>
+            )}
           </div>
           {hasExplanation && (
             <div className="req-decision__explanation">
@@ -286,6 +301,14 @@ function RequestBody({ request }: { request: Details }) {
                   status={courseSubstitution.status}
                   explanation={courseSubstitution.decision?.explanation}
                   retry={courseSubstitution.retry}
+                  rejected={request.status === 'Rejected'}
+                />
+              )}
+              {showCourseEquivalencyDecision && (
+                <DecisionExplanation
+                  status={courseEquivalency.status}
+                  explanation={courseEquivalency.decision?.explanation}
+                  retry={courseEquivalency.retry}
                   rejected={request.status === 'Rejected'}
                 />
               )}

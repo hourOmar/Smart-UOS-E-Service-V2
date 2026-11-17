@@ -46,10 +46,20 @@ test('Course Substitution: Completed is Approved only with a recorded approval d
   }
 })
 
+test('Course Equivalency: Completed is Approved only with a recorded approval decision', () => {
+  // Decision only: "Approved" is the administrative approval, never a transcript change.
+  assert.equal(statusLabel('Completed', 'Course Equivalency'), 'Completed')
+  assert.equal(statusLabel('Completed', 'Course Equivalency', false), 'Completed')
+  assert.equal(statusLabel('Completed', 'Course Equivalency', true), 'Approved')
+  for (const recorded of [true, false]) {
+    assert.equal(statusLabel('Rejected', 'Course Equivalency', recorded), 'Rejected')
+    assert.equal(statusLabel('In Progress', 'Course Equivalency', recorded), 'In Progress')
+  }
+})
+
 test('the approval flag changes nothing for the other types', () => {
   assert.equal(statusLabel('Completed', 'Program Change', false), 'Approved')
   assert.equal(statusLabel('Completed', 'Raise Capacity', false), 'Approved')
-  assert.equal(statusLabel('Completed', 'Course Equivalency', true), 'Completed')
   assert.equal(statusLabel('Completed', null, true), 'Completed')
 })
 
@@ -63,20 +73,25 @@ test('other request types keep their stored status', () => {
 
 // -- lists: which rows need a decision lookup, and which decisions count ----
 
-test('only Completed Incomplete Exam / Course Substitution requests need an approval record', () => {
+test('only Completed Incomplete Exam / Course Substitution / Course Equivalency requests need an approval record', () => {
   assert.equal(needsApprovalRecord('Completed', 'Course Substitution'), true)
   assert.equal(needsApprovalRecord('Completed', 'Incomplete Exam'), true)
+  assert.equal(needsApprovalRecord('Completed', 'Course Equivalency'), true)
+  for (const status of ['Rejected', 'In Progress']) {
+    assert.equal(needsApprovalRecord(status, 'Course Equivalency'), false)
+  }
   for (const status of ['Rejected', 'In Progress']) {
     assert.equal(needsApprovalRecord(status, 'Course Substitution'), false)
     assert.equal(needsApprovalRecord(status, 'Incomplete Exam'), false)
   }
   // Their 'Completed' is always an approval, or never: no lookup.
-  for (const type of ['Raise Capacity', 'Program Change', 'Course Equivalency', null, undefined]) {
+  for (const type of ['Raise Capacity', 'Program Change', null, undefined]) {
     assert.equal(needsApprovalRecord('Completed', type), false)
   }
   assert.deepEqual(APPROVAL_DECISION_TYPES, {
     'Incomplete Exam': 'Incomplete Exam Approved',
     'Course Substitution': 'Course Substitution Approved',
+    'Course Equivalency': 'Course Equivalency Approved',
   })
 })
 

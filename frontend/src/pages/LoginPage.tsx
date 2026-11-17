@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../services/supabase'
+import { signInAndResolveRole, type LoginClient } from '../utils/loginFlow'
 import loginBackground from '../assets/login-background.jpg'
 import './LoginPage.css'
 
@@ -19,43 +20,30 @@ function LoginPage() {
     setError('')
     setLoading(true)
 
-    const { data, error: loginError } =
-      await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
+    // Staff and students are identified by the signed-in user's Auth UID
+    // (see utils/loginFlow.ts); an unlinked account is signed out again.
+    // (The full Supabase client type is too deep to compare with LoginClient
+    // structurally; it provides exactly the calls LoginClient lists.)
+    const outcome = await signInAndResolveRole(supabase as unknown as LoginClient, email, password)
 
-    if (loginError || !data.user) {
+    if (outcome === 'invalid_credentials') {
       setError('Invalid email or password.')
       setLoading(false)
       return
     }
 
-    const { data: staff } = await supabase
-      .from('Authorized_Staff')
-      .select('Staff_ID')
-      .eq('Auth_User_ID', data.user.id)
-      .maybeSingle()
-
-    if (staff) {
+    if (outcome === 'staff') {
       setLoading(false)
       navigate('/admin')
       return
     }
 
-    const { data: student } = await supabase
-      .from('Student')
-      .select('Student_ID')
-      .eq('Student_Email', data.user.email)
-      .maybeSingle()
-
-    if (student) {
+    if (outcome === 'student') {
       setLoading(false)
       navigate('/student')
       return
     }
 
-    await supabase.auth.signOut()
     setError('This account is not registered as a student or authorized staff member.')
     setLoading(false)
   }

@@ -23,8 +23,8 @@ const firstNameOf = (fullName: string | null | undefined) => {
   return first ? first : null
 }
 
-// Looks up the signed-in student's record by email (the same match the
-// login and ProtectedRoute use).
+// Looks up the signed-in student's record by Auth UID (the same match the
+// login, ProtectedRoute and the database policies use).
 function useStudentProfile() {
   const [state, setState] = useState<StudentProfileState>({
     status: 'loading',
@@ -41,23 +41,25 @@ function useStudentProfile() {
         error: userError,
       } = await supabase.auth.getUser()
 
-      if (userError || !user?.email) {
+      if (userError || !user) {
         if (!cancelled) setState({ status: 'error', ...emptyProfile })
         return
       }
 
+      // The student is identified by the signed-in user's Auth UID (as in the
+      // database policies), never by email: Auth stores the email in lowercase.
       const { data: student, error: studentError } = await supabase
         .from('Student')
         .select('Student_ID, Student_Name')
-        .eq('Student_Email', user.email)
+        .eq('Auth_User_ID', user.id)
         .maybeSingle()
 
       if (cancelled) return
 
-      // The email is the signed-in account's own address (the one
-      // matched to Student_Email above), so it needs no extra query.
+      // The signed-in account's own address, for display only.
+      const email = user.email ?? null
       if (studentError || !student) {
-        setState({ status: 'error', ...emptyProfile, email: user.email })
+        setState({ status: 'error', ...emptyProfile, email })
         return
       }
 
@@ -69,7 +71,7 @@ function useStudentProfile() {
         firstName: firstNameOf(fullName),
         studentId:
           student.Student_ID != null ? String(student.Student_ID) : null,
-        email: user.email,
+        email,
       })
     }
 

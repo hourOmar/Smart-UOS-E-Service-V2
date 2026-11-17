@@ -44,6 +44,7 @@ function CoursePicker({ id, label, hint, courses, selectedId, excludedId, onSele
           <>
             <span className="csf-picker__selected-label">Selected</span>
             <span className="csf-picker__selected-name">{courseLabel(selected)}</span>
+            {selected.detail && <span className="csf-picker__selected-detail">{selected.detail}</span>}
           </>
         ) : (
           <span className="csf-picker__selected-empty">No course selected yet.</span>
@@ -79,7 +80,10 @@ function CoursePicker({ id, label, hint, courses, selectedId, excludedId, onSele
                 onChange={() => onSelect(course.id)}
               />
               <span className="csf-option__id">{course.id}</span>
-              <span className="csf-option__name">{course.name ?? 'Name not recorded'}</span>
+              <span className="csf-option__name">
+                {course.name ?? 'Name not recorded'}
+                {course.detail && <span className="csf-option__detail">{course.detail}</span>}
+              </span>
               {course.creditHours != null && <span className="csf-option__hours">{course.creditHours} cr</span>}
             </label>
           ))}

@@ -10,6 +10,8 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
+from app.api.course_equivalency_review import router as course_equivalency_review_router
+from app.api.course_equivalency_syllabi import router as course_equivalency_syllabi_router
 from app.api.course_substitution_review import router as course_substitution_review_router
 from app.api.incomplete_exam_review import router as incomplete_exam_review_router
 from app.api.program_change_review import router as program_change_review_router
@@ -55,3 +57,5 @@ app.include_router(raise_capacity_priority_router)
 app.include_router(program_change_review_router)
 app.include_router(incomplete_exam_review_router)
 app.include_router(course_substitution_review_router)
+app.include_router(course_equivalency_syllabi_router)
+app.include_router(course_equivalency_review_router)

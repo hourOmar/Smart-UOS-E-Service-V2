@@ -4,6 +4,9 @@
 # Database maintenance scripts and notes for the shared project
 database/
 
+# Private handover and project documentation
+/local_docs/
+
 # Local skills and design tooling / notes
 .claude/
 .impeccable/
