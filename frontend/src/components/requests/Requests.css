@@ -502,17 +502,21 @@
   background: var(--proto-line);
 }
 
+/* Sections stacked full width, one under another, each as tall as its
+   content: Request Details, Supporting Documents (where the type has them),
+   Request Progress, then the decision card below. The gap matches .req-page,
+   so every section is spaced the same. */
 .req-detail__columns {
-  display: grid;
-  grid-template-columns: minmax(0, 1.75fr) minmax(280px, 1fr);
-  align-items: start;
-  gap: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-width: 0;
 }
 
 .req-detail__main {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 22px;
   min-width: 0;
 }
 
@@ -535,12 +539,6 @@
 .req-details .req-panel__body > .req-text {
   padding-top: 14px;
   border-top: 1px solid #edf0eb;
-}
-
-@media (max-width: 900px) {
-  .req-detail__columns {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }
 
 @media (max-width: 560px) {
@@ -870,6 +868,49 @@
 .req-progress__meta {
   font-size: 12.5px;
   color: var(--proto-muted);
+}
+
+/* Horizontal timeline on tablet and desktop: the three steps side by side in
+   equal columns, each circle centred above its title and date, joined by a
+   horizontal line from one circle to the next. Circles, colours, icons and
+   text are the vertical timeline's; phones (560px and below) keep the
+   vertical arrangement above. */
+@media (min-width: 561px) {
+  .req-progress__list {
+    flex-direction: row;
+  }
+
+  .req-progress__step {
+    position: relative;
+    flex: 1 1 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    text-align: center;
+  }
+
+  /* From 6px right of this circle to 6px left of the next one: steps are
+     equal, so the next circle's centre is one step width (100%) along. */
+  .req-progress__line {
+    position: absolute;
+    top: 10px;
+    left: calc(50% + 17px);
+    width: calc(100% - 34px);
+    height: 2px;
+    min-height: 0;
+    margin: 0;
+  }
+
+  .req-progress__step[data-next='rejected'] .req-progress__line {
+    background: linear-gradient(to right, var(--proto-green), #b3261e);
+  }
+
+  .req-progress__text {
+    align-items: center;
+    padding: 0 6px;
+    overflow-wrap: anywhere;
+  }
 }
 
 /* Supporting documents of an Incomplete Exam request (read-only) */

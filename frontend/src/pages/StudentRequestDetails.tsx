@@ -257,8 +257,8 @@ function RequestBody({ request }: { request: Details }) {
         <Progress request={request} approvalRecorded={approvalRecorded} />
       </div>
 
-      {/* Below both columns: the final decision once the request is decided,
-          otherwise a note that none has been made yet. */}
+      {/* Below the stacked sections: the final decision once the request is
+          decided, otherwise a note that none has been made yet. */}
       {decision ? (
         <section
           className="req-decision"

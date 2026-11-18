@@ -1,7 +1,8 @@
 // The student request details page layout (one page for every request type):
-// header with the copyable request ID, Request Details and Request Progress
-// side by side, and the Final Decision card across the full width below
-// them, shown only once the request is decided. Static checks of the page
+// header with the copyable request ID, then full-width sections stacked one
+// under another — Request Details, Supporting Documents (Incomplete Exam
+// only), Request Progress — and the Final Decision card (or the no-decision
+// note) below them. Static checks of the page
 // source and its stylesheet (no browser, backend or database). Run: npm test.
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -33,7 +34,7 @@ test('header: type as title, summary, copyable ID, submission date and status', 
   assert.match(body, /<RequestStatusBadge status=\{request\.status\} requestType=\{request\.type\} approvalRecorded=\{approvalRecorded\} \/>/)
 })
 
-test('Request Details and Request Progress first, then the Final Decision across the full width', () => {
+test('sections stacked full width: Details, Documents, Progress, then the Final Decision', () => {
   const columns = at('<div className="req-detail__columns">')
   const details = at('Request Details')
   const documents = at('<StudentProofDocuments requestId={request.id} paths={request.documents} />')
@@ -42,10 +43,18 @@ test('Request Details and Request Progress first, then the Final Decision across
   const awaiting = at('className="req-awaiting"')
   assert.ok(columns < details && details < documents && documents < progress)
   assert.ok(progress < decision && decision < awaiting)
-  // The decision card is outside the two columns.
+  // The decision card is outside the stacked sections.
   const columnsBlock = body.slice(columns, decision)
   assert.equal((columnsBlock.match(/<div/g) ?? []).length, (columnsBlock.match(/<\/div>/g) ?? []).length)
-  assert.match(CSS, /\.req-detail__columns \{\s+display: grid;\s+grid-template-columns: minmax\(0, 1\.75fr\) minmax\(280px, 1fr\);/)
+  // One column at every width, natural heights, the page's own 22px spacing.
+  for (const selector of ['req-detail__columns', 'req-detail__main']) {
+    assert.match(CSS, new RegExp(`\\.${selector} \\{\\s+display: flex;\\s+flex-direction: column;\\s+gap: 22px;\\s+min-width: 0;\\s+\\}`))
+  }
+  assert.match(CSS, /\.req-page \{\s+display: flex;\s+flex-direction: column;\s+gap: 22px;/)
+  assert.doesNotMatch(CSS, /grid-template-columns: minmax\(0, 1\.75fr\)/)
+  assert.doesNotMatch(CSS, /\.req-detail__columns \{[^}]*(grid|align-items|height)/)
+  // Supporting Documents stay where they are: Incomplete Exam only.
+  assert.match(body, /\{request\.type === INCOMPLETE_EXAM && request\.documents !== null && \(/)
 })
 
 test('the Final Decision card appears only for a decided request, with the saved explanation', () => {
@@ -93,6 +102,26 @@ test('progress: the same three stages, green when done, red when rejected', () =
   assert.match(progress, /\{ title: 'Decision', meta: 'Not yet decided', state: 'pending' \}/)
   assert.match(CSS, /\.req-progress__step\[data-state='done'\] \.req-progress__dot \{[^}]*background: var\(--proto-green\);/)
   assert.match(CSS, /\.req-progress__step\[data-state='rejected'\] \.req-progress__dot \{[^}]*background: #b3261e;/)
+})
+
+test('progress: horizontal on tablet and desktop, vertical on phones, same look', () => {
+  const start = CSS.indexOf('@media (min-width: 561px) {')
+  assert.ok(start > CSS.indexOf('.req-progress__meta {'), 'horizontal rules follow the base timeline rules')
+  const horizontal = CSS.slice(start, CSS.indexOf('\n}\n', start))
+  // Steps in one row of equal columns; circle above centred title and date.
+  assert.match(horizontal, /\.req-progress__list \{\s+flex-direction: row;\s+\}/)
+  assert.match(horizontal, /\.req-progress__step \{[^}]*flex: 1 1 0;[^}]*flex-direction: column;[^}]*align-items: center;[^}]*text-align: center;/)
+  // A horizontal line from one circle to the next, the rejection fade left to right.
+  assert.match(horizontal, /\.req-progress__line \{[^}]*position: absolute;[^}]*left: calc\(50% \+ 17px\);[^}]*width: calc\(100% - 34px\);[^}]*height: 2px;/)
+  assert.match(horizontal, /linear-gradient\(to right, var\(--proto-green\), #b3261e\)/)
+  // Only arrangement changes: no circle, colour or font rules are overridden.
+  assert.doesNotMatch(horizontal, /\.req-progress__dot|font-size|font-weight|color:|border/)
+  // The base (phone) timeline is still the vertical one.
+  assert.match(CSS, /\.req-progress__list \{\s+display: flex;\s+flex-direction: column;/)
+  assert.match(CSS, /\.req-progress__line \{\s+flex: 1;\s+width: 2px;/)
+  // Same markup and accessible text for every request type.
+  assert.match(PAGE, /<ol className="req-progress__list">/)
+  assert.match(PAGE, /<span className="student-visually-hidden"> \(\{stateLabel\[step\.state\]\}\)<\/span>/)
 })
 
 test('the request ID can be copied, and the result is announced', () => {
