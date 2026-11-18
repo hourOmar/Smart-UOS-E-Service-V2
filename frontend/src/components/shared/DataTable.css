@@ -1,0 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&display=swap');
+
+/* Base data table and monospace text, shared by the admin lists
+   (AdminDashboard.css imports this file) and the transcript
+   (components/profile/TranscriptTerms.tsx). Moved unchanged from
+   AdminDashboard.css; page-specific table rules stay with their pages. */
+
+.adm-mono {
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.adm-table-wrap {
+  overflow-x: auto;
+  border: 1px solid #dde2de;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgb(23 33 28 / 0.04);
+}
+
+.adm-table {
+  width: 100%;
+  min-width: 920px;
+  border-collapse: collapse;
+  font-size: 14.5px;
+}
+
+.adm-table thead tr {
+  background: #f6f8f6;
+  text-align: left;
+}
+
+.adm-table th {
+  padding: 12px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #4f5b54;
+  white-space: nowrap;
+}
+
+.adm-table td {
+  padding: 13px 14px;
+  color: #3c4842;
+}
+
+.adm-table th:first-child,
+.adm-table td:first-child {
+  padding-left: 20px;
+}
+
+.adm-table tbody tr {
+  border-top: 1px solid #edf0eb;
+}
+
+.adm-table tbody tr:hover {
+  background: #f8faf8;
+}

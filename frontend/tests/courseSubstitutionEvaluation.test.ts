@@ -138,8 +138,12 @@ test('the Summer limitation is shown only for a completed run without a term', (
 
 test('the term checked is shown with its semester', () => {
   assert.equal(termLabel(run()), 'Fall 2026 (202601)')
-  assert.equal(termLabel(run({ current_term: 202602, current_semester: 'Spring' })), 'Spring 2026 (202602)')
+  // Spring of the 2026 academic year falls in calendar 2027 (YYYY02 → Spring YYYY+1).
+  assert.equal(termLabel(run({ current_term: 202602, current_semester: 'Spring' })), 'Spring 2027 (202602)')
   assert.equal(termLabel(run({ current_term: null, current_semester: null })), null)
+  // Without a semester, or with a code outside the convention, the term is shown as stored.
+  assert.equal(termLabel(run({ current_term: 202601, current_semester: null })), '202601')
+  assert.equal(termLabel(run({ current_term: 202605, current_semester: 'Fall' })), '202605')
 })
 
 // -- rejection explanations ------------------------------------------------------------

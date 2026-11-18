@@ -2,8 +2,11 @@ import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import useStudentProfile from '../hooks/useStudentProfile'
 import useStudentProfileDetails from '../hooks/useStudentProfileDetails'
+import useStudentTranscript from '../hooks/useStudentTranscript'
 import type { StudentProfileDetails } from '../services/studentProfile'
+import { termName } from '../utils/studentProfile'
 import StudentLayout from '../components/student/StudentLayout'
+import TranscriptTerms from '../components/profile/TranscriptTerms'
 import '../components/requests/Requests.css'
 import './MyProfile.css'
 
@@ -51,6 +54,16 @@ const ICONS = {
       <path d="M10 10h4" />
       <path d="M10 14h4" />
       <path d="M10 18h4" />
+    </>
+  ),
+  // file-text
+  transcript: (
+    <>
+      <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+      <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+      <path d="M10 9H8" />
+      <path d="M16 13H8" />
+      <path d="M16 17H8" />
     </>
   ),
 }
@@ -152,6 +165,49 @@ function InfoCard({ id, icon, title, fields }: { id: string; icon: keyof typeof 
   )
 }
 
+// The student's own courses, grouped by term (newest first). Loaded on its
+// own: while it loads or if it fails, the rest of the profile stays as is.
+// The Student_ID comes from the student's own record (read by Auth UID).
+function AcademicTranscript({ studentId }: { studentId: string | null }) {
+  const { status, entries, retry } = useStudentTranscript(studentId)
+
+  return (
+    <section className="req-panel profile-transcript" aria-labelledby="profile-transcript-title">
+      <h2 id="profile-transcript-title" className="req-panel__title profile-info__title">
+        <ProfileIcon name="transcript" />
+        Academic Transcript
+      </h2>
+      <div className="req-panel__body">
+        {status === 'loading' && (
+          <p className="sp-empty" role="status">
+            Loading your transcript…
+          </p>
+        )}
+
+        {status === 'error' && (
+          <div className="profile-transcript__error" role="alert">
+            <p className="profile-transcript__error-text">
+              We couldn’t load your transcript. Check your connection and try again.
+            </p>
+            <button type="button" className="req-button" onClick={retry}>
+              Try again
+            </button>
+          </div>
+        )}
+
+        {status === 'ready' && (
+          <TranscriptTerms
+            entries={entries}
+            emptyMessage="No courses are recorded on your transcript yet."
+            termTitle={termName}
+            tableClassName="profile-transcript__table"
+          />
+        )}
+      </div>
+    </section>
+  )
+}
+
 function ProfileBody({ profile }: { profile: StudentProfileDetails }) {
   return (
     <>
@@ -184,6 +240,8 @@ function ProfileBody({ profile }: { profile: StudentProfileDetails }) {
           ]}
         />
       </div>
+
+      <AcademicTranscript studentId={profile.studentId} />
     </>
   )
 }

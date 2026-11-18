@@ -2,6 +2,8 @@
 // (GET .../evaluation, POST .../evaluations). Pure functions only (no
 // network, no Supabase), so they can be tested with `npm test`.
 
+import { knownTermName } from './studentProfile.ts'
+
 export type CourseSubstitutionResult = 'ELIGIBLE' | 'NOT_ELIGIBLE' | 'MANUAL_REVIEW'
 export type CheckStatus = 'PASS' | 'FAIL' | 'REQUIRES_REVIEW'
 
@@ -163,11 +165,13 @@ export function summerLimitation(run: CourseSubstitutionRun | null | undefined):
   return run.current_term == null ? SUMMER_LIMITATION_MESSAGE : null
 }
 
-/** "Fall 2026 (202601)", or null without a term. */
+/** "Fall 2026 (202601)" or "Spring 2027 (202602)" — the project's term
+ *  names (knownTermName) — or null without a term. A term without a semester
+ *  or with an unknown code is shown as stored. */
 export function termLabel(run: CourseSubstitutionRun | null | undefined): string | null {
   if (!run || run.current_term == null) return null
-  const year = Math.floor(run.current_term / 100)
-  return run.current_semester ? `${run.current_semester} ${year} (${run.current_term})` : String(run.current_term)
+  const name = run.current_semester ? knownTermName(run.current_term) : null
+  return name ? `${name} (${run.current_term})` : String(run.current_term)
 }
 
 export interface ManualReviewSummary {

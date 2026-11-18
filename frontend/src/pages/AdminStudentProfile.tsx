@@ -8,7 +8,6 @@ import type { AdminStudent, AdminStudentProfile as Profile, RequestHistoryData }
 import { formatDate } from '../services/studentRequests'
 import {
   filterRequestHistory,
-  groupTranscript,
   historyStatusLabel,
   historyStatusOptions,
   sortRequestHistory,
@@ -18,6 +17,7 @@ import {
 import { ADMIN_HOME_ITEM, ADMIN_HOME_PATH, reviewPathFor, type FromStudentProfile } from '../utils/adminPaths'
 import StudentLayout from '../components/student/StudentLayout'
 import RequestStatusBadge from '../components/requests/RequestStatusBadge'
+import TranscriptTerms from '../components/profile/TranscriptTerms'
 import { StudentProfileBreadcrumb } from '../components/admin/ReviewBreadcrumb'
 import { NOT_RECORDED } from '../components/review/format'
 import '../components/requests/Requests.css'
@@ -88,8 +88,6 @@ function Transcript({
   part: Profile['transcript']
   onRetry: () => void
 }) {
-  const terms = useMemo(() => (part.status === 'ready' ? groupTranscript(part.data) : []), [part])
-
   return (
     <section className="req-panel rv-panel" aria-labelledby="sp-transcript-title">
       <h2 id="sp-transcript-title" className="req-panel__title">
@@ -115,58 +113,9 @@ function Transcript({
         </div>
 
         {part.status === 'error' && <PartError what="transcript" onRetry={onRetry} />}
-        {part.status === 'ready' && terms.length === 0 && (
-          <p className="rv-muted">No courses are recorded for this student.</p>
+        {part.status === 'ready' && (
+          <TranscriptTerms entries={part.data} emptyMessage="No courses are recorded for this student." />
         )}
-        {terms.map(({ term, courses }) => (
-          <section key={term} className="sp-term" aria-labelledby={`sp-term-${term}`}>
-            <h3 id={`sp-term-${term}`} className="sp-term__title">
-              Term {term}
-              <span className="sp-term__count">
-                {courses.length} {courses.length === 1 ? 'course' : 'courses'}
-              </span>
-            </h3>
-            <div className="adm-table-wrap">
-              <table className="adm-table sp-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Course code</th>
-                    <th scope="col">Course name</th>
-                    <th scope="col" className="sp-num">
-                      Credit hours
-                    </th>
-                    <th scope="col">Section</th>
-                    <th scope="col">Grade</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {courses.map((c, index) => (
-                    <tr key={`${c.courseId}-${c.sectionId ?? ''}-${index}`}>
-                      <td className="adm-mono sp-code">
-                        {c.courseId}
-                        {c.repeated && (
-                          <span className="sp-tag" title="Taken in more than one term">
-                            Repeated
-                          </span>
-                        )}
-                      </td>
-                      <td>{c.courseName ?? <span className="rv-missing">{NOT_RECORDED}</span>}</td>
-                      <td className="sp-num">{c.creditHours ?? <span className="rv-missing">—</span>}</td>
-                      <td className="adm-mono">{c.sectionId ?? '—'}</td>
-                      <td>
-                        {c.grade ? (
-                          <span className="sp-grade">{c.grade}</span>
-                        ) : (
-                          <span className="rv-missing">No grade recorded</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-        ))}
       </div>
     </section>
   )

@@ -52,6 +52,27 @@ export function groupTranscript(entries: readonly TranscriptEntry[]): Transcript
     }))
 }
 
+/** The semester name of a stored term, or null when the code is not one of
+ *  the project's. Terms are the academic year's start plus a semester code:
+ *  YYYY01 is Fall YYYY, YYYY02 is Spring of the next calendar year and YYYY03
+ *  is Summer of the next calendar year, so 202601 → "Fall 2026", 202602 →
+ *  "Spring 2027" and 202603 → "Summer 2027". */
+export function knownTermName(term: number): string | null {
+  if (!Number.isInteger(term) || term < 100000 || term > 999999) return null
+  const year = Math.floor(term / 100)
+  const code = term % 100
+  if (code === 1) return `Fall ${year}`
+  if (code === 2) return `Spring ${year + 1}`
+  if (code === 3) return `Summer ${year + 1}`
+  return null
+}
+
+/** A readable name for a stored term (see knownTermName); any other value is
+ *  shown as stored ("Term 202605") rather than guessed. */
+export function termName(term: number): string {
+  return knownTermName(term) ?? `Term ${term}`
+}
+
 // ---------------------------------------------------------------------------
 // Request history (every Request row of the student)
 

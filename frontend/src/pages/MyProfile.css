@@ -199,11 +199,53 @@
   color: var(--proto-muted);
 }
 
+/* Academic Transcript (term blocks: components/profile/TranscriptTerms.css) */
+
+/* Five columns need less room than the admin lists' 920px: narrower screens
+   scroll the table inside its frame instead of the page. */
+.adm-table.profile-transcript__table {
+  min-width: 600px;
+}
+
+.profile-transcript__error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px 16px;
+}
+
+.profile-transcript__error-text {
+  margin: 0;
+  font-size: 14px;
+  color: var(--proto-muted);
+}
+
 /* Responsive */
 
 @media (max-width: 860px) {
   .profile-panels {
     grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .profile-transcript .req-panel__body {
+    padding: 14px;
+  }
+
+  .adm-table.profile-transcript__table {
+    font-size: 14px;
+  }
+
+  .adm-table.profile-transcript__table th,
+  .adm-table.profile-transcript__table td {
+    padding: 10px 12px;
+  }
+
+  .adm-table.profile-transcript__table th:first-child,
+  .adm-table.profile-transcript__table td:first-child {
+    padding-left: 14px;
   }
 }
 

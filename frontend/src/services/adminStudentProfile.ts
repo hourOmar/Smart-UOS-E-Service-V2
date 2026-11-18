@@ -54,7 +54,12 @@ async function settle<T>(load: () => Promise<T>): Promise<ProfilePart<T>> {
   }
 }
 
-async function loadTranscript(studentId: string): Promise<TranscriptEntry[]> {
+/** Every Takes row of one student, with course names and credit hours.
+ *  Read with the caller's session, so RLS decides what comes back: staff
+ *  ("Staff can view academic records") or the student themself ("Students
+ *  can view own academic records"). Also used by the student's My Profile
+ *  (hooks/useStudentTranscript.ts). */
+export async function loadTranscript(studentId: string): Promise<TranscriptEntry[]> {
   const takes = await supabase.from('Takes').select('Course_ID, Section_ID, Term, Grade').eq('Student_ID', studentId)
   if (takes.error) throw takes.error
   const rows = (takes.data ?? []) as { Course_ID: unknown; Section_ID: unknown; Term: unknown; Grade: unknown }[]
