@@ -1,0 +1,184 @@
+/* Searchable course dropdown (Course Equivalency). The field itself is the
+   shared .rc-field__input; this adds the toggle, the options panel and the
+   option rows, in the colours of the existing course picker. */
+
+.cec-combo__control {
+  position: relative;
+}
+
+.cec-combo__input.rc-field__input {
+  padding-right: 46px;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.cec-combo__control[data-open] .cec-combo__input.rc-field__input {
+  cursor: text;
+}
+
+.cec-combo__input.rc-field__input:disabled {
+  background: #f4f6f3;
+  cursor: not-allowed;
+}
+
+.cec-combo__input[aria-invalid='true'] {
+  border-color: #9a2b1f;
+}
+
+.cec-combo__toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--proto-muted);
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.cec-combo__toggle:hover:not(:disabled) {
+  background: #f1f4f0;
+  color: var(--proto-heading);
+}
+
+.cec-combo__toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.cec-combo__toggle svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.15s ease;
+}
+
+.cec-combo__control[data-open] .cec-combo__toggle svg {
+  transform: rotate(180deg);
+}
+
+.cec-combo__panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  left: 0;
+  z-index: 30;
+  overflow: hidden;
+  border: 1px solid #d5dbd6;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 10px 28px rgba(23, 33, 28, 0.14);
+}
+
+.cec-combo__list {
+  max-height: min(320px, 50vh);
+  margin: 0;
+  padding: 4px 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+}
+
+.cec-option {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 14px;
+  padding: 10px 14px;
+  border-left: 3px solid transparent;
+  cursor: pointer;
+}
+
+.cec-option[data-active] {
+  background: #f6f8f5;
+}
+
+.cec-option[aria-selected='true'] {
+  border-left-color: var(--proto-green);
+  background: #e6f2ec;
+}
+
+.cec-option__main {
+  display: flex;
+  flex: 1 1 260px;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.cec-option__id {
+  flex: none;
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--proto-heading);
+}
+
+.cec-option__name {
+  min-width: 0;
+  font-size: 14.5px;
+  color: var(--proto-body);
+  overflow-wrap: anywhere;
+}
+
+.cec-option__meta {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.cec-option__detail,
+.cec-option__hours {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.cec-option__detail {
+  background: #eef3ef;
+  color: var(--proto-heading);
+  font-weight: 600;
+}
+
+.cec-option__hours {
+  border: 1px solid #dde2de;
+  color: var(--proto-muted);
+}
+
+.cec-combo__empty {
+  margin: 0;
+  padding: 14px 16px;
+  font-size: 13.5px;
+  color: var(--proto-muted);
+}
+
+.cec-combo__selected {
+  font-size: 12.5px;
+  color: var(--proto-muted);
+}
+
+/* Narrow screens: the grade / requirement and hours go under the name. */
+@media (max-width: 560px) {
+  .cec-option {
+    padding: 10px 12px;
+  }
+  .cec-option__main {
+    flex-basis: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cec-combo__toggle svg {
+    transition: none;
+  }
+}

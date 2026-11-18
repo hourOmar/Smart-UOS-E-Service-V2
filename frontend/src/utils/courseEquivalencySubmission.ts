@@ -16,9 +16,6 @@ import type { CourseOption } from './courseSubstitutionSubmission'
 export const REASON_MIN_LENGTH = 20
 export const REASON_MAX_LENGTH = 1000
 
-/** Grades that make a completed course eligible (C+ or higher), as in the database. */
-export const ELIGIBLE_GRADES: readonly string[] = ['A', 'B+', 'B', 'C+']
-
 // ---------------------------------------------------------------------------
 // Options (get_my_course_equivalency_options)
 
@@ -101,7 +98,8 @@ export const UNEXPECTED_OPTIONS: CourseEquivalencyOptions = {
 }
 
 /** The options reply, checked field by field. Anything malformed is 'unexpected'
- *  (never shown raw). Completed courses below C+ are dropped as a second guard. */
+ *  (never shown raw). Completed courses come with any recorded grade (A to F);
+ *  a row without a grade is dropped, as the database never sends one. */
 export function parseCourseEquivalencyOptions(data: unknown): CourseEquivalencyOptions {
   if (!isRecord(data) || typeof data.status !== 'string' || !SERVER_STATUSES.has(data.status)) return UNEXPECTED_OPTIONS
   const status = data.status as OptionsStatus
@@ -130,7 +128,7 @@ export function parseCourseEquivalencyOptions(data: unknown): CourseEquivalencyO
     if (!isRecord(row)) continue
     const id = clean(row.course_id)
     const grade = clean(row.grade)
-    if (!id || !grade || !ELIGIBLE_GRADES.includes(grade)) continue
+    if (!id || !grade) continue
     oldCourses.push({ id, name: clean(row.course_name), creditHours: number(row.credit_hours), grade, term: number(row.term) })
   }
   const newCourses: PlanCourse[] = []

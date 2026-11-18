@@ -16,16 +16,16 @@ import {
 import { requestDetailsPath } from '../utils/requestPaths'
 import StudentLayout from '../components/student/StudentLayout'
 import ServiceBreadcrumb from '../components/student/ServiceBreadcrumb'
-import CoursePicker from '../components/courseSubstitution/CoursePicker'
+import CourseCombobox from '../components/courseEquivalency/CourseCombobox'
 import { CapIcon } from '../components/programChange/CurrentProgramCard'
 import './RaiseCapacityForm.css'
 import './ProgramChangeForm.css'
 import './CourseSubstitutionForm.css'
 import './CourseEquivalencyForm.css'
 
-// Course Equivalency request form: a course the student completed (best grade
-// C+ or higher) to count as a course in the current study plan of the program
-// from their latest approved Program Change, plus a reason. Everything comes
+// Course Equivalency request form: a course the student completed (any recorded
+// grade; the best attempt is shown) to count as a course in the current study
+// plan of the program from their latest approved Program Change, plus a reason. Everything comes
 // from public.get_my_course_equivalency_options and is saved through
 // public.submit_course_equivalency_request; both identify the student from the
 // session and enforce every rule again. The program stored on the student's own
@@ -186,8 +186,8 @@ function CourseEquivalencyForm() {
             {oldOptions.length === 0 || newOptions.length === 0 ? (
               <p className="pc-state" role="status">
                 {oldOptions.length === 0
-                  ? 'You have no completed course with a grade of C+ or higher, so a course equivalency cannot be requested.'
-                  : 'Every course in your new program’s study plan is already passed or unavailable, so there is nothing to request.'}
+                  ? 'You have no completed course with a recorded grade, so a course equivalency cannot be requested.'
+                  : 'Your new program’s current study plan has no courses available, so there is nothing to request.'}
               </p>
             ) : (
               <form className="pc-form csf-form" onSubmit={handleSubmit} noValidate aria-busy={submitting || undefined}>
@@ -201,10 +201,11 @@ function CourseEquivalencyForm() {
                     </div>
                   </div>
 
-                  <CoursePicker
+                  <CourseCombobox
                     id="cef-old"
                     label="Completed course"
-                    hint="A course you completed with a grade of C+ or higher (your best attempt is shown)."
+                    hint="A course from your transcript with a recorded grade (your best attempt is shown)."
+                    placeholder="Search or select a completed course"
                     courses={oldOptions}
                     selectedId={oldCourseId}
                     onSelect={chooseOld}
@@ -212,10 +213,11 @@ function CourseEquivalencyForm() {
                     disabled={submitting}
                   />
 
-                  <CoursePicker
+                  <CourseCombobox
                     id="cef-new"
                     label="Equivalent course in your new program"
-                    hint="A course in your new program’s current study plan that you have not passed yet."
+                    hint="A course in your new program’s current study plan."
+                    placeholder="Search or select an equivalent course"
                     courses={newOptions}
                     selectedId={newCourseId}
                     excludedId={oldCourseId}

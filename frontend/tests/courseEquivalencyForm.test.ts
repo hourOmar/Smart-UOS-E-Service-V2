@@ -13,7 +13,7 @@ const PAGE = source('../src/pages/CourseEquivalencyForm.tsx')
 const HOOK = source('../src/hooks/useCourseEquivalencyOptions.ts')
 const SERVICE = source('../src/services/courseEquivalency.ts')
 const DETAILS = source('../src/services/studentRequests.ts')
-const PICKER = source('../src/components/courseSubstitution/CoursePicker.tsx')
+const COMBO = source('../src/components/courseEquivalency/CourseCombobox.tsx')
 const CS_PAGE = source('../src/pages/CourseSubstitutionForm.tsx')
 const CS_SERVICE = source('../src/services/courseSubstitution.ts')
 
@@ -89,7 +89,8 @@ test('the form shows the applicable program and study-plan version, the best gra
   assert.match(PAGE, /completedCourseOptions\(options\?\.oldCourses \?\? \[\]\)/)
   assert.match(PAGE, /planCourseOptions\(options\?\.newCourses \?\? \[\]\)/)
   assert.match(PAGE, /excludedId=\{oldCourseId\}/)
-  assert.match(PICKER, /\{course\.detail && <span className="csf-option__detail">\{course\.detail\}<\/span>\}/)
+  assert.match(COMBO, /\{course\.detail && <span className="cec-option__detail">\{course\.detail\}<\/span>\}/)
+  assert.match(COMBO, /\{hours && <span className="cec-option__hours">\{hours\}<\/span>\}/)
 })
 
 test('request details read the stored context and add it only when present', () => {
@@ -103,4 +104,12 @@ test('Course Substitution is unchanged: its page, service and picker contract st
   // Course Substitution never sets the picker's optional detail line.
   assert.doesNotMatch(CS_PAGE, /\bdetail:/)
   assert.doesNotMatch(CS_SERVICE, /\bdetail:/)
+})
+
+test('the form no longer mentions a C+ minimum or hides passed study-plan courses', () => {
+  assert.doesNotMatch(PAGE, /C\+/)
+  assert.doesNotMatch(PAGE, /not passed yet|already passed/)
+  assert.match(PAGE, /hint="A course from your transcript with a recorded grade \(your best attempt is shown\)\."/)
+  assert.match(PAGE, /hint="A course in your new program’s current study plan\."/)
+  assert.match(PAGE, /You have no completed course with a recorded grade, so a course equivalency cannot be requested\./)
 })

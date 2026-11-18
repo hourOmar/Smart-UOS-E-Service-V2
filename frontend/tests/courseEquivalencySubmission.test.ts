@@ -6,7 +6,6 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
   BLOCKED_MESSAGES,
-  ELIGIBLE_GRADES,
   REASON_MAX_LENGTH,
   REASON_MIN_LENGTH,
   RELOAD_OPTIONS_CODES,
@@ -95,18 +94,21 @@ test('every non-ok status has a blocked-state message', () => {
 
 // -- course lists ------------------------------------------------------------------
 
-test('only C+ or higher completed courses are offered (second guard after the database)', () => {
-  assert.deepEqual(ELIGIBLE_GRADES, ['A', 'B+', 'B', 'C+'])
+test('completed courses with any recorded grade are offered, including F; a row without a grade is not', () => {
   const options = parseCourseEquivalencyOptions({
     ...OK_PAYLOAD,
     old_courses: [
       ...OK_PAYLOAD.old_courses,
       { course_id: '0000001', course_name: 'Low', credit_hours: 3, grade: 'C', term: 202310 },
       { course_id: '0000002', course_name: 'Failed', credit_hours: 3, grade: 'F', term: 202310 },
+      { course_id: '0000004', course_name: 'Pass', credit_hours: 3, grade: 'D', term: 202310 },
       { course_id: '0000003', course_name: 'No grade', credit_hours: 3, grade: null, term: 202310 },
+      { course_id: '0000005', course_name: 'Blank grade', credit_hours: 3, grade: '  ', term: 202310 },
     ],
   })
-  assert.deepEqual(options.oldCourses.map((c) => c.id), ['1440131', '1501215'])
+  assert.deepEqual(options.oldCourses.map((c) => c.id), ['0000001', '0000002', '0000004', '1440131', '1501215'])
+  assert.deepEqual(options.oldCourses.map((c) => c.grade), ['C', 'F', 'D', 'C+', 'B+'])
+  assert.equal(completedCourseOptions(options.oldCourses)[1].detail, 'Best grade F · Term 202310')
 })
 
 test('the picker shows each completed course with its best grade and term', () => {
@@ -119,7 +121,7 @@ test('the picker shows each completed course with its best grade and term', () =
     'Best grade A')
 })
 
-test('the requested-course picker offers exactly the study-plan courses the database returned (already-passed ones are not added back)', () => {
+test('the requested-course picker offers exactly the study-plan courses the database returned (passed ones included)', () => {
   const options = parseCourseEquivalencyOptions(OK_PAYLOAD)
   const picker = planCourseOptions(options.newCourses)
   assert.deepEqual(picker.map((c) => c.id), ['1502326', '1502412'])
