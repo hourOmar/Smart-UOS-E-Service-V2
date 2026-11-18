@@ -4,6 +4,7 @@ import { fetchCourseEquivalencyDecision } from './courseEquivalencyStudent'
 import { fetchIncompleteExamDecision } from './incompleteExamStudent'
 import { COURSE_EQUIVALENCY, COURSE_SUBSTITUTION, INCOMPLETE_EXAM, needsApprovalRecord } from '../utils/statusLabels'
 import { courseEquivalencyContextFields } from '../utils/courseEquivalencySubmission'
+import { evidenceDescriptionFields } from '../utils/incompleteExamRecord'
 
 // Every query here runs with the signed-in student's session. The database
 // policies return only that student's own requests and details, so another
@@ -213,7 +214,7 @@ async function fetchTypeDetails(type: string, requestId: string): Promise<TypeDe
           { label: 'Exam type', value: text(row.Exam_Type) },
           { label: 'Missed exam date', value: formatDate(text(row.Missed_Exam_Date)) },
           { label: 'Missed exam time', value: formatTime(row.Missed_Exam_Time) },
-          { label: 'Description of evidence', value: text(row.Proof) },
+          ...evidenceDescriptionFields(row.Proof),
         ],
         reason: reasonOf(row),
         documents: textList(row.Proof_Files),

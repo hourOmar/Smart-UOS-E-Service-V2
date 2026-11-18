@@ -14,7 +14,6 @@ import {
 import {
   INCOMPLETE_EXAM_TYPE,
   PROOF_FILE_PROBLEM_MESSAGES,
-  PROOF_NOTE_MAX_LENGTH,
   PROOF_SELECTION_PROBLEM_MESSAGES,
   REASON_MAX_LENGTH,
   SUBMISSION_WINDOW_WORKING_DAYS,
@@ -57,6 +56,7 @@ const FIELD_TARGETS: Record<keyof FormErrors, string> = {
   missedExamDate: '#ie-date',
   missedExamTime: '#ie-time',
   reason: '#ie-reason',
+  // Not on the form any more; the empty description sent is always valid.
   proofNote: '#ie-proof',
 }
 
@@ -79,7 +79,11 @@ function IncompleteExamForm() {
   const [missedExamDate, setMissedExamDate] = useState('')
   const [missedExamTime, setMissedExamTime] = useState('')
   const [reason, setReason] = useState('')
-  const [proofNote, setProofNote] = useState('')
+  // The form no longer asks for a description of the evidence (the PDFs are
+  // the evidence). An empty description is sent, which the submission RPC
+  // stores as '' in Incomplete_Exam.Proof — as it always did when the
+  // optional field was left blank.
+  const proofNote = ''
   const [entries, setEntries] = useState<ProofEntry<File>[]>([])
   const [fileMessages, setFileMessages] = useState<string[]>([])
   const [reservation, setReservation] = useState<UploadReservation | null>(null)
@@ -393,38 +397,6 @@ function IncompleteExamForm() {
                   )}
                   <span id="ie-reason-count" className="rc-field__count">
                     {reason.length} / {REASON_MAX_LENGTH}
-                  </span>
-                </div>
-
-                <div className="rc-field">
-                  <label htmlFor="ie-proof" className="rc-field__label">
-                    Description of your evidence (optional)
-                  </label>
-                  <span id="ie-proof-help" className="rc-field__help">
-                    For example: “Medical report from the hospital, dated the day of the exam.”
-                  </span>
-                  <textarea
-                    id="ie-proof"
-                    className="rc-field__input"
-                    rows={2}
-                    maxLength={PROOF_NOTE_MAX_LENGTH}
-                    value={proofNote}
-                    onChange={(event) => {
-                      setProofNote(event.target.value)
-                      changed()
-                    }}
-                    aria-invalid={shown.proofNote ? true : undefined}
-                    aria-describedby={['ie-proof-help', 'ie-proof-count', shown.proofNote ? 'ie-proof-err' : '']
-                      .filter(Boolean).join(' ')}
-                  />
-                  {shown.proofNote && (
-                    <span id="ie-proof-err" className="rc-error">
-                      <span aria-hidden="true">✕ </span>
-                      {shown.proofNote}
-                    </span>
-                  )}
-                  <span id="ie-proof-count" className="rc-field__count">
-                    {proofNote.length} / {PROOF_NOTE_MAX_LENGTH}
                   </span>
                 </div>
 

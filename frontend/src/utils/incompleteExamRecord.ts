@@ -84,6 +84,14 @@ export const text = (value: unknown): string | null => {
   return trimmed === '' ? null : trimmed
 }
 
+/** The "Description of evidence" row of the student's request details: only
+ *  when the student wrote one (Proof with non-whitespace text), none for an
+ *  empty, whitespace-only or missing Proof. Earlier requests keep theirs. */
+export function evidenceDescriptionFields(proof: unknown): { label: string; value: string }[] {
+  const value = text(proof)
+  return value ? [{ label: 'Description of evidence', value }] : []
+}
+
 const num = (value: unknown): number | null => {
   if (value == null || value === '') return null
   const n = Number(value)

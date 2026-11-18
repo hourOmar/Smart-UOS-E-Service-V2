@@ -66,10 +66,13 @@ function ProofDocuments({ requestId, paths, description, outcomes }: ProofDocume
         Supporting proof
       </h2>
       <div className="req-panel__body">
-        <div className="req-text">
-          <span className="req-text__label">Student’s proof description</span>
-          {description ? <p className="req-text__body">{description}</p> : <p className="rv-missing">Not recorded</p>}
-        </div>
+        {/* Only when the student described their evidence (the form no longer asks). */}
+        {description && (
+          <div className="req-text">
+            <span className="req-text__label">Student’s proof description</span>
+            <p className="req-text__body">{description}</p>
+          </div>
+        )}
 
         {paths.length === 0 ? (
           <p className="rv-muted">No proof document was uploaded with this request.</p>

@@ -29,12 +29,28 @@ function ProofFilesField({ entries, messages, onAdd, onRemove, locked }: ProofFi
       <span className="rc-field__label" id="ie-files-label">
         Supporting documents (optional)
       </span>
-      <span id="ie-files-help" className="rc-field__help">
-        PDF only: up to {MAX_PROOF_FILES} files, 10 MB each and 18 MB in total. Documents cannot be added,
-        replaced or deleted after you submit.
-      </span>
 
-      <div className="ie-files__picker">
+      {/* The upload area: its button opens the file picker (there is no drag
+          and drop). It grows to list the chosen files. */}
+      <div className="ie-drop" data-disabled={locked || full || undefined}>
+        <span className="ie-drop__icon" aria-hidden="true">
+          {/* file-up, from Lucide (lucide.dev, ISC licence) */}
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+            <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+            <path d="M12 12v6" />
+            <path d="m15 15-3-3-3 3" />
+          </svg>
+        </span>
+        <span className="ie-drop__title">Add supporting documents</span>
+
         <input
           id="ie-files-input"
           type="file"
@@ -44,14 +60,50 @@ function ProofFilesField({ entries, messages, onAdd, onRemove, locked }: ProofFi
           onChange={onAdd}
           disabled={locked || full}
           aria-labelledby="ie-files-label"
-          aria-describedby="ie-files-help"
+          aria-describedby="ie-files-help ie-files-note"
         />
-        <label htmlFor="ie-files-input" className="rc-button ie-files__add" aria-disabled={locked || full || undefined}>
-          Add PDF files
+        <label htmlFor="ie-files-input" className="ie-drop__button" aria-disabled={locked || full || undefined}>
+          Choose PDF files
         </label>
-        <span className="ie-files__count">
-          {entries.length} / {MAX_PROOF_FILES} files{entries.length > 0 ? ` · ${formatFileSize(total)}` : ''}
+
+        <span id="ie-files-help" className="ie-drop__limits">
+          PDF only · Max {MAX_PROOF_FILES} files · 10 MB each · 18 MB total
         </span>
+        <span className="ie-files__count">
+          {entries.length} of {MAX_PROOF_FILES} files selected
+          {entries.length > 0 ? ` · ${formatFileSize(total)}` : ''}
+        </span>
+
+        {entries.length > 0 && (
+          <ul className="ie-files__list" aria-live="polite" aria-label="Selected documents">
+            {entries.map((entry) => (
+              <li key={entry.id} className="ie-file" data-status={entry.status}>
+                <span className="ie-file__info">
+                  <span className="ie-file__name">{entry.file.name}</span>
+                  <span className="ie-file__meta">
+                    {formatFileSize(entry.file.size)} ·{' '}
+                    <span className="ie-file__status">{PROOF_STATUS_LABELS[entry.status]}</span>
+                  </span>
+                  {entry.status === 'failed' && entry.error && (
+                    <span className="rc-error ie-file__error">
+                      <span aria-hidden="true">✕ </span>
+                      {PROOF_UPLOAD_ERROR_MESSAGES[entry.error]}
+                    </span>
+                  )}
+                </span>
+                <button
+                  type="button"
+                  className="rc-button ie-file__remove"
+                  onClick={() => onRemove(entry.id)}
+                  disabled={locked}
+                  aria-label={`Remove ${entry.file.name}`}
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {messages.length > 0 && (
@@ -65,36 +117,9 @@ function ProofFilesField({ entries, messages, onAdd, onRemove, locked }: ProofFi
         </ul>
       )}
 
-      {entries.length > 0 && (
-        <ul className="ie-files__list" aria-live="polite" aria-label="Selected documents">
-          {entries.map((entry) => (
-            <li key={entry.id} className="ie-file" data-status={entry.status}>
-              <span className="ie-file__info">
-                <span className="ie-file__name">{entry.file.name}</span>
-                <span className="ie-file__meta">
-                  {formatFileSize(entry.file.size)} ·{' '}
-                  <span className="ie-file__status">{PROOF_STATUS_LABELS[entry.status]}</span>
-                </span>
-                {entry.status === 'failed' && entry.error && (
-                  <span className="rc-error ie-file__error">
-                    <span aria-hidden="true">✕ </span>
-                    {PROOF_UPLOAD_ERROR_MESSAGES[entry.error]}
-                  </span>
-                )}
-              </span>
-              <button
-                type="button"
-                className="rc-button ie-file__remove"
-                onClick={() => onRemove(entry.id)}
-                disabled={locked}
-                aria-label={`Remove ${entry.file.name}`}
-              >
-                Remove
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <p id="ie-files-note" className="ie-files__note">
+        Documents cannot be added, replaced, or removed after submission.
+      </p>
     </div>
   )
 }

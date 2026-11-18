@@ -4,7 +4,7 @@
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
-import { PROOF_ERROR_MESSAGES } from '../src/utils/incompleteExamRecord.ts'
+import { PROOF_ERROR_MESSAGES, evidenceDescriptionFields } from '../src/utils/incompleteExamRecord.ts'
 import { STUDENT_DOCUMENT_ERROR_MESSAGES, displayProofName } from '../src/utils/incompleteExamSubmission.ts'
 
 const read = (path: string) => readFileSync(new URL(path, import.meta.url), 'utf8')
@@ -38,7 +38,28 @@ test('the details service reads Proof_Files for Incomplete Exam only', () => {
   assert.match(SERVICE, /'Course_ID, Section_ID, Term, Exam_Type, Missed_Exam_Date, Missed_Exam_Time, Proof, Reason, Proof_Files'/)
   assert.match(SERVICE, /documents: textList\(row\.Proof_Files\)/)
   assert.match(SERVICE, /documents: row\.Request_Type === 'Incomplete Exam' \? \(details\.documents \?\? \[\]\) : null/)
-  assert.match(SERVICE, /\{ label: 'Description of evidence', value: text\(row\.Proof\) \}/)
+  assert.match(SERVICE, /\.\.\.evidenceDescriptionFields\(row\.Proof\),/)
+})
+
+test('the evidence description is shown only when the student wrote one', () => {
+  // Populated (earlier requests): shown, trimmed, under the same label.
+  assert.deepEqual(evidenceDescriptionFields('Medical report from the hospital.'), [
+    { label: 'Description of evidence', value: 'Medical report from the hospital.' },
+  ])
+  assert.deepEqual(evidenceDescriptionFields('  Police report \n'), [{ label: 'Description of evidence', value: 'Police report' }])
+  // Missing, empty or whitespace only: no row at all (label included).
+  for (const empty of [null, undefined, '', '   ', '\n\t ']) {
+    assert.deepEqual(evidenceDescriptionFields(empty), [], JSON.stringify(empty))
+  }
+})
+
+test('the admin review shows the student\'s description only when there is one', () => {
+  const ADMIN_DOCS = read('../src/components/incompleteExamReview/ProofDocuments.tsx')
+  assert.match(ADMIN_DOCS, /\{description && \(\s+<div className="req-text">\s+<span className="req-text__label">Student’s proof description<\/span>\s+<p className="req-text__body">\{description\}<\/p>/)
+  assert.doesNotMatch(ADMIN_DOCS, /Not recorded/)
+  // The record trims Proof to null when it is empty or whitespace only.
+  const ADMIN_RECORD = read('../src/utils/incompleteExamRecord.ts')
+  assert.match(ADMIN_RECORD, /proof: text\(details\.Proof\),/)
 })
 
 test('documents open only on click, with the student\'s own session, through the checked download', () => {

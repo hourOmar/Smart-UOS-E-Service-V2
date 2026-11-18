@@ -124,6 +124,51 @@ test('leaving during an upload asks first', () => {
   assert.match(PAGE, /if \(!submitting\) return\s+const warn[\s\S]*?addEventListener\('beforeunload', warn\)/)
 })
 
+test('no evidence description on the form; an empty one is still sent, documents unchanged', () => {
+  // The field (label, help, textarea, counter) is gone.
+  assert.ok(!PAGE.includes('Description of your evidence'))
+  assert.doesNotMatch(PAGE, /id="ie-proof"|ie-proof-help|ie-proof-count|setProofNote|PROOF_NOTE_MAX_LENGTH/)
+  // The submission keeps its shape: '' is sent as p_proof, which the RPC stores
+  // as '' (Incomplete_Exam.Proof is NOT NULL), and '' always passes validation.
+  assert.match(PAGE, /const proofNote = ''\r?\n/)
+  assert.equal((PAGE.match(/^\s+proofNote,\r?$/gm) ?? []).length, 2)
+  const SERVICE = read('../src/services/incompleteExamSubmission.ts')
+  assert.match(SERVICE, /p_proof: form\.proofNote,/)
+  // Supporting documents are unchanged.
+  assert.match(PAGE, /<ProofFilesField\s+entries=\{entries\}/)
+  // Earlier requests still show their saved description to the student
+  // (only when there is one: tests/studentProofDocuments.test.ts).
+  const DETAILS = read('../src/services/studentRequests.ts')
+  assert.match(DETAILS, /\.\.\.evidenceDescriptionFields\(row\.Proof\),/)
+})
+
+test('supporting documents: a compact upload area whose button opens the same file picker', () => {
+  const CSS = read('../src/pages/IncompleteExamForm.css')
+  // Heading, icon, title, the button (the label of the hidden file input), limits, count.
+  assert.match(FILES, /Supporting documents \(optional\)/)
+  assert.match(FILES, /<div className="ie-drop" data-disabled=\{locked \|\| full \|\| undefined\}>/)
+  assert.match(FILES, /Add supporting documents/)
+  assert.match(FILES, /<label htmlFor="ie-files-input" className="ie-drop__button" aria-disabled=\{locked \|\| full \|\| undefined\}>\s+Choose PDF files/)
+  assert.match(FILES, /PDF only · Max \{MAX_PROOF_FILES\} files · 10 MB each · 18 MB total/)
+  assert.match(FILES, /\{entries\.length\} of \{MAX_PROOF_FILES\} files selected/)
+  // The warning sits below the area.
+  const area = FILES.indexOf('<div className="ie-drop"')
+  const note = FILES.indexOf('Documents cannot be added, replaced, or removed after submission.')
+  assert.ok(area > -1 && note > area)
+  // Same input, handlers and limits; chosen files listed with size, status and Remove.
+  assert.match(FILES, /id="ie-files-input"\s+type="file"\s+accept="\.pdf,application\/pdf"\s+multiple\s+className="student-visually-hidden"\s+onChange=\{onAdd\}\s+disabled=\{locked \|\| full\}/)
+  assert.match(FILES, /\{formatFileSize\(entry\.file\.size\)\} ·/)
+  assert.match(FILES, /PROOF_STATUS_LABELS\[entry\.status\]/)
+  assert.match(FILES, /aria-label=\{`Remove \$\{entry\.file\.name\}`\}/)
+  // No drag and drop is implied or handled.
+  assert.doesNotMatch(FILES, /onDrop|onDragOver|[Dd]rag (and|&) drop here/)
+  // Compact: a dashed, light area with small padding, a small icon and button.
+  assert.match(CSS, /\.ie-drop \{[^}]*padding: 18px 16px 16px;[^}]*border: 1\.5px dashed #b8c7bd;[^}]*border-radius: 10px;[^}]*background: #f8fbf9;/)
+  assert.match(CSS, /\.ie-drop__icon \{[^}]*width: 34px;[^}]*height: 34px;/)
+  assert.match(CSS, /\.ie-drop__button \{[^}]*padding: 7px 16px;[^}]*background: var\(--proto-green\);/)
+  assert.doesNotMatch(CSS, /\.ie-files__picker|\.ie-files__add/)
+})
+
 test('display helpers', () => {
   assert.equal(formatFileSize(0), '1 KB')
   assert.equal(formatFileSize(340 * 1024), '340 KB')

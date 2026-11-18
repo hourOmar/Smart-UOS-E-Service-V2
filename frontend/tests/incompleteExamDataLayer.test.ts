@@ -86,6 +86,13 @@ test('the review record keeps every source, trimmed, with proof paths and UTC ti
   assert.deepEqual(record.history, { status: 'Rejected', staffId: 100001, date: '2026-11-07T10:00:00Z' })
 })
 
+test('an empty or whitespace-only proof description is null (the admin hides it)', () => {
+  for (const Proof of ['', '   ', '\n ', null]) {
+    const record = buildIncompleteExamRecord({ ...ROWS, details: { ...ROWS.details, Proof } })
+    assert.equal(record.request.details?.proof, null, JSON.stringify(Proof))
+  }
+})
+
 test('missing details, student, decision and history are null, not errors', () => {
   const record = buildIncompleteExamRecord({ ...ROWS, details: null, course: null, student: null, decision: null, history: null })
   assert.equal(record.request.details, null)
