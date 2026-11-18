@@ -24,8 +24,7 @@ function JustificationField({ value, onChange, error }: JustificationFieldProps)
         <span className="student-visually-hidden">(required)</span>
       </label>
       <span id="rc-justification-help" className="rc-field__help">
-        Explain why you need a seat in this section, for example graduation
-        plan or schedule conflicts.
+        Explain why you need a seat in this section.
       </span>
       <textarea
         id="rc-justification"

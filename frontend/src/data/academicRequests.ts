@@ -129,7 +129,7 @@ export const academicRequestTypes: AcademicRequestType[] = [
       checklist: [
         'Know the course section of the missed final exam.',
         'Have the date and time of the missed final exam.',
-        'Prepare a clear explanation (at least 20 characters).',
+        'Prepare a clear explanation.',
         'Have your supporting documents ready as PDF files, if any.',
       ],
     },
@@ -157,7 +157,7 @@ export const academicRequestTypes: AcademicRequestType[] = [
     id: 'course-substitution',
     name: 'Course Substitution',
     description:
-      'Request that another University of Sharjah course count in place of a course in your plan.',
+      'Request to replace a course in your study plan with another course.',
     keywords: 'substitution substitute replace course plan',
     details: {
       description:

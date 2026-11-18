@@ -92,6 +92,22 @@ test('loading, load errors, blocked statuses and empty lists each have their own
   assert.match(PAGE, /options\?\.status === 'ok' && originalCourses\.length > 0 && proposedCourses\.length > 0 &&/)
 })
 
+test('page text: the new description; no study-plan version line and no helper lines under the course fields', () => {
+  assert.match(PAGE, /Request to replace a course in your study plan with another course\./)
+  assert.doesNotMatch(PAGE, /Request that another University of Sharjah course count in place of a course in your plan/)
+  assert.doesNotMatch(PAGE, /Study plan version|planVersion/)
+  assert.doesNotMatch(PAGE, /hint=/)
+  assert.doesNotMatch(PAGE, /have not passed and are not taking now/)
+  // The program name stays.
+  assert.match(PAGE, /\{options\.program\.programName\}/)
+})
+
+test('the dropdown renders a helper line only when one is given', () => {
+  assert.match(COMBO, /hint\?: string/)
+  assert.match(COMBO, /\{hint && \(\s+<span id=\{`\$\{id\}-hint`\} className="csf-picker__hint">/)
+  assert.match(COMBO, /\[hint \? `\$\{id\}-hint` : ''/)
+})
+
 test('a refusal meaning the options changed reloads them and clears both choices', () => {
   assert.match(PAGE, /if \(error instanceof CourseSubstitutionSubmitError && RELOAD_OPTIONS_CODES\.has\(error\.code\)\) \{\s+setOriginalId\(null\)\s+setProposedId\(null\)\s+retry\(\)/)
 })

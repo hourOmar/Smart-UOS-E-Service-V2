@@ -24,7 +24,8 @@ export const INCOMPLETE_EXAM_TYPE: ExamType = 'Final'
 export const FINAL_ONLY_MESSAGE =
   'Incomplete Exam requests are for final exams only. Midterm exams have a separate request service.'
 
-export const REASON_MIN_LENGTH = 20
+// The explanation is required (not empty after trimming) with no minimum
+// length: a single word is accepted. The maximum is unchanged.
 export const REASON_MAX_LENGTH = 1000
 export const PROOF_NOTE_MAX_LENGTH = 500
 
@@ -123,7 +124,6 @@ export function examKey(exam: ExamSelection): string {
 export function reasonError(reason: string): string | null {
   const length = reason.trim().length
   if (length === 0) return 'Explain why you missed the exam.'
-  if (length < REASON_MIN_LENGTH) return `Add a little more detail (at least ${REASON_MIN_LENGTH} characters).`
   if (length > REASON_MAX_LENGTH) return `The explanation can be at most ${REASON_MAX_LENGTH} characters.`
   return null
 }
@@ -327,7 +327,8 @@ export const SUBMIT_ERROR_MESSAGES: Record<SubmitErrorCode, string> = {
   missed_exam_date_in_future: 'The missed exam date cannot be in the future.',
   missed_exam_time_required: 'Enter the time of the missed exam.',
   reason_required: 'Explain why you missed the exam.',
-  reason_too_short: `Add a little more detail (at least ${REASON_MIN_LENGTH} characters).`,
+  // Only returned while the database still has its old 20-character minimum.
+  reason_too_short: 'Your explanation is too short. Add a little more detail, then submit again.',
   reason_too_long: `The explanation can be at most ${REASON_MAX_LENGTH} characters.`,
   proof_too_long: `The description of your evidence can be at most ${PROOF_NOTE_MAX_LENGTH} characters.`,
   duplicate_request:

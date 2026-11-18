@@ -8,7 +8,8 @@ interface CourseComboboxProps {
   /** Unique prefix for element ids, e.g. 'cef-old'. */
   id: string
   label: string
-  hint: string
+  /** Optional line under the label; nothing is rendered without it. */
+  hint?: string
   placeholder: string
   courses: CourseOption[]
   selectedId: string | null
@@ -53,7 +54,7 @@ function CourseCombobox({
   const selectedMeta = selected
     ? [selected.detail, creditHoursLabel(selected.creditHours)].filter(Boolean).join(' · ')
     : ''
-  const describedBy = [`${id}-hint`, selectedMeta ? `${id}-selected` : '', error ? `${id}-error` : '']
+  const describedBy = [hint ? `${id}-hint` : '', selectedMeta ? `${id}-selected` : '', error ? `${id}-error` : '']
     .filter(Boolean)
     .join(' ')
 
@@ -137,9 +138,11 @@ function CourseCombobox({
         {label} <span className="rc-field__required" aria-hidden="true">*</span>
         <span className="student-visually-hidden">(required)</span>
       </label>
-      <span id={`${id}-hint`} className="csf-picker__hint">
-        {hint}
-      </span>
+      {hint && (
+        <span id={`${id}-hint`} className="csf-picker__hint">
+          {hint}
+        </span>
+      )}
 
       <div className="cec-combo__control" data-open={isOpen || undefined}>
         <input

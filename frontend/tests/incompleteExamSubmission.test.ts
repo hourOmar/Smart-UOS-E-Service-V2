@@ -77,10 +77,15 @@ test('working days are counted like the agent: after the exam, Friday and Saturd
 // ---------------------------------------------------------------------------
 // Fields (the database's rules)
 
-test('field rules match the database', () => {
-  assert.ok(reasonError('   '))
-  assert.ok(reasonError('x'.repeat(19)))
-  assert.equal(reasonError(`  ${'x'.repeat(20)}  `), null)
+test('field rules: the explanation is required, has no minimum length, keeps its maximum', () => {
+  // Required: empty or whitespace only is refused.
+  assert.ok(reasonError(''))
+  assert.ok(reasonError('   \n\t '))
+  // No minimum: a single word (or character) is accepted.
+  assert.equal(reasonError('Sick'), null)
+  assert.equal(reasonError('x'), null)
+  assert.equal(reasonError(`  ${'x'.repeat(19)}  `), null)
+  // The maximum is unchanged.
   assert.equal(reasonError('x'.repeat(1000)), null)
   assert.ok(reasonError('x'.repeat(1001)))
   assert.equal(proofNoteError(''), null)
@@ -100,10 +105,12 @@ test('field rules match the database', () => {
 test('the whole form: valid, and each missing field reported', () => {
   assert.deepEqual(validateIncompleteExamForm(FORM, '2026-11-08'), {})
   const errors = validateIncompleteExamForm(
-    { ...FORM, courseId: '', examType: 'Quiz' as never, missedExamTime: '', reason: 'short', proofNote: 'p'.repeat(501) },
+    { ...FORM, courseId: '', examType: 'Quiz' as never, missedExamTime: '', reason: '   ', proofNote: 'p'.repeat(501) },
     '2026-11-08',
   )
   assert.deepEqual(Object.keys(errors).sort(), ['examType', 'missedExamTime', 'proofNote', 'reason', 'section'])
+  // A one-word explanation is a valid explanation.
+  assert.equal(validateIncompleteExamForm({ ...FORM, reason: 'Hospitalised' }, '2026-11-08').reason, undefined)
 })
 
 test('Incomplete Exam is for final exams only: Midterm is never accepted', () => {

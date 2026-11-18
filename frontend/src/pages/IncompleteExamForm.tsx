@@ -373,7 +373,7 @@ function IncompleteExamForm() {
                     <span className="student-visually-hidden">(required)</span>
                   </label>
                   <span id="ie-reason-help" className="rc-field__help">
-                    Explain what happened, in at least 20 characters.
+                    Explain what happened.
                   </span>
                   <textarea
                     id="ie-reason"

@@ -177,9 +177,6 @@ function CourseEquivalencyForm() {
               <div className="pc-current__program">
                 <span className="pc-current__label">Your new program (approved program change)</span>
                 <span className="pc-current__name">{program.programName}</span>
-                {program.planVersion && (
-                  <span className="pc-current__college">Study plan version {program.planVersion}</span>
-                )}
               </div>
             </section>
 
@@ -204,7 +201,6 @@ function CourseEquivalencyForm() {
                   <CourseCombobox
                     id="cef-old"
                     label="Completed course"
-                    hint="A course from your transcript with a recorded grade (your best attempt is shown)."
                     placeholder="Search or select a completed course"
                     courses={oldOptions}
                     selectedId={oldCourseId}
@@ -216,7 +212,6 @@ function CourseEquivalencyForm() {
                   <CourseCombobox
                     id="cef-new"
                     label="Equivalent course in your new program"
-                    hint="A course in your new program’s current study plan."
                     placeholder="Search or select an equivalent course"
                     courses={newOptions}
                     selectedId={newCourseId}

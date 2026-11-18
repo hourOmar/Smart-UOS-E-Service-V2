@@ -178,3 +178,18 @@ test('display helpers', () => {
   assert.deepEqual(Object.keys(PROOF_STATUS_LABELS).sort(), ['failed', 'pending', 'uploaded', 'uploading'])
   assert.equal(PROOF_STATUS_LABELS.failed, 'Not uploaded')
 })
+
+test('the explanation help text no longer asks for a minimum length', () => {
+  assert.match(PAGE, /<span id="ie-reason-help" className="rc-field__help">\s+Explain what happened\.\s+<\/span>/)
+  assert.doesNotMatch(PAGE, /at least 20 characters/)
+  const CATALOG = read('../src/data/academicRequests.ts')
+  const entry = CATALOG.slice(CATALOG.indexOf("id: 'incomplete-exam'"), CATALOG.indexOf("id: 'program-change'"))
+  assert.match(entry, /'Prepare a clear explanation\.'/)
+  assert.doesNotMatch(entry, /20 characters/)
+})
+
+test('Raise Capacity: the justification help text is the short version', () => {
+  const FIELD = read('../src/components/raiseCapacity/JustificationField.tsx')
+  assert.match(FIELD, /<span id="rc-justification-help" className="rc-field__help">\s+Explain why you need a seat in this section\.\s+<\/span>/)
+  assert.doesNotMatch(FIELD, /graduation\s+plan or schedule conflicts/)
+})

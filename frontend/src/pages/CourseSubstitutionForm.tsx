@@ -127,7 +127,7 @@ function CourseSubstitutionForm() {
         <div className="rc-page__intro">
           <h1 className="rc-page__title pc-page__title">Course Substitution Request</h1>
           <p className="rc-page__lede">
-            Request that another University of Sharjah course count in place of a course in your plan.
+            Request to replace a course in your study plan with another course.
           </p>
         </div>
 
@@ -213,9 +213,6 @@ function CourseSubstitutionForm() {
                 <div className="pc-current__program">
                   <span className="pc-current__label">Your program</span>
                   <span className="pc-current__name">{options.program.programName}</span>
-                  {options.program.planVersion && (
-                    <span className="pc-current__college">Study plan version {options.program.planVersion}</span>
-                  )}
                 </div>
               </section>
             )}
@@ -239,7 +236,6 @@ function CourseSubstitutionForm() {
                   <CourseCombobox
                     id="csf-original"
                     label="Original course"
-                    hint="A Required course in your study plan that you have not passed and are not taking now."
                     placeholder="Search or select the course to replace"
                     courses={originalCourses}
                     selectedId={originalId}
@@ -251,7 +247,6 @@ function CourseSubstitutionForm() {
                   <CourseCombobox
                     id="csf-proposed"
                     label="Proposed course"
-                    hint="An Elective course in your study plan that you have not passed and are not taking now."
                     placeholder="Search or select the course to take instead"
                     courses={proposedCourses}
                     selectedId={proposedId}

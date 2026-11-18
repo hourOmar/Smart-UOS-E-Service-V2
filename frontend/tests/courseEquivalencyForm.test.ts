@@ -83,9 +83,9 @@ test('every blocked status shows an explanation instead of the form', () => {
   assert.match(PAGE, /state=\{\{ scrollTo: CATALOG_ANCHOR_ID \}\} className="rc-button">\s+Academic requests/)
 })
 
-test('the form shows the applicable program and study-plan version, the best grade and the requirement type', () => {
+test('the form shows the applicable program (no study-plan version line), the best grade and the requirement type', () => {
   assert.match(PAGE, /\{program\.programName\}/)
-  assert.match(PAGE, /Study plan version \{program\.planVersion\}/)
+  assert.doesNotMatch(PAGE, /Study plan version|program\.planVersion/)
   assert.match(PAGE, /completedCourseOptions\(options\?\.oldCourses \?\? \[\]\)/)
   assert.match(PAGE, /planCourseOptions\(options\?\.newCourses \?\? \[\]\)/)
   assert.match(PAGE, /excludedId=\{oldCourseId\}/)
@@ -109,7 +109,8 @@ test('Course Substitution is unchanged: its page, service and picker contract st
 test('the form no longer mentions a C+ minimum or hides passed study-plan courses', () => {
   assert.doesNotMatch(PAGE, /C\+/)
   assert.doesNotMatch(PAGE, /not passed yet|already passed/)
-  assert.match(PAGE, /hint="A course from your transcript with a recorded grade \(your best attempt is shown\)\."/)
-  assert.match(PAGE, /hint="A course in your new program’s current study plan\."/)
+  // Neither course field has a helper line any more.
+  assert.doesNotMatch(PAGE, /hint=/)
+  assert.doesNotMatch(PAGE, /A course from your transcript with a recorded grade|A course in your new program’s current study plan/)
   assert.match(PAGE, /You have no completed course with a recorded grade, so a course equivalency cannot be requested\./)
 })
