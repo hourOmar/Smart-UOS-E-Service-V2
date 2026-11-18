@@ -6,14 +6,19 @@ import useStudentProfile from '../hooks/useStudentProfile'
 import useCourseSubstitutionData from '../hooks/useCourseSubstitutionData'
 import { CourseSubstitutionSubmitError, submitCourseSubstitutionRequest } from '../services/courseSubstitution'
 import {
+  BLOCKED_MESSAGES,
+  NO_ORIGINAL_COURSES,
+  NO_PROPOSED_COURSES,
   REASON_MAX_LENGTH,
+  RELOAD_OPTIONS_CODES,
   courseLabel,
   validateCourseSubstitutionForm,
 } from '../utils/courseSubstitutionSubmission'
 import { requestDetailsPath } from '../utils/requestPaths'
 import StudentLayout from '../components/student/StudentLayout'
 import ServiceBreadcrumb from '../components/student/ServiceBreadcrumb'
-import CoursePicker from '../components/courseSubstitution/CoursePicker'
+import CourseCombobox from '../components/courseEquivalency/CourseCombobox'
+import { CapIcon } from '../components/programChange/CurrentProgramCard'
 import './RaiseCapacityForm.css'
 import './ProgramChangeForm.css'
 import './CourseSubstitutionForm.css'
@@ -24,17 +29,21 @@ interface SubmittedRequest {
   proposed: string
 }
 
-// Course Substitution request form: the course in the student's plan to
-// replace, the proposed course and a reason. Courses come from
-// public."Course". The form does not judge eligibility (core course, offering,
-// completion): the agent and staff do. Submit Request saves the request
-// through public.submit_course_substitution_request, which identifies the
-// student from the session.
+// Course Substitution request form: a Required course of the student's current
+// study plan to replace, an Elective course of the same plan to take instead,
+// and a reason. Both lists come from public.get_my_course_substitution_options
+// (the program on the student's own record; courses already passed or in
+// progress are left out). Submit Request saves the request through
+// public.submit_course_substitution_request, which identifies the student from
+// the session and enforces the same rules. Level and offering rules are left
+// to the agent and staff.
 function CourseSubstitutionForm() {
   const location = useLocation()
   const navigate = useNavigate()
   const profile = useStudentProfile()
-  const { status, courses, isStudent, retry } = useCourseSubstitutionData()
+  const { status, options, retry } = useCourseSubstitutionData()
+  const originalCourses = options?.originalCourses ?? []
+  const proposedCourses = options?.proposedCourses ?? []
   const [originalId, setOriginalId] = useState<string | null>(null)
   const [proposedId, setProposedId] = useState<string | null>(null)
   const [reason, setReason] = useState('')
@@ -87,7 +96,8 @@ function CourseSubstitutionForm() {
     setSubmitError(null)
     try {
       const requestId = await submitCourseSubstitutionRequest(originalId, proposedId, reason)
-      const label = (id: string) => courseLabel(courses.find((course) => course.id === id)) || id
+      const label = (id: string) =>
+        courseLabel([...originalCourses, ...proposedCourses].find((course) => course.id === id)) || id
       setSubmitted({ id: requestId, original: label(originalId), proposed: label(proposedId) })
       window.scrollTo(0, 0)
     } catch (error) {
@@ -96,6 +106,13 @@ function CourseSubstitutionForm() {
           ? error.message
           : new CourseSubstitutionSubmitError('unknown').message,
       )
+      // The study plan, transcript or course list changed since the page
+      // loaded: reload the options and clear both choices.
+      if (error instanceof CourseSubstitutionSubmitError && RELOAD_OPTIONS_CODES.has(error.code)) {
+        setOriginalId(null)
+        setProposedId(null)
+        retry()
+      }
     } finally {
       submittingRef.current = false
       setSubmitting(false)
@@ -145,7 +162,7 @@ function CourseSubstitutionForm() {
           <>
             {status === 'loading' && (
               <p className="pc-state" role="status">
-                Loading the list of courses…
+                Loading your study plan and courses…
               </p>
             )}
 
@@ -153,7 +170,7 @@ function CourseSubstitutionForm() {
               <div className="rc-alert pc-load-error" role="alert">
                 <span>
                   <span aria-hidden="true">✕ </span>
-                  We couldn’t load the list of courses. Check your connection and try again.
+                  We couldn’t load your study plan and courses. Check your connection and try again.
                 </span>
                 <button type="button" className="rc-button" onClick={retry}>
                   Try again
@@ -161,20 +178,55 @@ function CourseSubstitutionForm() {
               </div>
             )}
 
-            {status === 'ready' && !isStudent && (
-              <p className="rc-alert" role="alert">
-                <span aria-hidden="true">✕ </span>
-                This account is not linked to a student record, so a course substitution cannot be requested.
-              </p>
+            {status === 'ready' && options && options.status !== 'ok' && (
+              <section className="csf-blocked" role="alert" aria-labelledby="csf-blocked-title">
+                <h2 id="csf-blocked-title" className="csf-blocked__title">
+                  {BLOCKED_MESSAGES[options.status].title}
+                </h2>
+                <p className="csf-blocked__text">{BLOCKED_MESSAGES[options.status].text}</p>
+                {options.status === 'study_plan_unavailable' && options.program && (
+                  <p className="csf-blocked__text">
+                    Your program: <strong>{options.program.programName}</strong>
+                  </p>
+                )}
+                <div className="csf-blocked__actions">
+                  {options.status === 'unexpected' && (
+                    <button type="button" className="rc-button" onClick={retry}>
+                      Try again
+                    </button>
+                  )}
+                  <Link to="/student" state={{ scrollTo: CATALOG_ANCHOR_ID }} className="rc-button">
+                    Academic requests
+                  </Link>
+                  <Link to="/student" className="rc-submit">
+                    Back to dashboard
+                  </Link>
+                </div>
+              </section>
             )}
 
-            {status === 'ready' && isStudent && courses.length === 0 && (
+            {status === 'ready' && options?.status === 'ok' && options.program && (
+              <section className="pc-current csf-program" aria-label="Your study plan">
+                <span className="pc-current__icon" aria-hidden="true">
+                  <CapIcon size={30} />
+                </span>
+                <div className="pc-current__program">
+                  <span className="pc-current__label">Your program</span>
+                  <span className="pc-current__name">{options.program.programName}</span>
+                  {options.program.planVersion && (
+                    <span className="pc-current__college">Study plan version {options.program.planVersion}</span>
+                  )}
+                </div>
+              </section>
+            )}
+
+            {status === 'ready' && options?.status === 'ok' && (originalCourses.length === 0 || proposedCourses.length === 0) && (
               <p className="pc-state" role="status">
-                No courses are available right now.
+                {originalCourses.length === 0 ? NO_ORIGINAL_COURSES : NO_PROPOSED_COURSES}
               </p>
             )}
 
-            {status === 'ready' && isStudent && courses.length > 0 && (
+            {status === 'ready' && options?.status === 'ok' && originalCourses.length > 0 && proposedCourses.length > 0 && (
               <form className="pc-form csf-form" onSubmit={handleSubmit} noValidate aria-busy={submitting || undefined}>
                 <section className="pc-details" aria-labelledby="csf-details-title">
                   <div className="pc-details__head">
@@ -184,22 +236,24 @@ function CourseSubstitutionForm() {
                     </div>
                   </div>
 
-                  <CoursePicker
+                  <CourseCombobox
                     id="csf-original"
                     label="Original course"
-                    hint="The course in your study plan that you want to replace."
-                    courses={courses}
+                    hint="A Required course in your study plan that you have not passed and are not taking now."
+                    placeholder="Search or select the course to replace"
+                    courses={originalCourses}
                     selectedId={originalId}
                     onSelect={chooseOriginal}
                     error={attempted ? (errors.originalCourse ?? null) : null}
                     disabled={submitting}
                   />
 
-                  <CoursePicker
+                  <CourseCombobox
                     id="csf-proposed"
                     label="Proposed course"
-                    hint="The course you want to take instead."
-                    courses={courses}
+                    hint="An Elective course in your study plan that you have not passed and are not taking now."
+                    placeholder="Search or select the course to take instead"
+                    courses={proposedCourses}
                     selectedId={proposedId}
                     excludedId={originalId}
                     onSelect={chooseProposed}

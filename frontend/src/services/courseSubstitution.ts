@@ -1,41 +1,31 @@
 import { supabase } from './supabase'
 import {
   CourseSubstitutionSubmitError,
-  buildCourseOptions,
+  parseCourseSubstitutionOptions,
   submitErrorCode,
   type CourseOption,
+  type CourseSubstitutionOptions,
 } from '../utils/courseSubstitutionSubmission'
 
 // The student's Course Substitution request, with the signed-in student's own
-// session only:
-// - the course list comes from public."Course" exactly as stored;
-// - the student record check reads only the account's own Student row;
-// - submit_course_substitution_request identifies the student from the
-//   session and writes Request and Course_Substitution together. No student
-//   ID is ever sent.
+// session only. Both database functions identify the student from the session;
+// no student ID is ever sent:
+// - get_my_course_substitution_options: the Required (original) and Elective
+//   (proposed) courses of the current study plan of the student's program
+//   that the student has not passed and is not taking (the student cannot
+//   read the study plan table directly);
+// - submit_course_substitution_request: enforces the same rules again and
+//   writes Request and Course_Substitution together.
 
 export { CourseSubstitutionSubmitError }
-export type { CourseOption }
+export type { CourseOption, CourseSubstitutionOptions }
 
-/** Every course, sorted by ID. */
-export async function fetchCourses(): Promise<CourseOption[]> {
-  const { data, error } = await supabase.from('Course').select('Course_ID, Course_Name, Credit_Hours')
+/** The student's course options. Throws when the call itself fails; a reply
+ *  this page does not understand is status 'unexpected'. */
+export async function fetchCourseSubstitutionOptions(): Promise<CourseSubstitutionOptions> {
+  const { data, error } = await supabase.rpc('get_my_course_substitution_options')
   if (error) throw error
-  return buildCourseOptions((data ?? []) as Record<string, unknown>[])
-}
-
-/** Whether the signed-in account is linked to a student record. */
-export async function hasStudentRecord(): Promise<boolean> {
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser()
-  if (userError) throw userError
-  if (!user) return false
-
-  const { data, error } = await supabase.from('Student').select('Student_ID').eq('Auth_User_ID', user.id).maybeSingle()
-  if (error) throw error
-  return data !== null
+  return parseCourseSubstitutionOptions(data)
 }
 
 /** Saves the request; returns the new Request_ID. */

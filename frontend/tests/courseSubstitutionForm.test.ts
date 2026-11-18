@@ -9,7 +9,7 @@ import { academicRequestTypes } from '../src/data/academicRequests.ts'
 const source = (path: string) => readFileSync(new URL(path, import.meta.url), 'utf8')
 const APP = source('../src/App.tsx')
 const PAGE = source('../src/pages/CourseSubstitutionForm.tsx')
-const PICKER = source('../src/components/courseSubstitution/CoursePicker.tsx')
+const COMBO = source('../src/components/courseEquivalency/CourseCombobox.tsx')
 const HOOK = source('../src/hooks/useCourseSubstitutionData.ts')
 const SERVICE = source('../src/services/courseSubstitution.ts')
 
@@ -33,7 +33,7 @@ test('the catalog entry starts the form and has its details filled in', () => {
 })
 
 test('the page and picker use only the data layer (no direct Supabase, fetch or token)', () => {
-  for (const [name, text] of Object.entries({ PAGE, PICKER, HOOK })) {
+  for (const [name, text] of Object.entries({ PAGE, COMBO, HOOK })) {
     for (const forbidden of [/\bsupabase\b/, /\bfetch\(/, /access_token/, /getSession/, /console\./, /localStorage/,
       /\.rpc\(/, /service_role/i]) {
       assert.doesNotMatch(text, forbidden, `${name} must not match ${forbidden}`)
@@ -43,12 +43,16 @@ test('the page and picker use only the data layer (no direct Supabase, fetch or 
   assert.match(PAGE, /await submitCourseSubstitutionRequest\(originalId, proposedId, reason\)/)
 })
 
-test('the submission calls only submit_course_substitution_request, with the three arguments and no student ID', () => {
-  assert.equal(SERVICE.match(/\.rpc\(/g)?.length, 1)
+test('the service calls only the two database functions, with no student ID', () => {
+  assert.equal(SERVICE.match(/\.rpc\(/g)?.length, 2)
+  // Options: no arguments at all (the student comes from the session).
+  assert.match(SERVICE, /supabase\.rpc\('get_my_course_substitution_options'\)/)
+  // No direct table reads: students cannot read the study plan, and the old
+  // whole-catalog list (public."Course") is gone.
+  assert.doesNotMatch(SERVICE, /\.from\(/)
   assert.match(SERVICE, /supabase\.rpc\('submit_course_substitution_request', \{\s+p_original_course_id: originalCourseId,\s+p_proposed_course_id: proposedCourseId,\s+p_reason: reason\.trim\(\),\s+\}\)/)
   const submit = SERVICE.slice(SERVICE.indexOf('export async function submitCourseSubstitutionRequest'))
   assert.doesNotMatch(submit, /student_id|Student_ID|studentId/i)
-  // The service only reads public."Course" and the account's own Student row.
   assert.doesNotMatch(SERVICE, /\.(insert|update|upsert|delete)\(/)
 })
 
@@ -63,7 +67,33 @@ test('duplicate submissions are prevented and the form is locked while submittin
 test('the proposed course can never be the original course', () => {
   assert.match(PAGE, /excludedId=\{originalId\}/)
   assert.match(PAGE, /if \(proposedId === id\) setProposedId\(null\)/)
-  assert.match(PICKER, /courses\.filter\(\(course\) => course\.id !== excludedId\)/)
+  assert.match(COMBO, /comboboxCourses\(courses, query, excludedId\)/)
+})
+
+test('both dropdowns are the searchable combobox, fed by the study-plan options', () => {
+  assert.match(PAGE, /import CourseCombobox from '\.\.\/components\/courseEquivalency\/CourseCombobox'/)
+  assert.doesNotMatch(PAGE, /CoursePicker/)
+  assert.match(PAGE, /placeholder="Search or select the course to replace"\s+courses=\{originalCourses\}\s+selectedId=\{originalId\}\s+onSelect=\{chooseOriginal\}/)
+  assert.match(PAGE, /placeholder="Search or select the course to take instead"\s+courses=\{proposedCourses\}\s+selectedId=\{proposedId\}\s+excludedId=\{originalId\}/)
+  assert.match(PAGE, /const originalCourses = options\?\.originalCourses \?\? \[\]/)
+  assert.match(PAGE, /const proposedCourses = options\?\.proposedCourses \?\? \[\]/)
+  assert.match(HOOK, /fetchCourseSubstitutionOptions\(\)/)
+})
+
+test('loading, load errors, blocked statuses and empty lists each have their own state', () => {
+  assert.match(PAGE, /status === 'loading' &&/)
+  assert.match(PAGE, /status === 'error' &&[\s\S]*?onClick=\{retry\}/)
+  // No student record, no study plan for the program, or an unreadable reply.
+  assert.match(PAGE, /status === 'ready' && options && options\.status !== 'ok' &&/)
+  assert.match(PAGE, /\{BLOCKED_MESSAGES\[options\.status\]\.title\}/)
+  assert.match(PAGE, /options\.status === 'study_plan_unavailable' && options\.program &&/)
+  // Either list empty: a message instead of the form; the form needs both.
+  assert.match(PAGE, /\{originalCourses\.length === 0 \? NO_ORIGINAL_COURSES : NO_PROPOSED_COURSES\}/)
+  assert.match(PAGE, /options\?\.status === 'ok' && originalCourses\.length > 0 && proposedCourses\.length > 0 &&/)
+})
+
+test('a refusal meaning the options changed reloads them and clears both choices', () => {
+  assert.match(PAGE, /if \(error instanceof CourseSubstitutionSubmitError && RELOAD_OPTIONS_CODES\.has\(error\.code\)\) \{\s+setOriginalId\(null\)\s+setProposedId\(null\)\s+retry\(\)/)
 })
 
 test('refusals are shown as the mapped message only', () => {

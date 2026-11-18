@@ -99,7 +99,7 @@ test('the form uses the dropdowns with the requested placeholders and the same d
   assert.match(PAGE, /error=\{attempted \? \(errors\.newCourse \?\? null\) : null\}\s+disabled=\{submitting\}/)
 })
 
-test('Course Substitution keeps its own picker', () => {
-  assert.match(CS_PAGE, /import CoursePicker from '\.\.\/components\/courseSubstitution\/CoursePicker'/)
-  assert.doesNotMatch(CS_PAGE, /CourseCombobox/)
+test('Course Substitution reuses the same dropdown component (no copy)', () => {
+  assert.match(CS_PAGE, /import CourseCombobox from '\.\.\/components\/courseEquivalency\/CourseCombobox'/)
+  assert.doesNotMatch(CS_PAGE, /CoursePicker/)
 })
