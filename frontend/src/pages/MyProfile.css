@@ -147,7 +147,8 @@
 .profile-panels {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
+  /* Both cards take the height of the taller one; headers stay aligned at the top. */
+  align-items: stretch;
   gap: 16px;
 }
 
