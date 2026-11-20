@@ -5,7 +5,14 @@ import useStaffIdentity from '../hooks/useStaffIdentity'
 import useIncompleteExamRecord from '../hooks/useIncompleteExamRecord'
 import useIncompleteExamEvaluation from '../hooks/useIncompleteExamEvaluation'
 import { formatDate } from '../services/studentRequests'
-import { ADMIN_HOME_PATH, adminTypePath, studentProfilePath, type ReviewOrigin } from '../utils/adminPaths'
+import {
+  ADMIN_HOME_PATH,
+  ADMIN_MENU_ITEMS,
+  adminTypePath,
+  allRequestsReturnPath,
+  studentProfilePath,
+  type ReviewOrigin,
+} from '../utils/adminPaths'
 import { EXPLANATION_FIELD_ID, type IncompleteExamEvaluationSummary } from '../utils/incompleteExamDecision'
 import { proofOutcomes } from '../utils/incompleteExamEvaluation'
 import { distinctDescription, type IncompleteExamReviewRecord } from '../utils/incompleteExamRecord'
@@ -193,8 +200,10 @@ function ReviewPage({ requestId }: { requestId: string | undefined }) {
   const [decisionStep, setDecisionStep] = useState<'form' | 'confirm'>('form')
 
   const origin = (location.state as { from?: ReviewOrigin } | null)?.from
-  const back =
-    origin === 'dashboard'
+  const allRequests = allRequestsReturnPath(location.state)
+  const back = allRequests
+    ? { to: allRequests, label: 'All Requests' }
+    : origin === 'dashboard'
       ? { to: ADMIN_HOME_PATH, label: 'Admin home' }
       : { to: adminTypePath('incomplete-exam'), label: 'Incomplete Exam requests' }
 
@@ -227,7 +236,7 @@ function ReviewPage({ requestId }: { requestId: string | undefined }) {
   }, [])
 
   return (
-    <StudentLayout profile={identity} solidHeader homePath={ADMIN_HOME_PATH} menuItems={[]}>
+    <StudentLayout profile={identity} solidHeader homePath={ADMIN_HOME_PATH} menuItems={ADMIN_MENU_ITEMS}>
       <div className="adm-page rv-page pcr-page">
         <ReviewBreadcrumb typeId="incomplete-exam" />
 

@@ -198,7 +198,8 @@ test('the review link is enabled for Incomplete Exam with the back-navigation or
   const ADMIN_PATHS = source('../src/utils/adminPaths.ts')
   assert.match(ADMIN_PATHS, /'Incomplete Exam': incompleteExamReviewPath/)
   assert.match(REVIEW_ACTION, /reviewPathFor\(requestType, requestId\)/)
-  assert.match(REVIEW_ACTION, /state=\{\{ from: origin \}\}/)
+  assert.match(REVIEW_ACTION, /origin === 'all-requests' \? \{ from: origin, search: returnSearch \} : \{ from: origin \}/)
+  assert.match(REVIEW_ACTION, /state=\{state\}/)
   assert.match(PAGE, /origin === 'dashboard'\s+\? \{ to: ADMIN_HOME_PATH, label: 'Admin home' \}\s+: \{ to: adminTypePath\('incomplete-exam'\), label: 'Incomplete Exam requests' \}/)
 })
 

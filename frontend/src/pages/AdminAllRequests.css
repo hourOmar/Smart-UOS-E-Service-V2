@@ -1,0 +1,80 @@
+/* All Requests (/admin/requests): search and filter bar. Table, pager, states
+   and the search box come from AdminDashboard.css and Requests.css. */
+
+.aar-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 14px;
+}
+
+.adm-listsearch.aar-search {
+  flex: 1 1 260px;
+  min-height: 40px;
+  box-sizing: border-box;
+}
+
+.aar-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.aar-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--proto-heading);
+}
+
+/* Same control style as the dashboard's former type filter. */
+.aar-field select,
+.aar-field input {
+  box-sizing: border-box;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #8e9a92;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #17211c;
+  font: inherit;
+  font-size: 14px;
+}
+
+.aar-field select:focus-visible,
+.aar-field input:focus-visible {
+  outline: 2px solid var(--proto-green);
+  outline-offset: 2px;
+}
+
+.req-button.aar-clear {
+  min-height: 40px;
+  margin-top: 0;
+}
+
+.req-button.aar-clear:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.aar-error {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #a3261f;
+}
+
+@media (max-width: 640px) {
+  .aar-field {
+    flex: 1 1 calc(50% - 7px);
+    min-width: 0;
+  }
+
+  .aar-field select,
+  .aar-field input {
+    width: 100%;
+  }
+
+  .req-button.aar-clear {
+    flex: 1 1 100%;
+  }
+}

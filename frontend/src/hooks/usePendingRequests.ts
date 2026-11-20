@@ -1,41 +1,39 @@
 import { useCallback, useEffect, useState } from 'react'
-import { fetchPendingRequests, type PendingPage } from '../services/adminRequests'
+import { fetchPendingRequests, type PendingRequests } from '../services/adminRequests'
 
 type Status = 'loading' | 'ready' | 'error'
 
 interface Loaded {
-  /** Which type/page/attempt this result belongs to. */
-  key: string
+  /** Which attempt this result belongs to. */
+  attempt: number
   status: Exclude<Status, 'loading'>
-  data: PendingPage
+  data: PendingRequests
 }
 
-const EMPTY: Omit<PendingPage, 'page'> = { rows: [], total: 0 }
+const EMPTY: PendingRequests = { rows: [], total: 0 }
 
-// One page of In Progress requests (optionally of one type). While a new
-// type or page loads, the hook reports "loading".
-function usePendingRequests(type: string | null, page: number) {
+// The most recent In Progress requests for the admin home (no filter, no pages).
+function usePendingRequests() {
   const [loaded, setLoaded] = useState<Loaded | null>(null)
   const [attempt, setAttempt] = useState(0)
-  const key = `${type ?? ''}|${page}|${attempt}`
 
   useEffect(() => {
     let cancelled = false
-    fetchPendingRequests(type, page)
+    fetchPendingRequests()
       .then((data) => {
-        if (!cancelled) setLoaded({ key, status: 'ready', data })
+        if (!cancelled) setLoaded({ attempt, status: 'ready', data })
       })
       .catch(() => {
-        if (!cancelled) setLoaded({ key, status: 'error', data: { ...EMPTY, page } })
+        if (!cancelled) setLoaded({ attempt, status: 'error', data: EMPTY })
       })
     return () => {
       cancelled = true
     }
-  }, [type, page, key])
+  }, [attempt])
 
   const retry = useCallback(() => setAttempt((count) => count + 1), [])
 
-  if (!loaded || loaded.key !== key) return { status: 'loading' as Status, ...EMPTY, page, retry }
+  if (!loaded || loaded.attempt !== attempt) return { status: 'loading' as Status, ...EMPTY, retry }
   return { status: loaded.status as Status, ...loaded.data, retry }
 }
 

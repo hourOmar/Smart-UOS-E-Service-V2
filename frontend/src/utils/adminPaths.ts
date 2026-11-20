@@ -1,6 +1,13 @@
 import type { AcademicRequestId } from '../data/academicRequests'
+import type { AccountMenuItem } from '../components/student/AccountMenu'
 
 export const ADMIN_HOME_PATH = '/admin'
+
+/** Every request of every type and status, with search and filters. */
+export const ALL_REQUESTS_PATH = `${ADMIN_HOME_PATH}/requests`
+
+/** The account menu's links on every admin page (above Sign Out). */
+export const ADMIN_MENU_ITEMS: AccountMenuItem[] = [{ to: ALL_REQUESTS_PATH, label: 'All Requests' }]
 
 /** The list of one request type, e.g. /admin/requests/raise-capacity */
 export function adminTypePath(typeId: AcademicRequestId) {
@@ -33,7 +40,24 @@ export function courseEquivalencyReviewPath(requestId: string) {
 }
 
 /** Where a review page was opened from, for its back link. */
-export type ReviewOrigin = 'dashboard' | 'type-list'
+export type ReviewOrigin = 'dashboard' | 'type-list' | 'all-requests'
+
+/** Router state of a review page opened from All Requests: the list's query
+ *  string, so going back restores its search, filters, sort and page. */
+export interface FromAllRequests {
+  from: 'all-requests'
+  search: string
+}
+
+/** The All Requests list to return to (with its saved query string), or null
+ *  when the review was not opened from it. Only a plain query string is kept,
+ *  so the link always stays on /admin/requests. */
+export function allRequestsReturnPath(state: unknown): string | null {
+  const s = state as Partial<FromAllRequests> | null
+  if (s?.from !== 'all-requests') return null
+  const search = typeof s.search === 'string' && /^\?[^#\s/\\]*$/.test(s.search) ? s.search : ''
+  return `${ALL_REQUESTS_PATH}${search}`
+}
 
 /** The review page of each request type that has one (by Request_Type). */
 const REVIEW_PATHS: Readonly<Record<string, (requestId: string) => string>> = {

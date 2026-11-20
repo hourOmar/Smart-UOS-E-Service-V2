@@ -14,6 +14,7 @@ import MyProfile from './pages/MyProfile'
 import StudentRequestDetails from './pages/StudentRequestDetails'
 import AdminDashboard from './pages/AdminDashboard'
 import AdminTypeRequests from './pages/AdminTypeRequests'
+import AdminAllRequests from './pages/AdminAllRequests'
 import AdminRaiseCapacityReview from './pages/AdminRaiseCapacityReview'
 import AdminProgramChangeReview from './pages/AdminProgramChangeReview'
 import AdminIncompleteExamReview from './pages/AdminIncompleteExamReview'
@@ -176,6 +177,15 @@ function App() {
           element={
             <ProtectedRoute requiredRole="admin">
               <AdminStudentProfile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/requests"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminAllRequests />
             </ProtectedRoute>
           }
         />

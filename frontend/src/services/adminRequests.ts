@@ -1,6 +1,21 @@
 import { supabase } from './supabase'
 import { academicRequestTypes } from '../data/academicRequests'
 import { APPROVAL_DECISION_TYPES, needsApprovalRecord, recordedApprovalIds } from '../utils/statusLabels'
+import {
+  ALL_REQUESTS_PAGE_SIZE,
+  RECORDED_APPROVAL_TYPES,
+  approvedGroup,
+  approvedRequestIds,
+  combineOrGroups,
+  inList,
+  needsApprovalIds,
+  quoted,
+  searchTerm,
+  statusPlan,
+  studentSearchGroup,
+  type AllRequestsFilters,
+  type ApprovalDecisionRow,
+} from '../utils/adminAllRequests'
 
 // Read-only queries for the admin home. They run with the signed-in staff
 // member's session; the database policies let linked staff read every
@@ -162,34 +177,100 @@ async function fetchPage(build: () => PageQuery, page: number, size: number) {
   return { data: (data ?? []) as unknown[], total: count ?? 0, page: shown }
 }
 
-export const PENDING_PAGE_SIZE = 6
+/** How many In Progress requests the admin home lists. */
+export const PENDING_LIMIT = 10
 
-export interface PendingPage {
+export interface PendingRequests {
+  rows: AdminRequestRow[]
+  /** Every In Progress request, not only the ones listed. */
+  total: number
+}
+
+// The most recently submitted In Progress requests of every type, newest
+// first (date, then time, then Request ID, as in the prototype), with the
+// exact number of In Progress requests.
+export async function fetchPendingRequests(): Promise<PendingRequests> {
+  const { data, count, error } = await supabase
+    .from('Request')
+    .select(REQUEST_WITH_STUDENT, { count: 'exact' })
+    .eq('Current_Status', IN_PROGRESS)
+    .order('Request_Date', { ascending: false })
+    .order('Submission_Time', { ascending: false })
+    .order('Request_ID', { ascending: false })
+    .range(0, PENDING_LIMIT - 1)
+  if (error) throw error
+  return { rows: ((data ?? []) as RequestWithStudent[]).map(toAdminRow), total: count ?? 0 }
+}
+
+// ---------------------------------------------------------------------------
+// All Requests (/admin/requests): every type and status, filtered, sorted and
+// paged in the database (utils/adminAllRequests.ts builds the filters).
+
+export interface AllRequestsPage {
   rows: AdminRequestRow[]
   total: number
   /** The page shown (lower than requested if that page no longer exists). */
   page: number
 }
 
-// One page of In Progress requests, newest first (as in the prototype),
-// optionally of one type. The page is fetched from the database with an
-// exact total, so paging works for any number of requests.
-export async function fetchPendingRequests(type: string | null, page: number): Promise<PendingPage> {
+// The Completed Incomplete Exam / Course Substitution / Course Equivalency
+// requests with a matching approval decision (one read of the approval
+// decisions with their request). Unlike the badges, a failure is an error:
+// the Approved / Completed filters must never guess.
+async function fetchApprovedRequestIds(): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('Decision')
+    .select('Request_ID, Decision_Type, Request(Request_Type, Current_Status)')
+    .in('Decision_Type', Object.values(APPROVAL_DECISION_TYPES))
+  if (error) throw error
+  return approvedRequestIds((data ?? []) as unknown as ApprovalDecisionRow[])
+}
+
+async function studentIdsNamed(term: string): Promise<string[]> {
+  const { data, error } = await supabase
+    .from('Student')
+    .select('Student_ID')
+    .ilike('Student_Name', `%${term}%`)
+    .limit(200)
+  if (error) throw error
+  return ((data ?? []) as { Student_ID: unknown }[]).map((s) => str(s.Student_ID))
+}
+
+export async function fetchAllRequests(filters: AllRequestsFilters): Promise<AllRequestsPage> {
+  const plan = statusPlan(filters.status)
+  const term = searchTerm(filters.search)
+  const [studentIds, approvedIds] = await Promise.all([
+    term ? studentIdsNamed(term) : Promise.resolve([]),
+    needsApprovalIds(plan) ? fetchApprovedRequestIds() : Promise.resolve([]),
+  ])
+
+  const groups: string[] = []
+  if (term) groups.push(studentSearchGroup(term, studentIds))
+  if (plan.kind === 'approved') groups.push(approvedGroup(approvedIds))
+  const orFilter = combineOrGroups(groups)
+  const excluded = plan.kind === 'unconfirmed' ? inList(approvedIds) : null
+  const ascending = filters.sort === 'oldest'
+
   const build = () => {
-    let query = supabase
-      .from('Request')
-      .select(REQUEST_WITH_STUDENT, { count: 'exact' })
-      .eq('Current_Status', IN_PROGRESS)
-    if (type) query = query.eq('Request_Type', type)
+    let query = supabase.from('Request').select(REQUEST_WITH_STUDENT, { count: 'exact' })
+    if (filters.type) query = query.eq('Request_Type', filters.type)
+    if (plan.kind !== 'any') query = query.eq('Current_Status', plan.stored)
+    if (plan.kind === 'unconfirmed') {
+      query = query.in('Request_Type', [...RECORDED_APPROVAL_TYPES])
+      if (excluded) query = query.not('Request_ID', 'in', excluded)
+    }
+    if (filters.from) query = query.gte('Request_Date', filters.from)
+    if (filters.to) query = query.lte('Request_Date', filters.to)
+    if (orFilter) query = query.or(orFilter)
     return query
-      .order('Request_Date', { ascending: false })
-      .order('Submission_Time', { ascending: false })
-      .order('Request_ID', { ascending: false })
+      .order('Request_Date', { ascending })
+      .order('Submission_Time', { ascending })
+      .order('Request_ID', { ascending })
   }
 
-  const result = await fetchPage(build, page, PENDING_PAGE_SIZE)
+  const result = await fetchPage(build, filters.page, ALL_REQUESTS_PAGE_SIZE)
   return {
-    rows: (result.data as RequestWithStudent[]).map(toAdminRow),
+    rows: await withRecordedApprovals((result.data as RequestWithStudent[]).map(toAdminRow)),
     total: result.total,
     page: result.page,
   }
@@ -248,14 +329,6 @@ const COURSE_PAIRS: Record<string, [string, string]> = {
 type DetailRow = Record<string, string | number | null>
 
 const str = (value: unknown) => (value == null ? '' : String(value).trim())
-
-// Characters that would break a PostgREST filter are removed; the rest is
-// matched case-insensitively anywhere in the value.
-function searchTerm(raw: string) {
-  return raw.replace(/[^\p{L}\p{N} _.@-]/gu, ' ').replace(/\s+/g, ' ').trim()
-}
-
-const quoted = (value: string) => `"${value}"`
 
 async function courseIdsMatching(pattern: string): Promise<string[]> {
   const { data, error } = await supabase

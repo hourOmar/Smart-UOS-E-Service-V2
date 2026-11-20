@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { notAvailableMessage } from '../data/academicRequests'
 import useStaffIdentity from '../hooks/useStaffIdentity'
 import useRequestTypeCounts from '../hooks/useRequestTypeCounts'
@@ -8,7 +7,7 @@ import Toast from '../components/student/Toast'
 import AdminSearch from '../components/admin/AdminSearch'
 import AdminRequestTypes from '../components/admin/AdminRequestTypes'
 import PendingRequests from '../components/admin/PendingRequests'
-import { ADMIN_HOME_PATH } from '../utils/adminPaths'
+import { ADMIN_HOME_PATH, ADMIN_MENU_ITEMS } from '../utils/adminPaths'
 import '../components/requests/Requests.css'
 import './AdminDashboard.css'
 
@@ -18,17 +17,10 @@ import './AdminDashboard.css'
 function AdminDashboard() {
   const identity = useStaffIdentity()
   const typeCounts = useRequestTypeCounts()
-  const [pendingType, setPendingType] = useState<string | null>(null)
-  const [pendingPage, setPendingPage] = useState(1)
   const toast = useToast()
 
-  const handleTypeChange = (type: string | null) => {
-    setPendingType(type)
-    setPendingPage(1)
-  }
-
   return (
-    <StudentLayout profile={identity} homePath={ADMIN_HOME_PATH} menuItems={[]}>
+    <StudentLayout profile={identity} homePath={ADMIN_HOME_PATH} menuItems={ADMIN_MENU_ITEMS}>
       <AdminSearch />
 
       <div className="adm-main">
@@ -40,13 +32,7 @@ function AdminDashboard() {
         />
       </div>
 
-      <PendingRequests
-        counts={typeCounts.counts}
-        type={pendingType}
-        page={pendingPage}
-        onTypeChange={handleTypeChange}
-        onPageChange={setPendingPage}
-      />
+      <PendingRequests />
 
       <Toast message={toast.message} onDismiss={toast.dismiss} />
     </StudentLayout>

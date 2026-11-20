@@ -12,7 +12,7 @@ import {
   TYPE_PAGE_SIZE,
 } from '../services/adminRequests'
 import { formatDate } from '../services/studentRequests'
-import { ADMIN_HOME_PATH } from '../utils/adminPaths'
+import { ADMIN_HOME_PATH, ADMIN_MENU_ITEMS } from '../utils/adminPaths'
 import StudentLayout from '../components/student/StudentLayout'
 import RequestIcon from '../components/student/RequestIcon'
 import RequestStatusBadge from '../components/requests/RequestStatusBadge'
@@ -34,7 +34,7 @@ function AdminTypeRequests() {
   const identity = useStaffIdentity()
 
   return (
-    <StudentLayout profile={identity} solidHeader homePath={ADMIN_HOME_PATH} menuItems={[]}>
+    <StudentLayout profile={identity} solidHeader homePath={ADMIN_HOME_PATH} menuItems={ADMIN_MENU_ITEMS}>
       <div className="adm-page">
         <Link to={ADMIN_HOME_PATH} className="req-page__back">
           <svg

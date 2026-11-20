@@ -6,7 +6,14 @@ import useCourseEquivalencyRecord from '../hooks/useCourseEquivalencyRecord'
 import useCourseEquivalencyEvaluation from '../hooks/useCourseEquivalencyEvaluation'
 import useCourseEquivalencySyllabi from '../hooks/useCourseEquivalencySyllabi'
 import { formatDate } from '../services/studentRequests'
-import { ADMIN_HOME_PATH, adminTypePath, studentProfilePath, type ReviewOrigin } from '../utils/adminPaths'
+import {
+  ADMIN_HOME_PATH,
+  ADMIN_MENU_ITEMS,
+  adminTypePath,
+  allRequestsReturnPath,
+  studentProfilePath,
+  type ReviewOrigin,
+} from '../utils/adminPaths'
 import { evaluatedFile } from '../utils/courseEquivalencyEvaluation'
 import { decisionReadiness } from '../utils/courseEquivalencyDecision'
 import { programChangeContext, type CourseEquivalencyReviewRecord } from '../utils/courseEquivalencyRecord'
@@ -169,8 +176,10 @@ function ReviewPage({ requestId }: { requestId: string | undefined }) {
   const syllabi = useCourseEquivalencySyllabi(requestId, evaluation.refresh)
 
   const origin = (location.state as { from?: ReviewOrigin } | null)?.from
-  const back =
-    origin === 'dashboard'
+  const allRequests = allRequestsReturnPath(location.state)
+  const back = allRequests
+    ? { to: allRequests, label: 'All Requests' }
+    : origin === 'dashboard'
       ? { to: ADMIN_HOME_PATH, label: 'Admin home' }
       : { to: adminTypePath('course-equivalency'), label: 'Course Equivalency requests' }
 
@@ -189,7 +198,7 @@ function ReviewPage({ requestId }: { requestId: string | undefined }) {
   }, [refreshRecord, refreshEvaluation])
 
   return (
-    <StudentLayout profile={identity} solidHeader homePath={ADMIN_HOME_PATH} menuItems={[]}>
+    <StudentLayout profile={identity} solidHeader homePath={ADMIN_HOME_PATH} menuItems={ADMIN_MENU_ITEMS}>
       <div className="adm-page rv-page pcr-page">
         <ReviewBreadcrumb typeId="course-equivalency" />
 

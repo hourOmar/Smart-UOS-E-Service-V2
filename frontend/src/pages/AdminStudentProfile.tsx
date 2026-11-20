@@ -14,7 +14,7 @@ import {
   summarizeRequests,
   type HistoryRequest,
 } from '../utils/studentProfile'
-import { ADMIN_HOME_PATH, reviewPathFor, type FromStudentProfile } from '../utils/adminPaths'
+import { ADMIN_HOME_PATH, ADMIN_MENU_ITEMS, reviewPathFor, type FromStudentProfile } from '../utils/adminPaths'
 import StudentLayout from '../components/student/StudentLayout'
 import RequestStatusBadge from '../components/requests/RequestStatusBadge'
 import TranscriptTerms from '../components/profile/TranscriptTerms'
@@ -349,7 +349,7 @@ function AdminStudentProfile() {
   const { status, profile, retry } = useAdminStudentProfile(studentId)
 
   return (
-    <StudentLayout profile={identity} solidHeader homePath={ADMIN_HOME_PATH} menuItems={[]}>
+    <StudentLayout profile={identity} solidHeader homePath={ADMIN_HOME_PATH} menuItems={ADMIN_MENU_ITEMS}>
       <div className="adm-page rv-page sp-page">
         <StudentProfileBreadcrumb />
 

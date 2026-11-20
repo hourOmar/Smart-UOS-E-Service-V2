@@ -7,7 +7,14 @@ import useCourseNames from '../hooks/useCourseNames'
 import useRaiseCapacityPriority from '../hooks/useRaiseCapacityPriority'
 import { formatDate } from '../services/studentRequests'
 import type { ReviewRecord } from '../services/raiseCapacityReview'
-import { ADMIN_HOME_PATH, adminTypePath, studentProfilePath, type ReviewOrigin } from '../utils/adminPaths'
+import {
+  ADMIN_HOME_PATH,
+  ADMIN_MENU_ITEMS,
+  adminTypePath,
+  allRequestsReturnPath,
+  studentProfilePath,
+  type ReviewOrigin,
+} from '../utils/adminPaths'
 import StudentLayout from '../components/student/StudentLayout'
 import ReviewBreadcrumb from '../components/admin/ReviewBreadcrumb'
 import RequestStatusBadge from '../components/requests/RequestStatusBadge'
@@ -128,8 +135,10 @@ function AdminRaiseCapacityReview() {
   const priority = useRaiseCapacityPriority(requestId)
 
   const origin = (location.state as { from?: ReviewOrigin } | null)?.from
-  const back =
-    origin === 'dashboard'
+  const allRequests = allRequestsReturnPath(location.state)
+  const back = allRequests
+    ? { to: allRequests, label: 'All Requests' }
+    : origin === 'dashboard'
       ? { to: ADMIN_HOME_PATH, label: 'Admin home' }
       : { to: adminTypePath('raise-capacity'), label: 'Raise Capacity requests' }
 
@@ -139,7 +148,7 @@ function AdminRaiseCapacityReview() {
   const names = useCourseNames(groupIds)
 
   return (
-    <StudentLayout profile={identity} solidHeader homePath={ADMIN_HOME_PATH} menuItems={[]}>
+    <StudentLayout profile={identity} solidHeader homePath={ADMIN_HOME_PATH} menuItems={ADMIN_MENU_ITEMS}>
       <div className="adm-page rv-page">
         <ReviewBreadcrumb typeId="raise-capacity" />
 

@@ -41,7 +41,9 @@ const needsPolling = (states: PriorityState[]) =>
 //   waiting for a free slot;
 // - a failed read stops everything and shows "unavailable" until the admin
 //   chooses Try again; failed checks are retried only by the admin (retry()).
-function useRaiseCapacityPriorities(requestIds: string[]) {
+// With autoStart false (All Requests) only saved priorities are read: no check
+// is ever started automatically.
+function useRaiseCapacityPriorities(requestIds: string[], { autoStart = true }: { autoStart?: boolean } = {}) {
   const key = requestIds.join('|')
   const [attempt, setAttempt] = useState(0)
   const stateKey = `${key}#${attempt}`
@@ -84,7 +86,7 @@ function useRaiseCapacityPriorities(requestIds: string[]) {
         let states = await fetchPriorities(ids)
         if (cancelled) return
         update((prev) => ({ ...merge(states)(prev), status: 'ready' }))
-        const eligible = states.filter((s) => s.auto_eligible).map((s) => s.request_id)
+        const eligible = autoStart ? states.filter((s) => s.auto_eligible).map((s) => s.request_id) : []
         if (eligible.length > 0) {
           const started = await startAutomaticPriorities(eligible)
           if (cancelled) return
@@ -110,7 +112,7 @@ function useRaiseCapacityPriorities(requestIds: string[]) {
       window.clearTimeout(timer)
       kickRef.current = null
     }
-  }, [key, stateKey])
+  }, [key, stateKey, autoStart])
 
   const current = state && state.forKey === stateKey ? state : null
 

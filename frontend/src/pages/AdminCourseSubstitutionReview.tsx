@@ -5,7 +5,14 @@ import useStaffIdentity from '../hooks/useStaffIdentity'
 import useCourseSubstitutionRecord from '../hooks/useCourseSubstitutionRecord'
 import useCourseSubstitutionEvaluation from '../hooks/useCourseSubstitutionEvaluation'
 import { formatDate } from '../services/studentRequests'
-import { ADMIN_HOME_PATH, adminTypePath, studentProfilePath, type ReviewOrigin } from '../utils/adminPaths'
+import {
+  ADMIN_HOME_PATH,
+  ADMIN_MENU_ITEMS,
+  adminTypePath,
+  allRequestsReturnPath,
+  studentProfilePath,
+  type ReviewOrigin,
+} from '../utils/adminPaths'
 import { EXPLANATION_FIELD_ID, type CourseSubstitutionEvaluationSummary } from '../utils/courseSubstitutionDecision'
 import {
   courseTitle,
@@ -191,8 +198,10 @@ function ReviewPage({ requestId }: { requestId: string | undefined }) {
   const [decisionStep, setDecisionStep] = useState<'form' | 'confirm'>('form')
 
   const origin = (location.state as { from?: ReviewOrigin } | null)?.from
-  const back =
-    origin === 'dashboard'
+  const allRequests = allRequestsReturnPath(location.state)
+  const back = allRequests
+    ? { to: allRequests, label: 'All Requests' }
+    : origin === 'dashboard'
       ? { to: ADMIN_HOME_PATH, label: 'Admin home' }
       : { to: adminTypePath('course-substitution'), label: 'Course Substitution requests' }
 
@@ -225,7 +234,7 @@ function ReviewPage({ requestId }: { requestId: string | undefined }) {
   }, [])
 
   return (
-    <StudentLayout profile={identity} solidHeader homePath={ADMIN_HOME_PATH} menuItems={[]}>
+    <StudentLayout profile={identity} solidHeader homePath={ADMIN_HOME_PATH} menuItems={ADMIN_MENU_ITEMS}>
       <div className="adm-page rv-page pcr-page">
         <ReviewBreadcrumb typeId="course-substitution" />
 

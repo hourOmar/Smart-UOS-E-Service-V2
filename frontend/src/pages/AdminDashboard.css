@@ -525,26 +525,15 @@ button.adm-type__open:focus-visible {
   color: var(--proto-body);
 }
 
-.adm-pending__filter {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.adm-pending__all {
+  margin-top: 0;
+  white-space: nowrap;
 }
 
-.adm-pending__filter label {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--proto-heading);
-}
-
-.adm-pending__filter select {
-  padding: 9px 12px;
-  border: 1px solid #8e9a92;
-  border-radius: 6px;
-  background: #ffffff;
-  color: #17211c;
-  font: inherit;
+.adm-pending__count {
+  margin: 14px 0 0;
   font-size: 14px;
+  color: var(--proto-muted);
 }
 
 .adm-table td.adm-table__id {
