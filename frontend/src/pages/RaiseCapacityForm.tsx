@@ -17,10 +17,8 @@ import SectionPicker from '../components/raiseCapacity/SectionPicker'
 import SelectedSection from '../components/raiseCapacity/SelectedSection'
 import JustificationField from '../components/raiseCapacity/JustificationField'
 import RequestSummary from '../components/raiseCapacity/RequestSummary'
+import { justificationError } from '../utils/raiseCapacityJustification'
 import './RaiseCapacityForm.css'
-
-// The prototype asks for a little detail before a request is sent.
-const JUSTIFICATION_MIN_LENGTH = 20
 
 interface FieldErrors {
   section?: string
@@ -81,14 +79,11 @@ function RaiseCapacityForm() {
     event.preventDefault()
     if (submittingRef.current) return
 
-    // Same checks and wording as the prototype.
-    const length = justification.trim().length
+    // A section is required; the justification must not be empty (no minimum length).
     const errors: FieldErrors = {}
     if (!selected) errors.section = 'Select a course section.'
-    if (!length) errors.justification = 'Enter a justification for your request.'
-    else if (length < JUSTIFICATION_MIN_LENGTH) {
-      errors.justification = `Add a little more detail (at least ${JUSTIFICATION_MIN_LENGTH} characters).`
-    }
+    const justificationMessage = justificationError(justification)
+    if (justificationMessage) errors.justification = justificationMessage
     setFieldErrors(errors)
     setSubmitError(null)
 

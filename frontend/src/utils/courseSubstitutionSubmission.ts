@@ -3,7 +3,6 @@
 // The database function submit_course_substitution_request enforces the same
 // rules; these only give the student immediate feedback.
 
-export const REASON_MIN_LENGTH = 20
 export const REASON_MAX_LENGTH = 1000
 
 /** One course as offered in the pickers (from get_my_course_substitution_options;
@@ -30,7 +29,6 @@ export type FormErrors = Partial<Record<FormField, string>>
 export function reasonError(reason: string): string | null {
   const length = reason.trim().length
   if (!length) return 'Explain why you need this substitution.'
-  if (length < REASON_MIN_LENGTH) return `Add a little more detail (at least ${REASON_MIN_LENGTH} characters).`
   if (length > REASON_MAX_LENGTH) return `The reason can be at most ${REASON_MAX_LENGTH} characters.`
   return null
 }
@@ -242,7 +240,8 @@ export const RELOAD_OPTIONS_CODES: ReadonlySet<CourseSubstitutionErrorCode> = ne
 export const SUBMIT_ERROR_MESSAGES: Record<CourseSubstitutionErrorCode, string> = {
   not_registered_student: 'This account is not registered as a student, so the request cannot be submitted.',
   reason_required: 'Explain why you need this substitution.',
-  reason_too_short: `Add a little more detail (at least ${REASON_MIN_LENGTH} characters).`,
+  // Legacy code: the database no longer has a minimum length.
+  reason_too_short: 'Your reason is too short. Add a little more detail, then submit again.',
   reason_too_long: `The reason can be at most ${REASON_MAX_LENGTH} characters.`,
   original_course_not_found: 'The original course is no longer available. Select another course.',
   proposed_course_not_found: 'The proposed course is no longer available. Select another course.',

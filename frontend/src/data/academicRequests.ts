@@ -1,12 +1,10 @@
 // The five academic request services offered by Smart UoS E-Service, in the
 // catalog order of the final prototype (Smart UoS E-Service v3.dc.html).
-// Fixed application content. Raise Capacity's wording is taken verbatim
-// from the approved prototype design (Smart UoS E-Service.dc.html, kept
-// outside the project). Incomplete Exam and Course Substitution use wording
-// supplied for them. The details-page content of the other services is
-// deliberately empty until the university supplies it: their pages keep
-// every heading but show no text, and nothing here may be filled in with
-// invented or placeholder wording.
+// Fixed application content, reviewed against the implemented submission
+// rules (2026-11-20). Submission requirements are stated as such; checks made
+// by the automated eligibility agents are described as review criteria, and
+// the final decision is always made by authorized university staff. No
+// processing time, fee or unconfirmed university policy is stated.
 // Student data and submitted requests always come from the database.
 
 export type AcademicRequestId =
@@ -51,46 +49,39 @@ export interface AcademicRequestType {
   startPath?: string
 }
 
-// Details-page content not supplied yet.
-const notYetProvided = (): AcademicRequestDetails => ({
-  description: '',
-  audience: '',
-  requirements: '',
-  supportingDocuments: '',
-  steps: [],
-  requiredDocuments: [],
-  notes: [],
-  checklist: [],
-})
+// Shared closing note used by all five services.
+const STATUS_NOTE = 'Status updates and the decision appear in My Requests.'
 
 export const academicRequestTypes: AcademicRequestType[] = [
   {
     id: 'raise-capacity',
     name: 'Raise Capacity',
-    description:
-      'Request a seat in a course section that has reached its capacity.',
+    description: 'Request an increase in the capacity of a full course section.',
     keywords: 'seat section full capacity course register',
     details: {
       description:
-        "Request a seat in a course section that has reached its capacity. You'll provide: the course, the section you want, and your reason for the request.",
-      audience: 'Enrolled students who need a seat in a full course section.',
-      requirements: 'Course prerequisites completed for the requested course.',
-      supportingDocuments: 'No documents are requested in the current form.',
+        'If a course section is full and you need to enroll in it, you can submit a Raise Capacity request to ask the university to increase the number of available seats in that section.',
+      audience: 'Students who want to enroll in a course section that has reached its maximum capacity.',
+      requirements: 'Students should meet the course prerequisites and any required completed credit hours.',
+      supportingDocuments: 'None.',
       steps: [
         'Select Start request on this page.',
-        'Choose the course and the section you want.',
+        'Search for the course and choose the section.',
         'Explain why you need a seat in this section.',
-        'Confirm the information and submit.',
+        'Review the summary and submit.',
         'Track the status and decision in My Requests.',
       ],
-      requiredDocuments: [
-        'No documents are requested in the current Raise Capacity form.',
+      requiredDocuments: ['No documents are needed for this request.'],
+      notes: [
+        'Your request is reviewed against the course prerequisites and the additional seats the section can accommodate.',
+        'You can have only one Raise Capacity request in progress for the same section.',
+        "Submitting a request does not guarantee that the section's capacity will be increased.",
+        STATUS_NOTE,
       ],
-      notes: ['Status updates and the decision appear in My Requests.'],
       checklist: [
         'Know the course code and section you want.',
-        'Confirm the section is full in the registration system.',
-        'Prepare a short, clear reason for the request.',
+        'Check that you have completed the course prerequisites.',
+        'Prepare a clear reason for your request.',
       ],
     },
     startPath: '/student/services/raise-capacity/new',
@@ -104,11 +95,11 @@ export const academicRequestTypes: AcademicRequestType[] = [
     details: {
       description:
         "Request an incomplete for a final exam you were unable to attend. You'll provide: the course section, the date and time of the missed final exam, your explanation and, if you have them, supporting PDF documents.",
-      audience: 'Students registered in the course section of the missed exam this term.',
+      audience: 'Students registered in the course section of the missed exam.',
       requirements:
-        'Submit within four working days of the missed exam (Friday and Saturday are not counted). Later requests can still be submitted, but may not be accepted.',
+        'Submit your request within four working days of the missed exam. Late requests may still be submitted but may not be accepted.',
       supportingDocuments:
-        'Optional: up to 5 PDF files (10 MB each, 18 MB in total), for example a medical report.',
+        'You may provide supporting evidence to justify your request. You may upload up to five PDF files.',
       steps: [
         'Select Start request on this page.',
         'Choose the course section of the final exam you missed.',
@@ -117,19 +108,17 @@ export const academicRequestTypes: AcademicRequestType[] = [
         'Submit, then track the status and decision in My Requests.',
       ],
       requiredDocuments: [
-        'Supporting documents are optional. If you have them, attach them as PDF files: up to 5 files, 10 MB each, 18 MB in total.',
-        'Documents cannot be added, replaced or deleted after you submit.',
+        'Supporting documents are optional but recommended. Requests without sufficient evidence may not be accepted.',
       ],
       notes: [
         'Incomplete Exam requests are for final exams only. Midterm exams have a separate request service.',
-        'Your request stays In Progress until the Registrar’s Office makes a decision.',
-        'Accepted evidence includes an authenticated medical report, documented proof of a system outage for online exams, or travel documents together with a statement for an emergency.',
-        'Status updates and the decision appear in My Requests.',
+        'You can have only one request in progress for the same exam.',
+        STATUS_NOTE,
       ],
       checklist: [
         'Know the course section of the missed final exam.',
         'Have the date and time of the missed final exam.',
-        'Prepare a clear explanation.',
+        'Prepare a clear reason for your request.',
         'Have your supporting documents ready as PDF files, if any.',
       ],
     },
@@ -141,16 +130,65 @@ export const academicRequestTypes: AcademicRequestType[] = [
     description:
       'Apply to move from your current program to another major or program.',
     keywords: 'program major transfer change switch',
-    details: notYetProvided(),
+    details: {
+      description:
+        "Apply to move from your current program to another program. You'll provide the college and program you want to move to and your reason for the change.",
+      audience: 'Students who want to move from their current program to another program.',
+      requirements:
+        'You must choose a program different from your current one, and you can have only one Program Change request in progress at a time.',
+      supportingDocuments: 'None.',
+      steps: [
+        'Select Start request on this page.',
+        'Choose the college, then the program you want to move to.',
+        'Explain your reason for the change.',
+        'Submit your request.',
+        'Track the status and decision in My Requests.',
+      ],
+      requiredDocuments: ['No documents are needed for this request.'],
+      notes: [
+        'You can apply again after your request has been decided.',
+        'After an approved program change, you can request Course Equivalency for courses you have completed.',
+        STATUS_NOTE,
+      ],
+      checklist: [
+        'Know the college and program you want to move to.',
+        'Check your CGPA and completed courses.',
+        'Prepare a clear reason for your request.',
+      ],
+    },
     startPath: '/student/services/program-change/new',
   },
   {
     id: 'course-equivalency',
     name: 'Course Equivalency',
     description:
-      'After an approved program change, request that a course you completed count as a course in your new program’s study plan.',
+      'Request equivalency for a course that was not considered equivalent after your Program Change.',
     keywords: 'equivalency equivalent credit completed course new program change study plan',
-    details: notYetProvided(),
+    details: {
+      description:
+        'After your Program Change is approved, some courses from your previous program may be considered equivalent to courses in your new program. If a course was not considered equivalent, you can submit a Course Equivalency request to have it reviewed.',
+      audience: 'Students who want to request equivalency for courses that were not considered equivalent after an approved Program Change.',
+      requirements: 'You must have an approved Program Change request.',
+      supportingDocuments: 'None.',
+      steps: [
+        'Select Start request on this page.',
+        'Choose a course from your transcript with a recorded grade.',
+        "Choose the course in your new program's study plan.",
+        'Explain your reason.',
+        'Submit, then track the status and decision in My Requests.',
+      ],
+      requiredDocuments: ['No documents are needed from you.'],
+      notes: [
+        'You can have only one request in progress for the same pair of courses.',
+        'Submitting a request does not guarantee equivalency. The review compares the content of both courses using their syllabi and considers your grade and the credit hours.',
+        STATUS_NOTE,
+      ],
+      checklist: [
+        'Make sure your Program Change has been approved.',
+        'Know which course from your transcript should count as which course in your new study plan.',
+        'Prepare a clear reason for your request.',
+      ],
+    },
     startPath: '/student/services/course-equivalency/new',
   },
   {
@@ -161,28 +199,27 @@ export const academicRequestTypes: AcademicRequestType[] = [
     keywords: 'substitution substitute replace course plan',
     details: {
       description:
-        "Enables undergraduate students in their final semester to request an approved substitute for a required major course where permitted, supporting completion of graduation requirements. You'll provide: the course you want to replace, the course you propose instead, and your reason for the request.",
-      audience: 'Undergraduate students in their final semester.',
+        "Course Substitution allows you to request replacing a required course in your study plan with another course. You'll provide the course you want to replace, the course you want to take instead, and your reason.",
+      audience: 'Students who want to replace a required course in their study plan with another course.',
       requirements:
-        'Undergraduate students in their final semester. Your request is reviewed against these conditions: the original course will not be available before you graduate; the original course is a core course in your program; the proposed course is offered in the current semester; the proposed course is at the same academic level or higher than the original; and you have not already passed the proposed course.',
-      supportingDocuments: 'No documents are requested in the current form.',
+        'The course you want to replace must be a required course in your study plan. You must not have passed or currently be enrolled in either course.',
+      supportingDocuments: 'None.',
       steps: [
         'Select Start request on this page.',
-        'Choose the course in your plan that you want to replace.',
-        'Choose the course you propose instead.',
-        'Explain your reason for the request.',
+        'Choose the Required course you want to replace.',
+        'Choose the Elective course you want to take instead.',
+        'Explain your reason.',
         'Submit, then track the status and decision in My Requests.',
       ],
-      requiredDocuments: ['No documents are requested in the current Course Substitution form.'],
+      requiredDocuments: ['No documents are needed for this request.'],
       notes: [
-        'This service is free of charge.',
-        'Processing time: 3 to 5 business days.',
-        'Status updates and the decision appear in My Requests.',
+        'Courses you have passed or are currently taking are not available for selection. Courses you have only failed may still be selected.',
+        'You can have only one request in progress for the same original course.',
+        STATUS_NOTE,
       ],
       checklist: [
-        'Know the code of the course you want to replace.',
-        'Know the code of the course you propose instead.',
-        'Prepare a clear reason (at least 20 characters).',
+        'Know the codes of the course you want to replace and the course you want to take instead.',
+        'Prepare a clear reason for your request.',
       ],
     },
     startPath: '/student/services/course-substitution/new',

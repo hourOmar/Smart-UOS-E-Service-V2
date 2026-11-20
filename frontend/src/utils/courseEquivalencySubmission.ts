@@ -13,7 +13,6 @@
 
 import type { CourseOption } from './courseSubstitutionSubmission'
 
-export const REASON_MIN_LENGTH = 20
 export const REASON_MAX_LENGTH = 1000
 
 // ---------------------------------------------------------------------------
@@ -214,7 +213,6 @@ export type FormErrors = Partial<Record<FormField, string>>
 export function reasonError(reason: string): string | null {
   const length = reason.trim().length
   if (!length) return 'Explain why the completed course should count as the new course.'
-  if (length < REASON_MIN_LENGTH) return `Add a little more detail (at least ${REASON_MIN_LENGTH} characters).`
   if (length > REASON_MAX_LENGTH) return `The reason can be at most ${REASON_MAX_LENGTH} characters.`
   return null
 }
@@ -288,7 +286,8 @@ export const RELOAD_OPTIONS_CODES: ReadonlySet<CourseEquivalencyErrorCode> = new
 export const SUBMIT_ERROR_MESSAGES: Record<CourseEquivalencyErrorCode, string> = {
   not_registered_student: 'This account is not registered as a student, so the request cannot be submitted.',
   reason_required: 'Explain why the completed course should count as the new course.',
-  reason_too_short: `Add a little more detail (at least ${REASON_MIN_LENGTH} characters).`,
+  // Legacy code: the database no longer has a minimum length.
+  reason_too_short: 'Your reason is too short. Add a little more detail, then submit again.',
   reason_too_long: `The reason can be at most ${REASON_MAX_LENGTH} characters.`,
   no_approved_program_change: 'You need an approved Program Change before requesting a course equivalency.',
   program_change_in_progress: 'You have a Program Change request in progress. Try again after it has been decided.',

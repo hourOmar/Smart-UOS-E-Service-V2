@@ -7,7 +7,6 @@ import { test } from 'node:test'
 import {
   BLOCKED_MESSAGES,
   REASON_MAX_LENGTH,
-  REASON_MIN_LENGTH,
   RELOAD_OPTIONS_CODES,
   SUBMIT_ERROR_MESSAGES,
   completedCourseOptions,
@@ -132,14 +131,15 @@ test('the requested-course picker offers exactly the study-plan courses the data
 
 // -- form ---------------------------------------------------------------------------
 
-test('the reason is 20 to 1000 characters after trimming', () => {
-  assert.equal(REASON_MIN_LENGTH, 20)
+test('the reason is required and at most 1000 characters after trimming; no minimum', () => {
   assert.equal(REASON_MAX_LENGTH, 1000)
   assert.match(reasonError('   ') ?? '', /Explain why/)
-  assert.match(reasonError(`  ${'x'.repeat(19)}  `) ?? '', /at least 20 characters/)
-  assert.equal(reasonError('x'.repeat(20)), null)
+  assert.equal(reasonError(`  ${'x'.repeat(19)}  `), null)
+  assert.equal(reasonError('x'), null)
   assert.equal(reasonError('x'.repeat(1000)), null)
   assert.match(reasonError('x'.repeat(1001)) ?? '', /at most 1000/)
+  // A legacy minimum refusal from the database names no length.
+  assert.doesNotMatch(SUBMIT_ERROR_MESSAGES.reason_too_short, /\d/)
 })
 
 test('both courses are required and must differ', () => {
@@ -148,7 +148,8 @@ test('both courses are required and must differ', () => {
   assert.ok(validateCourseEquivalencyForm({ ...ok, oldCourseId: null }).oldCourse)
   assert.ok(validateCourseEquivalencyForm({ ...ok, newCourseId: null }).newCourse)
   assert.match(validateCourseEquivalencyForm({ ...ok, newCourseId: ok.oldCourseId }).newCourse ?? '', /different/)
-  assert.ok(validateCourseEquivalencyForm({ ...ok, reason: 'short' }).reason)
+  assert.ok(validateCourseEquivalencyForm({ ...ok, reason: '   ' }).reason)
+  assert.deepEqual(validateCourseEquivalencyForm({ ...ok, reason: 'short' }), {})   // no minimum length
 })
 
 // -- submission errors -------------------------------------------------------------

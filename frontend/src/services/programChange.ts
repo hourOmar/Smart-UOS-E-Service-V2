@@ -1,4 +1,5 @@
 import { supabase } from './supabase'
+import { REASON_MAX_LENGTH } from '../utils/programChangeReason'
 
 // Data for the student Program Change form, read with the signed-in
 // student's own session (no submission yet).
@@ -49,19 +50,9 @@ const value = (raw: unknown) => {
   return text.trim() === '' ? null : text
 }
 
-export const REASON_MIN_LENGTH = 20
-export const REASON_MAX_LENGTH = 1000
-
-/** The prototype's wording; null when the reason is acceptable. The maximum
- *  is enforced by the field itself (maxLength). */
-export function reasonError(reason: string): string | null {
-  const length = reason.trim().length
-  if (!length) return 'Explain why you want to change program.'
-  if (length < REASON_MIN_LENGTH) {
-    return `Add a little more detail (at least ${REASON_MIN_LENGTH} characters).`
-  }
-  return null
-}
+// The reason rule (required, at most 1000 characters, no minimum) lives in a
+// network-free module so it can be tested on its own.
+export { REASON_MAX_LENGTH, reasonError } from '../utils/programChangeReason'
 
 export function programKey(programId: string, programName: string) {
   return JSON.stringify([programId, programName])
@@ -135,7 +126,8 @@ const SUBMIT_ERROR_MESSAGES: Record<ProgramChangeErrorCode, string> = {
   not_registered_student:
     'This account is not registered as a student, so the request cannot be submitted.',
   reason_required: 'Explain why you want to change program.',
-  reason_too_short: `Add a little more detail (at least ${REASON_MIN_LENGTH} characters).`,
+  // Legacy code: the database no longer has a minimum length.
+  reason_too_short: 'Your reason is too short. Add a little more detail, then submit again.',
   reason_too_long: `The reason can be at most ${REASON_MAX_LENGTH} characters.`,
   current_program_missing:
     'Your current program is not recorded correctly, so the request cannot be submitted. Contact the Registrar’s Office.',

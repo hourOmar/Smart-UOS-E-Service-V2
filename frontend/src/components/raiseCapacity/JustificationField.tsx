@@ -1,4 +1,4 @@
-const JUSTIFICATION_MAX_LENGTH = 1000
+import { JUSTIFICATION_MAX_LENGTH } from '../../utils/raiseCapacityJustification'
 
 interface JustificationFieldProps {
   value: string

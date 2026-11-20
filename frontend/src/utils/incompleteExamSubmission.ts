@@ -7,7 +7,8 @@
 //   - FINAL exams only (midterm exams have a separate request service);
 //     an enrolled course section of the term;
 //   - missed exam date required, not after today in the UAE; a time;
-//   - reason 20-1000 characters (trimmed); optional proof note <= 500;
+//   - reason required (not empty after trimming), at most 1000 characters,
+//     no minimum length; optional proof note <= 500;
 //   - 0-5 optional PDFs, 10 MB each, 18 MB together, named
 //     <8 hex>-<safe name>.pdf inside the reserved folder.
 // A late request (over 4 working days, Friday/Saturday excluded, as the

@@ -26,8 +26,9 @@ test('the catalog entry is enabled with real details', () => {
   assert.ok(entry.details.description.length > 50)
   assert.ok(entry.details.steps.length >= 4)
   assert.ok(entry.details.requiredDocuments.some((d) => /optional/i.test(d)))
-  assert.ok(entry.details.requiredDocuments.some((d) => /cannot be added, replaced or deleted/i.test(d)))
-  assert.match(entry.details.supportingDocuments, /5 PDF files \(10 MB each, 18 MB in total\)/)
+  // Documents are optional ("You may provide") and limited to five PDF files.
+  assert.match(entry.details.supportingDocuments, /^You may provide supporting evidence/)
+  assert.match(entry.details.supportingDocuments, /up to five PDF files\.$/)
 })
 
 test('the page only uses the P3.1 data layer (no direct Supabase, Storage or agent calls)', () => {
@@ -184,7 +185,7 @@ test('the explanation help text no longer asks for a minimum length', () => {
   assert.doesNotMatch(PAGE, /at least 20 characters/)
   const CATALOG = read('../src/data/academicRequests.ts')
   const entry = CATALOG.slice(CATALOG.indexOf("id: 'incomplete-exam'"), CATALOG.indexOf("id: 'program-change'"))
-  assert.match(entry, /'Prepare a clear explanation\.'/)
+  assert.match(entry, /'Prepare a clear reason for your request\.'/)
   assert.doesNotMatch(entry, /20 characters/)
 })
 

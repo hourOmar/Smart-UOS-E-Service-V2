@@ -26,10 +26,10 @@ test('the catalog entry starts the form and has its details filled in', () => {
     assert.notEqual(details[field].trim(), '', `${field} must not be empty`)
   }
   assert.equal(details.steps.length, 5)
-  assert.ok(details.checklist.some((item) => item.includes('at least 20 characters')))
-  assert.match(details.supportingDocuments, /No documents are requested/)
+  assert.ok(details.checklist.includes('Prepare a clear reason for your request.'))
+  assert.equal(details.supportingDocuments, 'None.')
   assert.equal(details.requiredDocuments.length, 1)
-  assert.match(details.requiredDocuments[0], /No documents are requested/)
+  assert.match(details.requiredDocuments[0], /No documents are needed for this request\./)
 })
 
 test('the page and picker use only the data layer (no direct Supabase, fetch or token)', () => {

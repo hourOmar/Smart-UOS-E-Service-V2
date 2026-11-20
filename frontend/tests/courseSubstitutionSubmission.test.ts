@@ -4,7 +4,6 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import {
   REASON_MAX_LENGTH,
-  REASON_MIN_LENGTH,
   BLOCKED_MESSAGES,
   NO_ORIGINAL_COURSES,
   NO_PROPOSED_COURSES,
@@ -23,14 +22,14 @@ import {
 
 // -- reason ------------------------------------------------------------------------
 
-test('the reason is 20 to 1000 characters after trimming', () => {
-  assert.equal(REASON_MIN_LENGTH, 20)
+test('the reason is required and at most 1000 characters after trimming; no minimum', () => {
   assert.equal(REASON_MAX_LENGTH, 1000)
   assert.match(reasonError('') ?? '', /Explain why/)
   assert.match(reasonError('   \n ') ?? '', /Explain why/)
-  assert.match(reasonError('x'.repeat(19)) ?? '', /at least 20 characters/)
-  assert.match(reasonError(`   ${'x'.repeat(19)}   `) ?? '', /at least 20 characters/)   // spaces do not count
-  assert.equal(reasonError('x'.repeat(20)), null)
+  assert.equal(reasonError('x'.repeat(19)), null)
+  assert.equal(reasonError(`   ${'x'.repeat(19)}   `), null)
+  assert.equal(reasonError('x'), null)
+  assert.doesNotMatch(SUBMIT_ERROR_MESSAGES.reason_too_short, /\d/)   // legacy refusal names no length
   assert.equal(reasonError('x'.repeat(1000)), null)
   assert.equal(reasonError(`  ${'x'.repeat(1000)}  `), null)
   assert.match(reasonError('x'.repeat(1001)) ?? '', /at most 1000 characters/)
