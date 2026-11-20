@@ -2,9 +2,6 @@ import type { AcademicRequestId } from '../data/academicRequests'
 
 export const ADMIN_HOME_PATH = '/admin'
 
-/** The account menu's page link on admin pages. */
-export const ADMIN_HOME_ITEM = { to: ADMIN_HOME_PATH, label: 'Admin home' }
-
 /** The list of one request type, e.g. /admin/requests/raise-capacity */
 export function adminTypePath(typeId: AcademicRequestId) {
   return `${ADMIN_HOME_PATH}/requests/${typeId}`

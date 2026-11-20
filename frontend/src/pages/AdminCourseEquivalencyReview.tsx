@@ -6,7 +6,7 @@ import useCourseEquivalencyRecord from '../hooks/useCourseEquivalencyRecord'
 import useCourseEquivalencyEvaluation from '../hooks/useCourseEquivalencyEvaluation'
 import useCourseEquivalencySyllabi from '../hooks/useCourseEquivalencySyllabi'
 import { formatDate } from '../services/studentRequests'
-import { ADMIN_HOME_ITEM, ADMIN_HOME_PATH, adminTypePath, studentProfilePath, type ReviewOrigin } from '../utils/adminPaths'
+import { ADMIN_HOME_PATH, adminTypePath, studentProfilePath, type ReviewOrigin } from '../utils/adminPaths'
 import { evaluatedFile } from '../utils/courseEquivalencyEvaluation'
 import { decisionReadiness } from '../utils/courseEquivalencyDecision'
 import { programChangeContext, type CourseEquivalencyReviewRecord } from '../utils/courseEquivalencyRecord'
@@ -189,7 +189,7 @@ function ReviewPage({ requestId }: { requestId: string | undefined }) {
   }, [refreshRecord, refreshEvaluation])
 
   return (
-    <StudentLayout profile={identity} solidHeader homePath={ADMIN_HOME_PATH} menuItems={[ADMIN_HOME_ITEM]}>
+    <StudentLayout profile={identity} solidHeader homePath={ADMIN_HOME_PATH} menuItems={[]}>
       <div className="adm-page rv-page pcr-page">
         <ReviewBreadcrumb typeId="course-equivalency" />
 

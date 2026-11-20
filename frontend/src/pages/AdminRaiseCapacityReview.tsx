@@ -7,7 +7,7 @@ import useCourseNames from '../hooks/useCourseNames'
 import useRaiseCapacityPriority from '../hooks/useRaiseCapacityPriority'
 import { formatDate } from '../services/studentRequests'
 import type { ReviewRecord } from '../services/raiseCapacityReview'
-import { ADMIN_HOME_ITEM, ADMIN_HOME_PATH, adminTypePath, studentProfilePath, type ReviewOrigin } from '../utils/adminPaths'
+import { ADMIN_HOME_PATH, adminTypePath, studentProfilePath, type ReviewOrigin } from '../utils/adminPaths'
 import StudentLayout from '../components/student/StudentLayout'
 import ReviewBreadcrumb from '../components/admin/ReviewBreadcrumb'
 import RequestStatusBadge from '../components/requests/RequestStatusBadge'
@@ -139,7 +139,7 @@ function AdminRaiseCapacityReview() {
   const names = useCourseNames(groupIds)
 
   return (
-    <StudentLayout profile={identity} solidHeader homePath={ADMIN_HOME_PATH} menuItems={[ADMIN_HOME_ITEM]}>
+    <StudentLayout profile={identity} solidHeader homePath={ADMIN_HOME_PATH} menuItems={[]}>
       <div className="adm-page rv-page">
         <ReviewBreadcrumb typeId="raise-capacity" />
 

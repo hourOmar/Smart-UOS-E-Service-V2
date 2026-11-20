@@ -5,7 +5,7 @@ import useStaffIdentity from '../hooks/useStaffIdentity'
 import useCourseSubstitutionRecord from '../hooks/useCourseSubstitutionRecord'
 import useCourseSubstitutionEvaluation from '../hooks/useCourseSubstitutionEvaluation'
 import { formatDate } from '../services/studentRequests'
-import { ADMIN_HOME_ITEM, ADMIN_HOME_PATH, adminTypePath, studentProfilePath, type ReviewOrigin } from '../utils/adminPaths'
+import { ADMIN_HOME_PATH, adminTypePath, studentProfilePath, type ReviewOrigin } from '../utils/adminPaths'
 import { EXPLANATION_FIELD_ID, type CourseSubstitutionEvaluationSummary } from '../utils/courseSubstitutionDecision'
 import {
   courseTitle,
@@ -225,7 +225,7 @@ function ReviewPage({ requestId }: { requestId: string | undefined }) {
   }, [])
 
   return (
-    <StudentLayout profile={identity} solidHeader homePath={ADMIN_HOME_PATH} menuItems={[ADMIN_HOME_ITEM]}>
+    <StudentLayout profile={identity} solidHeader homePath={ADMIN_HOME_PATH} menuItems={[]}>
       <div className="adm-page rv-page pcr-page">
         <ReviewBreadcrumb typeId="course-substitution" />
 

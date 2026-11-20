@@ -8,7 +8,7 @@ import Toast from '../components/student/Toast'
 import AdminSearch from '../components/admin/AdminSearch'
 import AdminRequestTypes from '../components/admin/AdminRequestTypes'
 import PendingRequests from '../components/admin/PendingRequests'
-import { ADMIN_HOME_ITEM, ADMIN_HOME_PATH } from '../utils/adminPaths'
+import { ADMIN_HOME_PATH } from '../utils/adminPaths'
 import '../components/requests/Requests.css'
 import './AdminDashboard.css'
 
@@ -28,7 +28,7 @@ function AdminDashboard() {
   }
 
   return (
-    <StudentLayout profile={identity} homePath={ADMIN_HOME_PATH} menuItems={[ADMIN_HOME_ITEM]}>
+    <StudentLayout profile={identity} homePath={ADMIN_HOME_PATH} menuItems={[]}>
       <AdminSearch />
 
       <div className="adm-main">

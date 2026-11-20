@@ -41,7 +41,7 @@ const ITEM_ICONS = {
 interface AccountMenuProps {
   profile: AccountIdentity
   onSignOut: () => void
-  /** The menu's page links; students get My Profile and My Requests, staff Admin home. */
+  /** The menu's page links; students get My Profile and My Requests (the default), staff pages pass none. */
   menuItems?: AccountMenuItem[]
 }
 
