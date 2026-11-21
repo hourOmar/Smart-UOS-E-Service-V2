@@ -42,11 +42,14 @@ const params = (query: string) => new URLSearchParams(query)
 
 test('URL: filters, sort and page round-trip; defaults are left out of the URL', () => {
   const filters = {
+    ...DEFAULT_ALL_REQUESTS_FILTERS,
     search: 'U211', type: 'Program Change', status: 'Approved' as const,
-    from: '2026-01-01', to: '2026-03-31', sort: 'oldest' as const, page: 3,
+    from: '2026-01-01', fromTime: '08:30', to: '2026-03-31', toTime: '17:00', term: 202602,
+    sort: 'oldest' as const, page: 3,
   }
   const query = toAllRequestsParams(filters).toString()
-  assert.equal(query, 'q=U211&type=Program+Change&status=Approved&from=2026-01-01&to=2026-03-31&sort=oldest&page=3')
+  assert.equal(query,
+    'q=U211&type=Program+Change&status=Approved&from=2026-01-01&fromTime=08%3A30&to=2026-03-31&toTime=17%3A00&term=202602&sort=oldest&page=3')
   assert.deepEqual(parseAllRequestsParams(params(query)), filters)
   assert.equal(toAllRequestsParams(DEFAULT_ALL_REQUESTS_FILTERS).toString(), '')
   assert.deepEqual(parseAllRequestsParams(params('')), DEFAULT_ALL_REQUESTS_FILTERS)
@@ -142,9 +145,10 @@ test('search covers request ID and student ID only (not student name), with Post
   assert.equal(idSearchGroup('INC2_000008'), 'Request_ID.ilike."%INC2_000008%",Student_ID.ilike."%INC2_000008%"')
   const ALL_SECTION = SERVICE.slice(SERVICE.indexOf('// All Requests (/admin/requests)'), SERVICE.indexOf('// Requests of one type'))
   assert.match(ALL_SECTION, /if \(term\) groups\.push\(idSearchGroup\(term\)\)/)
-  // No student-name lookup, and no course / program search.
+  // No student-name lookup, and no course / program text search (the Raise
+  // Capacity course filter is an exact Course_ID match, not part of search).
   assert.doesNotMatch(ALL_SECTION, /Student_Name'|\.from\('Student'\)|studentIdsNamed|studentSearchGroup/)
-  assert.doesNotMatch(ALL_SECTION, /Course_ID|Program_Name|requestIdsByTarget/)
+  assert.doesNotMatch(ALL_SECTION, /Course_Name\.ilike|Program_Name|requestIdsByTarget/)
   // The search text still comes from (and goes back to) the URL's q parameter.
   assert.equal(parseAllRequestsParams(params('q=U24199999')).search, 'U24199999')
   assert.equal(toAllRequestsParams({ ...DEFAULT_ALL_REQUESTS_FILTERS, search: 'STUD_INCRQ' }).toString(), 'q=STUD_INCRQ')
@@ -170,12 +174,15 @@ const ALL = SERVICE.slice(SERVICE.indexOf('// All Requests (/admin/requests)'), 
 
 test('All Requests: filtered, counted, sorted and paged in the database, 10 per page', () => {
   assert.equal(ALL_REQUESTS_PAGE_SIZE, 10)
-  assert.match(ALL, /supabase\.from\('Request'\)\.select\(REQUEST_WITH_STUDENT, \{ count: 'exact' \}\)/)
+  assert.match(ALL, /const select = \[REQUEST_WITH_STUDENT, \.\.\.embeds\]\.join\(', '\)/)
+  assert.match(ALL, /supabase\.from\('Request'\)\.select\(select, \{ count: 'exact' \}\)/)
   assert.match(ALL, /if \(filters\.type\) query = query\.eq\('Request_Type', filters\.type\)/)
   assert.match(ALL, /if \(plan\.kind !== 'any'\) query = query\.eq\('Current_Status', plan\.stored\)/)
   assert.match(ALL, /query = query\.in\('Request_Type', \[\.\.\.RECORDED_APPROVAL_TYPES\]\)\s+if \(excluded\) query = query\.not\('Request_ID', 'in', excluded\)/)
-  assert.match(ALL, /if \(filters\.from\) query = query\.gte\('Request_Date', filters\.from\)/)
-  assert.match(ALL, /if \(filters\.to\) query = query\.lte\('Request_Date', filters\.to\)/)
+  // Submission window: UAE boundaries converted to the stored UTC date and time.
+  assert.match(ALL, /if \(filters\.from\) groups\.push\(submittedFromGroup\(submittedFromUtc\(filters\.from, filters\.fromTime\)\)\)/)
+  assert.match(ALL, /if \(filters\.to\) groups\.push\(submittedBeforeGroup\(submittedToUtcExclusive\(filters\.to, filters\.toTime\)\)\)/)
+  assert.doesNotMatch(ALL, /created_at/)
   assert.match(ALL, /if \(orFilter\) query = query\.or\(orFilter\)/)
   // Newest or oldest first, by date, time and Request ID together.
   assert.match(ALL, /const ascending = filters\.sort === 'oldest'/)
@@ -183,13 +190,18 @@ test('All Requests: filtered, counted, sorted and paged in the database, 10 per 
   // One page with an exact total; badges get their recorded approvals.
   assert.match(ALL, /await fetchPage\(build, filters\.page, ALL_REQUESTS_PAGE_SIZE\)/)
   assert.match(ALL, /rows: await withRecordedApprovals\(/)
-  // Read only: no writes, no RPCs, no backend calls.
-  assert.doesNotMatch(ALL, /\.(insert|update|upsert|delete|rpc)\(|fetch\(|api\//)
+  // Read only: no writes, no backend calls; the only RPC is the staff-only
+  // read of saved priority levels.
+  assert.doesNotMatch(ALL, /\.(insert|update|upsert|delete)\(|fetch\(|api\//)
+  assert.deepEqual([...ALL.matchAll(/\.rpc\('([a-z_]+)'/g)].map((m) => m[1]), ['get_raise_capacity_priorities'])
 })
 
-test('the recorded approvals for the filter are read once, only when needed, and a failure is an error', () => {
-  assert.match(ALL, /\.from\('Decision'\)\s+\.select\('Request_ID, Decision_Type, Request\(Request_Type, Current_Status\)'\)\s+\.in\('Decision_Type', Object\.values\(APPROVAL_DECISION_TYPES\)\)\s+if \(error\) throw error/)
-  assert.match(ALL, /const approvedIds = needsApprovalIds\(plan\) \? await fetchApprovedRequestIds\(\) : \[\]/)
+test('the recorded approvals for the filter are read completely, only when needed, and a failure is an error', () => {
+  assert.match(ALL, /\.from\('Decision'\)\s+\.select\('Request_ID, Decision_Type, Request\(Request_Type, Current_Status\)', \{ count: 'exact' \}\)\s+\.in\('Decision_Type', Object\.values\(APPROVAL_DECISION_TYPES\)\)\s+\.order\('Decision_ID'\)\s+\.range\(from, to\)/)
+  assert.match(ALL, /needsApprovalIds\(plan\) \? fetchApprovedRequestIds\(\) : Promise\.resolve\(\[\] as string\[\]\)/)
+  // Paged until the exact count is reached; an incomplete read is an error.
+  assert.match(ALL, /while \(total === null \|\| rows\.length < total\)/)
+  assert.match(ALL, /if \(batch\.length === 0 && rows\.length < total\) \{\s+throw new AllRequestsFilterError/)
 })
 
 // -- The page -------------------------------------------------------------------------
@@ -202,16 +214,21 @@ test('route: /admin/requests is admin-only, separate from the per-type lists', (
 test('page: filters live in the URL; changes go back to page 1; Clear filters empties the URL', () => {
   assert.match(PAGE, /const \[params, setParams\] = useSearchParams\(\)/)
   assert.match(PAGE, /const filters = parseAllRequestsParams\(params\)/)
-  assert.match(PAGE, /toAllRequestsParams\(\{ \.\.\.parseAllRequestsParams\(prev\), page: 1, \.\.\.patch \}\)/)
+  assert.match(PAGE, /toAllRequestsParams\(applyFilterPatch\(parseAllRequestsParams\(prev\), patch\)\)/)
   assert.match(PAGE, /onPageChange=\{\(page\) => apply\(\{ page \}\)\}/)
   assert.match(PAGE, /setParams\(new URLSearchParams\(\), \{ replace: true \}\)/)
-  assert.match(PAGE, />\s+Clear filters\s+</)
-  for (const id of ['aar-q', 'aar-type', 'aar-status', 'aar-from', 'aar-to', 'aar-sort']) {
-    assert.match(PAGE, new RegExp(`htmlFor="${id}"`), id)
+  // Clear all sits with the active filter chips (no separate toolbar button).
+  assert.match(PAGE, /onClick=\{clearFilters\}>\s+Clear all\s+</)
+  assert.doesNotMatch(PAGE, /Clear filters/)
+  for (const id of ['aar-q', 'aar-type', 'aar-status', 'aar-from', 'aar-to', 'aar-sort', 'aar-term', 'aar-from-time', 'aar-to-time']) {
+    assert.match(PAGE, new RegExp(`(htmlFor|id)="${id}"`), id)
   }
   assert.match(PAGE, /<option value="newest">Newest first<\/option>\s+<option value="oldest">Oldest first<\/option>/)
-  // An impossible date range is reported and not queried.
+  // An impossible date / time window is reported and not queried.
+  assert.match(PAGE, /const rangeError = dateRangeError\(filters\.from, filters\.to, filters\.fromTime, filters\.toTime\)/)
   assert.match(PAGE, /useAllRequests\(filters, rangeError === null\)/)
+  // The URL is kept in step with the controls (invalid or dropped values removed).
+  assert.match(PAGE, /const canonical = canonicalAllRequestsParams\(params\)\s+if \(canonical\.toString\(\) !== params\.toString\(\)\) setParams\(canonical, \{ replace: true \}\)/)
 })
 
 test('page: the columns, read-only priorities and review links that return to this list', () => {

@@ -1,15 +1,30 @@
-/* All Requests (/admin/requests): search and filter bar. Table, pager, states
-   and the search box come from AdminDashboard.css and Requests.css. */
+/* All Requests (/admin/requests): compact toolbar, Raise Capacity filters,
+   active filter chips and the advanced filters drawer. Table, pager, states
+   and the search box come from AdminDashboard.css and Requests.css; the
+   course dropdown from CourseCombobox.css and RaiseCapacityForm.css. */
 
-.aar-tools {
+/* Less space above the table than the other admin pages. */
+.adm-page.aar-page {
+  gap: 14px;
+}
+
+.aar-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Toolbar: search (widest), three selects, More filters. */
+
+.aar-toolbar {
   display: flex;
   flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 12px 14px;
+  align-items: center;
+  gap: 10px;
 }
 
 .adm-listsearch.aar-search {
-  flex: 1 1 260px;
+  flex: 2 1 300px;
   min-height: 40px;
   box-sizing: border-box;
 }
@@ -20,7 +35,13 @@
   gap: 6px;
 }
 
-.aar-field label {
+.aar-field--compact {
+  flex: 0 1 180px;
+  min-width: 140px;
+}
+
+.aar-field label,
+.aar-group legend {
   font-size: 13px;
   font-weight: 600;
   color: var(--proto-heading);
@@ -40,20 +61,235 @@
   font-size: 14px;
 }
 
+.aar-field--compact select {
+  width: 100%;
+}
+
 .aar-field select:focus-visible,
 .aar-field input:focus-visible {
   outline: 2px solid var(--proto-green);
   outline-offset: 2px;
 }
 
-.req-button.aar-clear {
-  min-height: 40px;
-  margin-top: 0;
+.aar-field select:disabled,
+.aar-field input:disabled {
+  background: #f3f5f2;
+  color: #8a948e;
+  cursor: not-allowed;
 }
 
-.req-button.aar-clear:disabled {
-  opacity: 0.55;
-  cursor: default;
+.aar-field input[aria-invalid='true'] {
+  border-color: #a3261f;
+}
+
+.aar-field--time input {
+  width: 6.5em;
+  font-variant-numeric: tabular-nums;
+}
+
+.aar-help {
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--proto-muted);
+}
+
+.aar-help--error {
+  color: #a3261f;
+}
+
+.aar-morebtn {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid #8e9a92;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #17211c;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.aar-morebtn:hover {
+  border-color: var(--proto-green);
+  color: var(--proto-green);
+}
+
+.aar-morebtn:focus-visible {
+  outline: 2px solid var(--proto-green);
+  outline-offset: 2px;
+}
+
+.aar-morebtn svg {
+  width: 17px;
+  height: 17px;
+}
+
+.aar-morebtn__count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--proto-green);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Text-style action (Clear course, Clear all, Try again). */
+.aar-link {
+  align-self: flex-start;
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: var(--proto-green);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.aar-link:hover {
+  text-decoration: underline;
+}
+
+.aar-link:focus-visible {
+  outline: 2px solid var(--proto-green);
+  outline-offset: 2px;
+}
+
+/* Raise Capacity filters: compact, left-aligned controls (Priority ~180px,
+   Course ~320px, Section ~180px) with the same label and input sizes. */
+
+.aar-rc {
+  padding: 8px 12px 10px;
+  border: 1px solid #dfe9e2;
+  border-radius: 8px;
+  background: #f7faf8;
+}
+
+.student .aar-rc__title {
+  margin: 0 0 6px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--proto-heading);
+}
+
+.aar-rc__fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 8px 12px;
+}
+
+.aar-rc__fields > .aar-field {
+  flex: 0 1 180px;
+  min-width: 0;
+}
+
+.aar-rc__fields .aar-field select {
+  width: 100%;
+}
+
+.aar-course {
+  display: flex;
+  flex: 0 1 320px;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.aar-course .rc-field {
+  gap: 6px;
+  margin: 0;
+}
+
+/* The shared course dropdown, sized like the selects next to it. */
+.aar-course .rc-field__label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.aar-course .cec-combo__input.rc-field__input {
+  min-height: 40px;
+  padding: 8px 44px 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.aar-course .cec-combo__toggle {
+  width: 30px;
+  height: 30px;
+}
+
+/* Wider than the field when needed, so course names stay readable. */
+.aar-course .cec-combo__panel {
+  right: auto;
+  width: max(100%, 380px);
+  max-width: calc(100vw - 32px);
+}
+
+/* Active filter chips */
+
+.aar-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.aar-chips__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.aar-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 4px 11px;
+  border: 1px solid #cfe0d5;
+  border-radius: 999px;
+  background: #eef6f1;
+  color: #164634;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  cursor: pointer;
+}
+
+.aar-chip:hover {
+  border-color: var(--proto-green);
+}
+
+.aar-chip:focus-visible {
+  outline: 2px solid var(--proto-green);
+  outline-offset: 2px;
+}
+
+.aar-chip svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0.75;
+}
+
+.aar-link.aar-chips__clear {
+  align-self: center;
 }
 
 .aar-error {
@@ -63,18 +299,232 @@
   color: #a3261f;
 }
 
+/* Advanced filters drawer (overlays the page; above the header). */
+
+.aar-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+}
+
+.aar-drawer__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgb(17 22 21 / 0.38);
+  animation: aar-fade-in 0.18s ease-out;
+}
+
+.aar-drawer__panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  width: min(400px, 100%);
+  box-sizing: border-box;
+  background: #ffffff;
+  box-shadow: -12px 0 32px rgb(17 22 21 / 0.18);
+  font-family: var(--proto-font);
+  animation: aar-slide-in 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.aar-drawer__panel:focus {
+  outline: none;
+}
+
+.aar-drawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e2e6e0;
+}
+
+.student .aar-drawer__title {
+  margin: 0;
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--proto-heading);
+}
+
+.aar-drawer__close {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: #3c4642;
+  cursor: pointer;
+}
+
+.aar-drawer__close:hover {
+  background: #f0f2ef;
+}
+
+.aar-drawer__close:focus-visible {
+  outline: 2px solid var(--proto-green);
+  outline-offset: 2px;
+}
+
+.aar-drawer__close svg {
+  width: 20px;
+  height: 20px;
+}
+
+.aar-drawer__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 22px;
+  overflow-y: auto;
+  padding: 18px 20px;
+}
+
+.aar-drawer__body .aar-field--term select {
+  width: 100%;
+}
+
+.aar-drawer__section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.student .aar-drawer__subtitle {
+  margin: 0;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--proto-heading);
+}
+
+.aar-drawer__note {
+  margin: -6px 0 0;
+  font-size: 12.5px;
+  color: var(--proto-muted);
+}
+
+/* Each date and time pair grouped. */
+.aar-group {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 8px 10px;
+  margin: 0;
+  padding: 10px 12px 12px;
+  border: 1px solid #e2e6e0;
+  border-radius: 8px;
+  min-width: 0;
+}
+
+.aar-group legend {
+  padding: 0 4px;
+}
+
+.aar-group .aar-field input[type='date'] {
+  width: 100%;
+}
+
+.aar-drawer__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid #e2e6e0;
+  background: #fafbf9;
+}
+
+.req-button.aar-drawer__reset {
+  margin-top: 0;
+}
+
+.req-button.aar-drawer__reset:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.aar-drawer__done {
+  min-height: 40px;
+  padding: 8px 22px;
+  border: 1px solid var(--proto-green);
+  border-radius: 6px;
+  background: var(--proto-green);
+  color: #ffffff;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.aar-drawer__done:focus-visible {
+  outline: 2px solid var(--proto-green);
+  outline-offset: 2px;
+}
+
+@keyframes aar-slide-in {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes aar-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 @media (max-width: 640px) {
-  .aar-field {
-    flex: 1 1 calc(50% - 7px);
+  .aar-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .adm-listsearch.aar-search {
+    grid-column: 1 / -1;
+  }
+
+  .aar-field--compact {
     min-width: 0;
   }
 
-  .aar-field select,
-  .aar-field input {
+  .aar-morebtn {
+    justify-content: center;
+  }
+
+  /* Stack the Raise Capacity controls at full width. */
+  .aar-rc__fields > .aar-field,
+  .aar-course {
+    flex: 1 1 100%;
+  }
+
+  .aar-drawer__panel {
     width: 100%;
   }
 
-  .req-button.aar-clear {
-    flex: 1 1 100%;
+  .aar-drawer__footer {
+    flex-wrap: wrap;
+  }
+
+  .aar-drawer__footer > * {
+    flex: 1 1 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aar-drawer__panel,
+  .aar-drawer__backdrop {
+    animation: none;
   }
 }

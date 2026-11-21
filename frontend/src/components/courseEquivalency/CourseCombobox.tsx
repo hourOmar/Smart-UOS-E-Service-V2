@@ -19,6 +19,8 @@ interface CourseComboboxProps {
   /** Shown once the student has tried to submit. */
   error: string | null
   disabled: boolean
+  /** Marks the field as required (default); false for an optional filter. */
+  required?: boolean
 }
 
 // A compact, searchable single-choice dropdown (ARIA combobox + listbox). The
@@ -37,6 +39,7 @@ function CourseCombobox({
   onSelect,
   error,
   disabled,
+  required = true,
 }: CourseComboboxProps) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -135,8 +138,14 @@ function CourseCombobox({
   return (
     <div className="rc-field cec-combo" ref={rootRef} onBlur={handleBlur}>
       <label htmlFor={`${id}-input`} className="rc-field__label">
-        {label} <span className="rc-field__required" aria-hidden="true">*</span>
-        <span className="student-visually-hidden">(required)</span>
+        {label}
+        {required && (
+          <>
+            {' '}
+            <span className="rc-field__required" aria-hidden="true">*</span>
+            <span className="student-visually-hidden">(required)</span>
+          </>
+        )}
       </label>
       {hint && (
         <span id={`${id}-hint`} className="csf-picker__hint">

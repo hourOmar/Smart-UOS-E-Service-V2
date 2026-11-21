@@ -3,19 +3,37 @@ import { academicRequestTypes } from '../data/academicRequests'
 import { APPROVAL_DECISION_TYPES, needsApprovalRecord, recordedApprovalIds } from '../utils/statusLabels'
 import {
   ALL_REQUESTS_PAGE_SIZE,
+  AllRequestsFilterError,
+  DERIVED_TERM_TYPES,
+  IE_TERM_ALIAS,
+  INCOMPLETE_EXAM,
+  MAX_FILTER_IDS,
+  RAISE_CAPACITY,
+  RC_TERM_ALIAS,
   RECORDED_APPROVAL_TYPES,
   approvedGroup,
   approvedRequestIds,
   combineOrGroups,
   inList,
   needsApprovalIds,
+  priorityIdFilter,
   quoted,
+  requestedCourseIds,
   searchTerm,
   statusPlan,
   idSearchGroup,
+  submittedBeforeGroup,
+  submittedFromGroup,
+  submittedFromUtc,
+  submittedToUtcExclusive,
+  termFromSubmissionDate,
+  termPlan,
   type AllRequestsFilters,
   type ApprovalDecisionRow,
+  type PriorityLevelRow,
+  type RaiseCapacityTarget,
 } from '../utils/adminAllRequests'
+import type { CourseOption } from '../utils/courseSubstitutionSubmission'
 
 // Read-only queries for the admin home. They run with the signed-in staff
 // member's session; the database policies let linked staff read every
@@ -213,42 +231,135 @@ export interface AllRequestsPage {
   page: number
 }
 
+// Reads EVERY row of a query, page by page, in a stable order. The database
+// caps each response (db-max-rows, 1,000 by default, also for functions), so
+// the exact count decides when the read is complete; a read that cannot be
+// completed is an error, never a silently shortened list.
+const READ_BATCH = 1000
+const MAX_READ_ROWS = 50_000
+type CountedQuery = (from: number, to: number) => PromiseLike<{ data: unknown; error: unknown; count: number | null }>
+
+async function readEveryRow<T>(query: CountedQuery, what: string): Promise<T[]> {
+  const rows: T[] = []
+  let total: number | null = null
+  while (total === null || rows.length < total) {
+    const { data, error, count } = await query(rows.length, rows.length + READ_BATCH - 1)
+    if (error) throw error
+    if (count == null) throw new AllRequestsFilterError(`The ${what} could not be counted, so the filter was not applied.`)
+    if (count > MAX_READ_ROWS) throw new AllRequestsFilterError(`There are too many ${what} to filter by here.`)
+    total = count
+    const batch = (data ?? []) as T[]
+    if (batch.length === 0 && rows.length < total) {
+      throw new AllRequestsFilterError(`The ${what} could not be read completely, so the filter was not applied.`)
+    }
+    rows.push(...batch)
+  }
+  return rows
+}
+
 // The Completed Incomplete Exam / Course Substitution / Course Equivalency
-// requests with a matching approval decision (one read of the approval
-// decisions with their request). Unlike the badges, a failure is an error:
+// requests with a matching approval decision (the approval decisions with
+// their request, read completely). Unlike the badges, a failure is an error:
 // the Approved / Completed filters must never guess.
 async function fetchApprovedRequestIds(): Promise<string[]> {
-  const { data, error } = await supabase
-    .from('Decision')
-    .select('Request_ID, Decision_Type, Request(Request_Type, Current_Status)')
-    .in('Decision_Type', Object.values(APPROVAL_DECISION_TYPES))
-  if (error) throw error
-  return approvedRequestIds((data ?? []) as unknown as ApprovalDecisionRow[])
+  const rows = await readEveryRow<ApprovalDecisionRow>(
+    (from, to) =>
+      supabase
+        .from('Decision')
+        .select('Request_ID, Decision_Type, Request(Request_Type, Current_Status)', { count: 'exact' })
+        .in('Decision_Type', Object.values(APPROVAL_DECISION_TYPES))
+        .order('Decision_ID')
+        .range(from, to),
+    'approval decisions',
+  )
+  return approvedRequestIds(rows)
+}
+
+// Every Raise Capacity request with its saved priority level (null when not
+// assessed), through the staff-only get_raise_capacity_priorities(NULL):
+// staff cannot read the priority columns directly. Only the level is
+// selected. A failure is reported, never treated as "no priority".
+async function fetchPriorityLevels(): Promise<PriorityLevelRow[]> {
+  try {
+    return await readEveryRow<PriorityLevelRow>(
+      (from, to) =>
+        supabase
+          .rpc('get_raise_capacity_priorities', { p_request_ids: null }, { count: 'exact' })
+          .select('Request_ID, Priority_Level')
+          .order('Request_ID')
+          .range(from, to),
+      'Raise Capacity priorities',
+    )
+  } catch (error) {
+    if (error instanceof AllRequestsFilterError) throw error
+    throw new AllRequestsFilterError(
+      'Raise Capacity priorities could not be loaded, so the Priority filter was not applied. Try again.',
+    )
+  }
 }
 
 export async function fetchAllRequests(filters: AllRequestsFilters): Promise<AllRequestsPage> {
   const plan = statusPlan(filters.status)
   // Search by Request ID or Student ID only (no student-name lookup).
   const term = searchTerm(filters.search)
-  const approvedIds = needsApprovalIds(plan) ? await fetchApprovedRequestIds() : []
+  const isRc = filters.type === RAISE_CAPACITY
+  const [approvedIds, priorityRows] = await Promise.all([
+    needsApprovalIds(plan) ? fetchApprovedRequestIds() : Promise.resolve([] as string[]),
+    isRc && filters.priority ? fetchPriorityLevels() : Promise.resolve(null),
+  ])
+
+  // Priority: the matching requests (or, for Not Assessed, every Raise
+  // Capacity request except the assessed ones), applied before paging.
+  const priority = priorityRows && filters.priority ? priorityIdFilter(filters.priority, priorityRows) : null
+  if (priority?.mode === 'in' && priority.ids.length === 0) return { rows: [], total: 0, page: 1 }
+  if (priority && priority.ids.length > MAX_FILTER_IDS) {
+    throw new AllRequestsFilterError(
+      'Too many Raise Capacity requests share this priority to filter at once. Narrow the list with Course, Section, Term or dates first.',
+    )
+  }
+
+  // Academic term: stored (Raise Capacity / Incomplete Exam), derived from the
+  // submission date (the other types), or both when all types are listed.
+  const termFilter = filters.term !== null ? termPlan(filters.term, filters.type) : null
+  const rcInner = isRc && (filters.course !== null || termFilter?.kind === 'stored')
+  const ieInner = filters.type === INCOMPLETE_EXAM && termFilter?.kind === 'stored'
+  const embeds = [
+    termFilter?.kind === 'mixed' ? `${RC_TERM_ALIAS}:Raise_Capacity(),${IE_TERM_ALIAS}:Incomplete_Exam()` : null,
+    rcInner ? 'rc:Raise_Capacity!inner(Course_ID)' : null,
+    ieInner ? 'ie:Incomplete_Exam!inner(Request_ID)' : null,
+  ].filter(Boolean)
+  const select = [REQUEST_WITH_STUDENT, ...embeds].join(', ')
 
   const groups: string[] = []
   if (term) groups.push(idSearchGroup(term))
   if (plan.kind === 'approved') groups.push(approvedGroup(approvedIds))
+  // Submission window: UAE boundaries converted to the stored UTC date + time.
+  if (filters.from) groups.push(submittedFromGroup(submittedFromUtc(filters.from, filters.fromTime)))
+  if (filters.to) groups.push(submittedBeforeGroup(submittedToUtcExclusive(filters.to, filters.toTime)))
+  if (termFilter?.kind === 'mixed') groups.push(termFilter.group)
   const orFilter = combineOrGroups(groups)
   const excluded = plan.kind === 'unconfirmed' ? inList(approvedIds) : null
   const ascending = filters.sort === 'oldest'
 
   const build = () => {
-    let query = supabase.from('Request').select(REQUEST_WITH_STUDENT, { count: 'exact' })
+    let query = supabase.from('Request').select(select, { count: 'exact' })
     if (filters.type) query = query.eq('Request_Type', filters.type)
     if (plan.kind !== 'any') query = query.eq('Current_Status', plan.stored)
     if (plan.kind === 'unconfirmed') {
       query = query.in('Request_Type', [...RECORDED_APPROVAL_TYPES])
       if (excluded) query = query.not('Request_ID', 'in', excluded)
     }
-    if (filters.from) query = query.gte('Request_Date', filters.from)
-    if (filters.to) query = query.lte('Request_Date', filters.to)
+    if (termFilter?.kind === 'mixed') {
+      query = query.eq(`${RC_TERM_ALIAS}.Term`, filters.term).eq(`${IE_TERM_ALIAS}.Term`, filters.term)
+    }
+    if (termFilter?.kind === 'stored') query = query.eq(`${isRc ? 'rc' : 'ie'}.Term`, filters.term)
+    if (termFilter?.kind === 'derived') {
+      query = query.gte('Request_Date', termFilter.start).lte('Request_Date', termFilter.end)
+    }
+    if (isRc && filters.course) query = query.eq('rc.Course_ID', filters.course)
+    if (isRc && filters.course && filters.section) query = query.eq('rc.Section_ID', filters.section)
+    if (priority?.mode === 'in') query = query.in('Request_ID', priority.ids)
+    if (priority?.mode === 'not-in' && priority.ids.length) query = query.not('Request_ID', 'in', inList(priority.ids))
     if (orFilter) query = query.or(orFilter)
     return query
       .order('Request_Date', { ascending })
@@ -261,6 +372,67 @@ export async function fetchAllRequests(filters: AllRequestsFilters): Promise<All
     rows: await withRecordedApprovals((result.data as RequestWithStudent[]).map(toAdminRow)),
     total: result.total,
     page: result.page,
+  }
+}
+
+export interface AllRequestsFilterOptions {
+  /** The term codes present in the data, per request type (stored terms for
+   *  Raise Capacity / Incomplete Exam, submission semesters for the others). */
+  termsByType: Record<string, number[]>
+  /** Course, section and term of every Raise Capacity request. */
+  raiseCapacityTargets: RaiseCapacityTarget[]
+  /** The courses of Raise Capacity requests, with their names. */
+  courses: CourseOption[]
+}
+
+const integer = (value: unknown) => (Number.isInteger(Number(value)) && value !== null && value !== '' ? Number(value) : null)
+
+// The values the term, course and section filters offer, read completely from
+// the requests themselves (never the whole catalog).
+export async function fetchAllRequestsFilterOptions(): Promise<AllRequestsFilterOptions> {
+  const [rcRows, ieRows, derivedRows] = await Promise.all([
+    readEveryRow<RaiseCapacityTarget>(
+      (from, to) =>
+        supabase.from('Raise_Capacity').select('Course_ID, Section_ID, Term', { count: 'exact' }).order('Request_ID').range(from, to),
+      'Raise Capacity requests',
+    ),
+    readEveryRow<{ Term: unknown }>(
+      (from, to) => supabase.from('Incomplete_Exam').select('Term', { count: 'exact' }).order('Request_ID').range(from, to),
+      'Incomplete Exam requests',
+    ),
+    readEveryRow<{ Request_Type: unknown; Request_Date: unknown }>(
+      (from, to) =>
+        supabase
+          .from('Request')
+          .select('Request_Type, Request_Date', { count: 'exact' })
+          .in('Request_Type', [...DERIVED_TERM_TYPES])
+          .order('Request_ID')
+          .range(from, to),
+      'requests',
+    ),
+  ])
+
+  const termsByType: Record<string, number[]> = {
+    [RAISE_CAPACITY]: rcRows.map((r) => integer(r.Term)).filter((t): t is number => t !== null),
+    [INCOMPLETE_EXAM]: ieRows.map((r) => integer(r.Term)).filter((t): t is number => t !== null),
+  }
+  for (const type of DERIVED_TERM_TYPES) termsByType[type] = []
+  for (const row of derivedRows) {
+    const date = str(row.Request_Date)
+    if (/^\d{4}-\d{2}-\d{2}/.test(date)) termsByType[str(row.Request_Type)]?.push(termFromSubmissionDate(date))
+  }
+
+  const ids = requestedCourseIds(rcRows)
+  const names = new Map<string, string>()
+  for (let i = 0; i < ids.length; i += 100) {
+    const { data, error } = await supabase.from('Course').select('Course_ID, Course_Name').in('Course_ID', ids.slice(i, i + 100))
+    if (error) throw error
+    for (const c of (data ?? []) as { Course_ID: unknown; Course_Name: unknown }[]) names.set(str(c.Course_ID), str(c.Course_Name))
+  }
+  return {
+    termsByType,
+    raiseCapacityTargets: rcRows,
+    courses: ids.map((id) => ({ id, name: names.get(id) || null, creditHours: null })),
   }
 }
 
