@@ -1,0 +1,246 @@
+/* Per-type request lists: the Filters button, its compact panel and the
+   active filter chips (components/admin/TypeFilterPanel.tsx and
+   pages/AdminTypeRequests.tsx). */
+
+.tfp-toggle {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid #dde2de;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #17211c;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tfp-toggle:hover,
+.tfp-toggle[aria-expanded='true'] {
+  border-color: var(--proto-green);
+  color: var(--proto-green);
+}
+
+.tfp-toggle:focus-visible {
+  outline: 2px solid var(--proto-green);
+  outline-offset: 2px;
+}
+
+.tfp-toggle svg {
+  width: 17px;
+  height: 17px;
+}
+
+.tfp-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--proto-green);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.tfp-search-row {
+  display: flex;
+  flex: 0 1 440px;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.tfp-search-row .adm-listsearch {
+  flex: 1 1 auto;
+  min-height: 40px;
+  box-sizing: border-box;
+}
+
+.tfp {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 10px 12px 12px;
+  border: 1px solid #dfe9e2;
+  border-radius: 8px;
+  background: #f7faf8;
+}
+
+.tfp-fields {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px 12px;
+}
+
+.tfp-field {
+  display: flex;
+  flex: 0 1 180px;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.tfp-field label,
+.tfp-combo .rc-field__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--proto-heading);
+}
+
+.tfp-field select {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #8e9a92;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #17211c;
+  font: inherit;
+  font-size: 14px;
+}
+
+.tfp-field select:focus-visible {
+  outline: 2px solid var(--proto-green);
+  outline-offset: 2px;
+}
+
+.tfp-field select:disabled {
+  background: #f3f5f2;
+  color: #8a948e;
+  cursor: not-allowed;
+}
+
+.tfp-combo {
+  display: flex;
+  flex: 0 1 320px;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.tfp-combo .rc-field {
+  gap: 6px;
+  margin: 0;
+}
+
+.tfp-combo .cec-combo__input.rc-field__input {
+  min-height: 40px;
+  padding: 8px 44px 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.tfp-combo .cec-combo__toggle {
+  width: 30px;
+  height: 30px;
+}
+
+.tfp-combo .cec-combo__panel {
+  right: auto;
+  width: max(100%, 380px);
+  max-width: calc(100vw - 32px);
+}
+
+.tfp-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.tfp-clear,
+.tfp-link {
+  padding: 2px 0;
+  border: 0;
+  background: none;
+  color: var(--proto-green);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tfp-link {
+  align-self: flex-start;
+}
+
+.tfp-clear:hover:not(:disabled),
+.tfp-link:hover {
+  text-decoration: underline;
+}
+
+.tfp-clear:disabled {
+  color: var(--proto-muted);
+  cursor: default;
+  opacity: 0.6;
+}
+
+.tfp-clear:focus-visible,
+.tfp-link:focus-visible {
+  outline: 2px solid var(--proto-green);
+  outline-offset: 2px;
+}
+
+.tfp-error {
+  margin: 0;
+  font-size: 13.5px;
+  color: #a3261f;
+}
+
+.tfp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tfp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 4px 11px;
+  border: 1px solid #cfe0d5;
+  border-radius: 999px;
+  background: #eef6f1;
+  color: #164634;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  cursor: pointer;
+}
+
+.tfp-chip:hover {
+  border-color: var(--proto-green);
+}
+
+.tfp-chip:focus-visible {
+  outline: 2px solid var(--proto-green);
+  outline-offset: 2px;
+}
+
+.tfp-chip svg {
+  width: 14px;
+  height: 14px;
+  opacity: 0.75;
+}
+
+@media (max-width: 640px) {
+  .tfp-search-row {
+    flex: 1 1 100%;
+  }
+
+  .tfp-field,
+  .tfp-combo {
+    flex: 1 1 100%;
+  }
+}

@@ -34,7 +34,7 @@ import {
 } from '../utils/adminAllRequests'
 import StudentLayout from '../components/student/StudentLayout'
 import RequestStatusBadge from '../components/requests/RequestStatusBadge'
-import Pager from '../components/admin/Pager'
+import WindowedPager from '../components/admin/WindowedPager'
 import ReviewAction from '../components/admin/ReviewAction'
 import PriorityCell, { PriorityNotice } from '../components/admin/PriorityCell'
 import { AllRequestsBreadcrumb } from '../components/admin/ReviewBreadcrumb'
@@ -196,10 +196,7 @@ function AdminAllRequests() {
       <div className="adm-page aar-page">
         <AllRequestsBreadcrumb />
 
-        <div className="adm-cat__heading">
-          <h1 className="adm-cat__title">All Requests</h1>
-          <p className="adm-cat__summary">Every request of every type and status, newest first by default.</p>
-        </div>
+        <h1 className="adm-cat__title">All Requests</h1>
 
         <div className="aar-filters">
           <div className="aar-toolbar">
@@ -487,7 +484,7 @@ function AdminAllRequests() {
               </table>
             </div>
 
-            <Pager
+            <WindowedPager
               label="All requests pages"
               rangeText={`Showing ${first}–${last} of ${list.total}${filtered ? ' matching' : ''} ${
                 list.total === 1 ? 'request' : 'requests'
@@ -527,7 +524,6 @@ function AdminAllRequests() {
               id="aar-term"
               data-autofocus
               value={filters.term ?? ''}
-              aria-describedby="aar-term-help"
               onChange={(event) => apply({ term: validTerm(event.target.value) })}
             >
               <option value="">All terms</option>
@@ -537,9 +533,6 @@ function AdminAllRequests() {
                 </option>
               ))}
             </select>
-            <span id="aar-term-help" className="aar-help">
-              Raise Capacity and Incomplete Exam: the requested term. Other types: the semester of submission.
-            </span>
             {filterOptions.status === 'error' && (
               <button type="button" className="aar-link" onClick={filterOptions.retry}>
                 Term options couldn’t load. Try again
@@ -549,11 +542,8 @@ function AdminAllRequests() {
 
           <div className="aar-drawer__section">
             <h3 className="aar-drawer__subtitle">Submission date and time</h3>
-            <p className="aar-drawer__note" id="aar-time-note">
-              All submission times are UAE time (UTC+4).
-            </p>
 
-            <fieldset className="aar-group" aria-describedby="aar-time-note">
+            <fieldset className="aar-group">
               <legend>From</legend>
               <div className="aar-field">
                 <label htmlFor="aar-from">Date</label>
@@ -574,7 +564,7 @@ function AdminAllRequests() {
               />
             </fieldset>
 
-            <fieldset className="aar-group" aria-describedby="aar-time-note">
+            <fieldset className="aar-group">
               <legend>To</legend>
               <div className="aar-field">
                 <label htmlFor="aar-to">Date</label>

@@ -304,11 +304,11 @@ test('dashboard: exactly the 10 latest In Progress requests, no type filter, no 
 
 test('the per-type lists keep their own search, status tabs, pages and back navigation', () => {
   const TYPE = read('../src/pages/AdminTypeRequests.tsx')
-  assert.match(TYPE, /const list = useTypeRequests\(type, statusTab, search, page\)/)
+  assert.match(TYPE, /const list = useTypeRequests\(type, statusTab, search, page, extra\)/)
   assert.match(TYPE, /\.\.\.REQUEST_STATUSES\.map\(\(status\) => \(\{/)
   assert.match(TYPE, /<ReviewAction requestId=\{row\.id\} requestType=\{type\} origin="type-list" \/>/)
   assert.match(SERVICE, /export async function fetchTypeRequests\(/)
-  assert.match(SERVICE, /const filter = await searchFilter\(type, search\)/)
+  assert.match(SERVICE, /const \[filter, priorityRows\] = await Promise\.all\(\[\s+searchFilter\(type, search\),/)
   // The dashboard's type cards still open them.
   assert.match(read('../src/components/admin/AdminRequestTypes.tsx'), /adminTypePath\(/)
 })

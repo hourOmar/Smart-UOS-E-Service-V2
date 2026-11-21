@@ -299,6 +299,60 @@
   color: #a3261f;
 }
 
+/* Pager: round buttons, outlined pages, a dark filled active page, and
+   at most three numbers between the arrows. */
+
+.aar-pager__buttons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.aar-pager__arrow,
+.aar-pager__page {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid #c9d0cb;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #1d2a33;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+
+.aar-pager__arrow svg {
+  width: 16px;
+  height: 16px;
+}
+
+.aar-pager__arrow:hover:not(:disabled),
+.aar-pager__page:hover:not([aria-current='page']) {
+  border-color: #1d2a33;
+}
+
+.aar-pager__page[aria-current='page'] {
+  border-color: #1d2a33;
+  background: #1d2a33;
+  color: #ffffff;
+}
+
+.aar-pager__arrow:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.aar-pager__arrow:focus-visible,
+.aar-pager__page:focus-visible {
+  outline: 2px solid var(--proto-green);
+  outline-offset: 2px;
+}
+
 /* Advanced filters drawer (overlays the page; above the header). */
 
 .aar-drawer {
@@ -401,12 +455,6 @@
   font-size: 14px;
   font-weight: 700;
   color: var(--proto-heading);
-}
-
-.aar-drawer__note {
-  margin: -6px 0 0;
-  font-size: 12.5px;
-  color: var(--proto-muted);
 }
 
 /* Each date and time pair grouped. */

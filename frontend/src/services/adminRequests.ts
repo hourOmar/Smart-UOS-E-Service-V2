@@ -34,6 +34,7 @@ import {
   type RaiseCapacityTarget,
 } from '../utils/adminAllRequests'
 import type { CourseOption } from '../utils/courseSubstitutionSubmission'
+import { EMPTY_TYPE_FILTERS, typeDetailConditions, type TypeFilters } from '../utils/adminTypeFilters'
 
 // Read-only queries for the admin home. They run with the signed-in staff
 // member's session; the database policies let linked staff read every
@@ -571,28 +572,55 @@ export interface TypeRequestsQuery {
   status: string | null
   search: string
   page: number
+  /** The type's additional filters (utils/adminTypeFilters.ts). */
+  filters?: TypeFilters
 }
 
 // One page of a type's requests, newest first, with an exact total for the
-// current status and search.
-export async function fetchTypeRequests({ type, status, search, page }: TypeRequestsQuery): Promise<{
+// current status, search and additional filters. The additional filters are
+// conditions on the type's own detail table through a filter-only inner
+// embed (flt), and the Raise Capacity priority a set of request IDs from the
+// staff-only priority function, all applied before paging.
+export async function fetchTypeRequests({
+  type,
+  status,
+  search,
+  page,
+  filters = EMPTY_TYPE_FILTERS,
+}: TypeRequestsQuery): Promise<{
   rows: TypeRequestRow[]
   total: number
   /** The page shown (lower than requested if that page no longer exists). */
   page: number
 }> {
   const details = TYPE_DETAILS[type]
-  const filter = await searchFilter(type, search)
+  const conditions = typeDetailConditions(type, filters)
+  const usePriority = type === RAISE_CAPACITY && filters.priority !== null
+  const [filter, priorityRows] = await Promise.all([
+    searchFilter(type, search),
+    usePriority ? fetchPriorityLevels() : Promise.resolve(null),
+  ])
+  const priority = priorityRows && filters.priority ? priorityIdFilter(filters.priority, priorityRows) : null
+  if (priority?.mode === 'in' && priority.ids.length === 0) return { rows: [], total: 0, page: 1 }
+  if (priority && priority.ids.length > MAX_FILTER_IDS) {
+    throw new AllRequestsFilterError(
+      'Too many requests share this priority to filter at once. Narrow the list with Course, Section or Term first.',
+    )
+  }
+  const filterEmbed = details && conditions.length ? `, flt:${details.table}!inner(Request_ID)` : ''
 
   const build = () => {
     let query = supabase
       .from('Request')
-      .select(`${REQUEST_WITH_STUDENT}${details ? `, ${details.table}(${details.columns})` : ''}`, {
+      .select(`${REQUEST_WITH_STUDENT}${details ? `, ${details.table}(${details.columns})` : ''}${filterEmbed}`, {
         count: 'exact',
       })
       .eq('Request_Type', type)
     if (status) query = query.eq('Current_Status', status)
     if (filter) query = query.or(filter)
+    if (filterEmbed) for (const c of conditions) query = query.eq(`flt.${c.column}`, c.value)
+    if (priority?.mode === 'in') query = query.in('Request_ID', priority.ids)
+    if (priority?.mode === 'not-in' && priority.ids.length) query = query.not('Request_ID', 'in', inList(priority.ids))
     return query
       .order('Request_Date', { ascending: false })
       .order('Submission_Time', { ascending: false })
@@ -634,6 +662,52 @@ export async function fetchTypeRequests({ type, status, search, page }: TypeRequ
     total: result.total,
     page: result.page,
   }
+}
+
+// ---------------------------------------------------------------------------
+// Options of the per-type additional filters, read completely from that
+// type's own requests (never the whole catalog).
+
+export interface TypeFilterOptions {
+  /** The requested courses (Raise Capacity / Incomplete Exam), with names. */
+  courses: CourseOption[]
+  /** Raise Capacity: course / section / term of every request (sections). */
+  raiseCapacityTargets: RaiseCapacityTarget[]
+  /** Raise Capacity / Incomplete Exam: the stored terms present. */
+  terms: number[]
+}
+
+async function courseOptions(ids: string[]): Promise<CourseOption[]> {
+  const unique = [...new Set(ids.filter(Boolean))].sort()
+  const names = new Map<string, string>()
+  for (let i = 0; i < unique.length; i += 100) {
+    const { data, error } = await supabase.from('Course').select('Course_ID, Course_Name').in('Course_ID', unique.slice(i, i + 100))
+    if (error) throw error
+    for (const c of (data ?? []) as { Course_ID: unknown; Course_Name: unknown }[]) names.set(str(c.Course_ID), str(c.Course_Name))
+  }
+  return unique.map((id) => ({ id, name: names.get(id) || null, creditHours: null }))
+}
+
+// Only Raise Capacity and Incomplete Exam have additional filters; the other
+// types read nothing.
+export async function fetchTypeFilterOptions(type: string): Promise<TypeFilterOptions> {
+  const empty: TypeFilterOptions = { courses: [], raiseCapacityTargets: [], terms: [] }
+  const details = TYPE_DETAILS[type]
+  if (!details || (type !== RAISE_CAPACITY && type !== INCOMPLETE_EXAM)) return empty
+  const read = <T,>(columns: string) =>
+    readEveryRow<T>(
+      (from, to) => supabase.from(details.table).select(columns, { count: 'exact' }).order('Request_ID').range(from, to),
+      `${type} requests`,
+    )
+  const terms = (rows: { Term: unknown }[]) =>
+    rows.map((r) => integer(r.Term)).filter((t): t is number => t !== null)
+
+  if (type === RAISE_CAPACITY) {
+    const rows = await read<RaiseCapacityTarget>('Course_ID, Section_ID, Term')
+    return { ...empty, courses: await courseOptions(rows.map((r) => str(r.Course_ID))), raiseCapacityTargets: rows, terms: terms(rows) }
+  }
+  const rows = await read<{ Course_ID: unknown; Term: unknown }>('Course_ID, Term')
+  return { ...empty, courses: await courseOptions(rows.map((r) => str(r.Course_ID))), terms: terms(rows) }
 }
 
 // ---------------------------------------------------------------------------

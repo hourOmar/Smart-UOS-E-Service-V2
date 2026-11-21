@@ -85,14 +85,14 @@ test('toolbar: search, type, status, sort and the More filters button with its a
   assert.doesNotMatch(PAGE, /Clear filters|aar-more__panel|aar-more__toggle/)
 })
 
-test('drawer: Advanced filters, term with its note, UAE time note, From / To pairs', () => {
+test('drawer: Advanced filters, term, Submission date and time with From / To pairs (no explanatory notes)', () => {
   assert.match(PAGE, /titleId="aar-drawer-title"\s+title="Advanced filters"/)
   const body = PAGE.slice(PAGE.indexOf('<FilterDrawer'))
   for (const id of ['aar-term', 'aar-from', 'aar-from-time', 'aar-to', 'aar-to-time']) assert.match(body, new RegExp(`id="${id}"`), id)
-  assert.match(body, /aria-describedby="aar-term-help"/)
-  assert.match(body, /All submission times are UAE time \(UTC\+4\)\./)
-  assert.match(body, /<fieldset className="aar-group" aria-describedby="aar-time-note">\s+<legend>From<\/legend>/)
-  assert.match(body, /<fieldset className="aar-group" aria-describedby="aar-time-note">\s+<legend>To<\/legend>/)
+  assert.match(body, /<h3 className="aar-drawer__subtitle">Submission date and time<\/h3>/)
+  assert.doesNotMatch(body, /UTC\+4|semester of submission|aar-term-help|aar-time-note/)
+  assert.match(body, /<fieldset className="aar-group">\s+<legend>From<\/legend>/)
+  assert.match(body, /<fieldset className="aar-group">\s+<legend>To<\/legend>/)
   // Times still disabled until their dates.
   assert.match(body, /disabled=\{!filters\.from\}/)
   assert.match(body, /disabled=\{!filters\.to\}/)

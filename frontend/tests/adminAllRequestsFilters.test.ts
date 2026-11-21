@@ -333,9 +333,9 @@ test('time fields: 24-hour HH:MM, disabled until their date, invalid input never
   assert.match(PAGE, /aria-invalid=\{invalid \|\| undefined\}/)
 })
 
-test('term help text and the Raise Capacity section (only for that type, section disabled until a course)', () => {
-  assert.match(PAGE, /Raise Capacity and Incomplete Exam: the requested term\. Other types: the semester of submission\./)
-  assert.match(PAGE, /aria-describedby="aar-term-help"/)
+test('the term dropdown (no help text) and the Raise Capacity section (only for that type, section disabled until a course)', () => {
+  assert.match(PAGE, /<label htmlFor="aar-term">Academic term<\/label>/)
+  assert.doesNotMatch(PAGE, /aar-term-help/)
   assert.match(PAGE, /\{isRc && \(\s+<section className="aar-rc" aria-labelledby="aar-rc-title">/)
   assert.match(PAGE, />\s+Raise Capacity filters\s+</)
   assert.match(PAGE, /<option value="">All priorities<\/option>/)

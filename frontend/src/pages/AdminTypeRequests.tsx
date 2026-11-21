@@ -16,7 +16,17 @@ import { ADMIN_HOME_PATH, ADMIN_MENU_ITEMS } from '../utils/adminPaths'
 import StudentLayout from '../components/student/StudentLayout'
 import RequestIcon from '../components/student/RequestIcon'
 import RequestStatusBadge from '../components/requests/RequestStatusBadge'
-import Pager from '../components/admin/Pager'
+import WindowedPager from '../components/admin/WindowedPager'
+import TypeFilterPanel from '../components/admin/TypeFilterPanel'
+import useTypeFilterOptions from '../hooks/useTypeFilterOptions'
+import {
+  EMPTY_TYPE_FILTERS,
+  patchTypeFilters,
+  typeFilterChips,
+  typeFilterCount,
+  typeHasFilters,
+  type TypeFilters,
+} from '../utils/adminTypeFilters'
 import ReviewAction from '../components/admin/ReviewAction'
 import PriorityCell, { PriorityNotice } from '../components/admin/PriorityCell'
 import { statusLabel } from '../utils/statusLabels'
@@ -77,9 +87,29 @@ function TypeRequestList({ requestType }: { requestType: (typeof academicRequest
   const [query, setQuery] = useState('')
   const [search, setSearch] = useState('')
   const [page, setPage] = useState(1)
+  // Additional filters (Raise Capacity and Incomplete Exam only; collapsed
+  // panel, kept while it is closed). The other types have none, and read no
+  // filter options.
+  const hasFilters = typeHasFilters(type)
+  const [extra, setExtra] = useState<TypeFilters>(EMPTY_TYPE_FILTERS)
+  const [panelOpen, setPanelOpen] = useState(false)
+  const filterOptions = useTypeFilterOptions(type)
+  const extraCount = typeFilterCount(type, extra)
+  const extraChips = typeFilterChips(type, extra)
+  const panelId = `adm-type-filters-${requestType.id}`
+
+  // Any change of the additional filters goes back to page 1.
+  const changeExtra = (patch: Partial<TypeFilters>) => {
+    setExtra((current) => patchTypeFilters(current, patch))
+    setPage(1)
+  }
+  const clearExtra = () => {
+    setExtra(EMPTY_TYPE_FILTERS)
+    setPage(1)
+  }
 
   const counts = useTypeStatusCounts(type)
-  const list = useTypeRequests(type, statusTab, search, page)
+  const list = useTypeRequests(type, statusTab, search, page, extra)
   // The Priority column exists only on the Raise Capacity list (staff-only backend).
   const showPriority = type === 'Raise Capacity'
   const priorities = useRaiseCapacityPriorities(
@@ -120,7 +150,7 @@ function TypeRequestList({ requestType }: { requestType: (typeof academicRequest
     })),
   ]
 
-  const filtered = statusTab !== null || search !== ''
+  const filtered = statusTab !== null || search !== '' || extraCount > 0
   // list.page can be lower than page if that page no longer exists.
   const pages = Math.max(1, Math.ceil(list.total / TYPE_PAGE_SIZE))
   const first = (list.page - 1) * TYPE_PAGE_SIZE + 1
@@ -165,6 +195,7 @@ function TypeRequestList({ requestType }: { requestType: (typeof academicRequest
           )}
         </div>
 
+        <div className="tfp-search-row">
         <form role="search" className="adm-listsearch" onSubmit={handleSearchSubmit}>
           <label htmlFor="adm-cat-q" className="student-visually-hidden">
             Search this list
@@ -189,7 +220,61 @@ function TypeRequestList({ requestType }: { requestType: (typeof academicRequest
             onChange={(event) => setQuery(event.target.value)}
           />
         </form>
+        {hasFilters && (
+        <button
+          type="button"
+          className="tfp-toggle"
+          aria-expanded={panelOpen}
+          aria-controls={panelId}
+          onClick={() => setPanelOpen((open) => !open)}
+        >
+          <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+            <path d="M3 5h14M6 10h8M8.5 15h3" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+          </svg>
+          Filters
+          {extraCount > 0 && (
+            <span className="tfp-count">
+              {extraCount}
+              <span className="student-visually-hidden"> active</span>
+            </span>
+          )}
+        </button>
+        )}
+        </div>
       </div>
+
+      {hasFilters && panelOpen && (
+        <TypeFilterPanel
+          id={panelId}
+          type={type}
+          filters={extra}
+          onChange={changeExtra}
+          onClear={clearExtra}
+          optionsStatus={filterOptions.status}
+          options={filterOptions.options}
+          onRetryOptions={filterOptions.retry}
+        />
+      )}
+
+      {hasFilters && extraChips.length > 0 && (
+        <ul className="tfp-chips" aria-label="Active filters">
+          {extraChips.map((chip) => (
+            <li key={chip.key}>
+              <button
+                type="button"
+                className="tfp-chip"
+                aria-label={`Remove filter: ${chip.label}`}
+                onClick={() => changeExtra(chip.remove)}
+              >
+                {chip.label}
+                <svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+                  <path d="M6 6l8 8M14 6l-8 8" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                </svg>
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {list.status === 'loading' && (
         <div className="req-state" role="status">
@@ -200,7 +285,7 @@ function TypeRequestList({ requestType }: { requestType: (typeof academicRequest
       {list.status === 'error' && (
         <div className="req-state" role="alert">
           <h2 className="req-state__title">We couldn’t load these requests.</h2>
-          <p className="req-state__body">Check your connection and try again.</p>
+          <p className="req-state__body">{list.filterError ?? 'Check your connection and try again.'}</p>
           <button type="button" className="req-button" onClick={list.retry}>
             Try again
           </button>
@@ -215,7 +300,7 @@ function TypeRequestList({ requestType }: { requestType: (typeof academicRequest
           {filtered ? (
             <>
               <h2 className="req-state__title">No requests match these filters.</h2>
-              <p className="req-state__body">Try another status or search term.</p>
+              <p className="req-state__body">Try another status, search term or filter.</p>
             </>
           ) : (
             <>
@@ -276,7 +361,7 @@ function TypeRequestList({ requestType }: { requestType: (typeof academicRequest
             </table>
           </div>
 
-          <Pager
+          <WindowedPager
             label={`${type} requests pages`}
             rangeText={`Showing ${first}–${last} of ${list.total}${filtered ? ' matching' : ''} ${
               list.total === 1 ? 'request' : 'requests'
