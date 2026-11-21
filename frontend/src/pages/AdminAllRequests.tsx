@@ -9,7 +9,7 @@ import { ADMIN_HOME_PATH, ADMIN_MENU_ITEMS } from '../utils/adminPaths'
 import {
   ALL_REQUESTS_PAGE_SIZE,
   ALL_REQUEST_TYPES,
-  DISPLAY_STATUSES,
+  FILTER_STATUSES,
   dateRangeError,
   hasActiveFilters,
   parseAllRequestsParams,
@@ -104,7 +104,7 @@ function AdminAllRequests() {
         <div className="aar-tools">
           <form role="search" className="adm-listsearch aar-search" onSubmit={handleSearchSubmit}>
             <label htmlFor="aar-q" className="student-visually-hidden">
-              Search by request ID, student ID or student name
+              Search by request ID or student ID
             </label>
             <svg
               viewBox="0 0 24 24"
@@ -120,7 +120,7 @@ function AdminAllRequests() {
             <input
               id="aar-q"
               type="search"
-              placeholder="Search request ID, student ID or name"
+              placeholder="Search request ID or student ID"
               autoComplete="off"
               maxLength={100}
               value={query}
@@ -152,7 +152,7 @@ function AdminAllRequests() {
               onChange={(event) => apply({ status: (event.target.value || null) as DisplayStatus | null })}
             >
               <option value="">All statuses</option>
-              {DISPLAY_STATUSES.map((status) => (
+              {FILTER_STATUSES.map((status) => (
                 <option key={status} value={status}>
                   {status}
                 </option>

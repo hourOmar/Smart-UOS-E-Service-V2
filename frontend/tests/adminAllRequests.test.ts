@@ -11,6 +11,7 @@ import {
   ALWAYS_APPROVED_TYPES,
   DEFAULT_ALL_REQUESTS_FILTERS,
   DISPLAY_STATUSES,
+  FILTER_STATUSES,
   RECORDED_APPROVAL_TYPES,
   approvedGroup,
   approvedRequestIds,
@@ -21,7 +22,7 @@ import {
   parseAllRequestsParams,
   searchTerm,
   statusPlan,
-  studentSearchGroup,
+  idSearchGroup,
   toAllRequestsParams,
   validDate,
   type StatusPlan,
@@ -75,7 +76,17 @@ test('Clear filters is offered only when something is filtered; impossible range
 
 // -- Status filter = badge -------------------------------------------------------------
 
-test('the status filter offers the badge statuses and maps each to a plan', () => {
+test('the status filter offers In Progress, Approved and Rejected; Completed is not offered', () => {
+  assert.deepEqual([...FILTER_STATUSES], ['In Progress', 'Approved', 'Rejected'])
+  // The page lists exactly these after "All statuses".
+  assert.match(PAGE, /<option value="">All statuses<\/option>\s+\{FILTER_STATUSES\.map\(\(status\) => \(/)
+  assert.doesNotMatch(PAGE, /DISPLAY_STATUSES/)
+  // An old ?status=Completed link shows All statuses (nothing hidden).
+  assert.equal(parseAllRequestsParams(params('status=Completed')).status, null)
+  for (const status of FILTER_STATUSES) assert.equal(parseAllRequestsParams(params(`status=${status}`)).status, status)
+})
+
+test('every badge status still maps to a plan (stored values and decision logic unchanged)', () => {
   assert.deepEqual([...DISPLAY_STATUSES], ['In Progress', 'Approved', 'Completed', 'Rejected'])
   assert.deepEqual(statusPlan(null), { kind: 'any' })
   assert.deepEqual(statusPlan('In Progress'), { kind: 'stored', stored: 'In Progress' })
@@ -125,14 +136,23 @@ test('recorded approvals: only a matching "<type> Approved" decision on a Comple
 
 // -- Filter strings ------------------------------------------------------------------
 
-test('search covers request ID, student ID and student name only, with PostgREST-breaking characters removed', () => {
+test('search covers request ID and student ID only (not student name), with PostgREST-breaking characters removed', () => {
   assert.equal(searchTerm(' Ali,(x)  "y" '), 'Ali x y')
-  assert.equal(studentSearchGroup('ali', []), 'Request_ID.ilike."%ali%",Student_ID.ilike."%ali%"')
-  assert.equal(studentSearchGroup('ali', ['U1', 'U2']),
-    'Request_ID.ilike."%ali%",Student_ID.ilike."%ali%",Student_ID.in.("U1","U2")')
-  const fetchAll = SERVICE.slice(SERVICE.indexOf('export async function fetchAllRequests'), SERVICE.indexOf('// Requests of one type'))
-  assert.match(fetchAll, /studentSearchGroup\(term, studentIds\)/)
-  assert.doesNotMatch(fetchAll, /Course_ID|Program_Name|requestIdsByTarget/)
+  assert.equal(idSearchGroup('u2419'), 'Request_ID.ilike."%u2419%",Student_ID.ilike."%u2419%"')
+  assert.equal(idSearchGroup('INC2_000008'), 'Request_ID.ilike."%INC2_000008%",Student_ID.ilike."%INC2_000008%"')
+  const ALL_SECTION = SERVICE.slice(SERVICE.indexOf('// All Requests (/admin/requests)'), SERVICE.indexOf('// Requests of one type'))
+  assert.match(ALL_SECTION, /if \(term\) groups\.push\(idSearchGroup\(term\)\)/)
+  // No student-name lookup, and no course / program search.
+  assert.doesNotMatch(ALL_SECTION, /Student_Name'|\.from\('Student'\)|studentIdsNamed|studentSearchGroup/)
+  assert.doesNotMatch(ALL_SECTION, /Course_ID|Program_Name|requestIdsByTarget/)
+  // The search text still comes from (and goes back to) the URL's q parameter.
+  assert.equal(parseAllRequestsParams(params('q=U24199999')).search, 'U24199999')
+  assert.equal(toAllRequestsParams({ ...DEFAULT_ALL_REQUESTS_FILTERS, search: 'STUD_INCRQ' }).toString(), 'q=STUD_INCRQ')
+  // The page's text says so; the Student Name column stays.
+  assert.match(PAGE, /placeholder="Search request ID or student ID"/)
+  assert.match(PAGE, />\s+Search by request ID or student ID\s+</)
+  assert.match(PAGE, /<th scope="col">Student Name<\/th>/)
+  assert.match(PAGE, /<td className="adm-table__name">\{row\.studentName \?\? '—'\}<\/td>/)
 })
 
 test('Approved = always-approved types or a recorded approval; groups combine with AND', () => {
@@ -169,7 +189,7 @@ test('All Requests: filtered, counted, sorted and paged in the database, 10 per 
 
 test('the recorded approvals for the filter are read once, only when needed, and a failure is an error', () => {
   assert.match(ALL, /\.from\('Decision'\)\s+\.select\('Request_ID, Decision_Type, Request\(Request_Type, Current_Status\)'\)\s+\.in\('Decision_Type', Object\.values\(APPROVAL_DECISION_TYPES\)\)\s+if \(error\) throw error/)
-  assert.match(ALL, /needsApprovalIds\(plan\) \? fetchApprovedRequestIds\(\) : Promise\.resolve\(\[\]\)/)
+  assert.match(ALL, /const approvedIds = needsApprovalIds\(plan\) \? await fetchApprovedRequestIds\(\) : \[\]/)
 })
 
 // -- The page -------------------------------------------------------------------------
@@ -249,7 +269,12 @@ test('dashboard: exactly the 10 latest In Progress requests, no type filter, no 
   assert.doesNotMatch(PENDING_SECTION, /Request_Type/)
 
   assert.doesNotMatch(PENDING, /<select|Pager|onTypeChange|onPageChange/)
-  assert.match(PENDING, /<Link to=\{ALL_REQUESTS_PATH\} className="req-view adm-pending__all">\s+View All Requests\s+<\/Link>/)
+  // The student dashboard's text link (same class, text and arrow as Recent Requests).
+  assert.match(PENDING, /<Link to=\{ALL_REQUESTS_PATH\} className="student-recent__all">\s+View all requests\s+<span aria-hidden="true">→<\/span>\s+<\/Link>/)
+  assert.match(read('../src/components/student/RecentRequests.tsx'),
+    /<Link to=\{MY_REQUESTS_PATH\} className="student-recent__all">\s+View all requests\s+<span aria-hidden="true">→<\/span>/)
+  assert.match(DASHBOARD, /import '\.\.\/components\/requests\/Requests\.css'/)
+  assert.doesNotMatch(read('../src/pages/AdminDashboard.css'), /adm-pending__all/)
   assert.match(PENDING, /<ReviewAction requestId=\{row\.id\} requestType=\{row\.type\} origin="dashboard" \/>/)
   assert.match(PENDING, /<PriorityCell requestId=\{row\.id\} requestType=\{row\.type\} priorities=\{priorities\} \/>/)
 

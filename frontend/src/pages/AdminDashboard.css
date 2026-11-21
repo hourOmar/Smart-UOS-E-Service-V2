@@ -525,11 +525,6 @@ button.adm-type__open:focus-visible {
   color: var(--proto-body);
 }
 
-.adm-pending__all {
-  margin-top: 0;
-  white-space: nowrap;
-}
-
 .adm-pending__count {
   margin: 14px 0 0;
   font-size: 14px;

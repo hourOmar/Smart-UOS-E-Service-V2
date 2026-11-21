@@ -24,6 +24,11 @@ export const ALL_REQUEST_TYPES: readonly string[] = academicRequestTypes.map((ty
 export const DISPLAY_STATUSES = ['In Progress', 'Approved', 'Completed', 'Rejected'] as const
 export type DisplayStatus = (typeof DISPLAY_STATUSES)[number]
 
+/** The statuses offered by the Status filter (and accepted from the URL).
+ *  'Completed' (a legacy Completed record without a recorded approval) is not
+ *  offered; such requests still appear under All statuses. */
+export const FILTER_STATUSES: readonly DisplayStatus[] = ['In Progress', 'Approved', 'Rejected']
+
 export type SortOrder = 'newest' | 'oldest'
 
 export interface AllRequestsFilters {
@@ -67,7 +72,7 @@ export function parseAllRequestsParams(params: URLSearchParams): AllRequestsFilt
   return {
     search: (params.get('q') ?? '').trim().slice(0, SEARCH_MAX_LENGTH),
     type: type !== null && ALL_REQUEST_TYPES.includes(type) ? type : null,
-    status: DISPLAY_STATUSES.find((s) => s === status) ?? null,
+    status: FILTER_STATUSES.find((s) => s === status) ?? null,
     from: validDate(params.get('from')),
     to: validDate(params.get('to')),
     sort: params.get('sort') === 'oldest' ? 'oldest' : 'newest',
@@ -178,14 +183,11 @@ export function inList(values: readonly string[]): string | null {
   return values.length ? `(${values.map(quoted).join(',')})` : null
 }
 
-/** OR group: Request ID or student ID containing the term, or one of the
- *  students whose name contains it. */
-export function studentSearchGroup(term: string, studentIds: readonly string[]): string {
+/** OR group: Request ID or student ID containing the term (student names are
+ *  not searched). */
+export function idSearchGroup(term: string): string {
   const pattern = quoted(`%${term}%`)
-  const parts = [`Request_ID.ilike.${pattern}`, `Student_ID.ilike.${pattern}`]
-  const students = inList(studentIds)
-  if (students) parts.push(`Student_ID.in.${students}`)
-  return parts.join(',')
+  return `Request_ID.ilike.${pattern},Student_ID.ilike.${pattern}`
 }
 
 /** OR group for "Approved" (with Current_Status = Completed): a type whose

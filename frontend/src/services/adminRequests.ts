@@ -12,7 +12,7 @@ import {
   quoted,
   searchTerm,
   statusPlan,
-  studentSearchGroup,
+  idSearchGroup,
   type AllRequestsFilters,
   type ApprovalDecisionRow,
 } from '../utils/adminAllRequests'
@@ -226,26 +226,14 @@ async function fetchApprovedRequestIds(): Promise<string[]> {
   return approvedRequestIds((data ?? []) as unknown as ApprovalDecisionRow[])
 }
 
-async function studentIdsNamed(term: string): Promise<string[]> {
-  const { data, error } = await supabase
-    .from('Student')
-    .select('Student_ID')
-    .ilike('Student_Name', `%${term}%`)
-    .limit(200)
-  if (error) throw error
-  return ((data ?? []) as { Student_ID: unknown }[]).map((s) => str(s.Student_ID))
-}
-
 export async function fetchAllRequests(filters: AllRequestsFilters): Promise<AllRequestsPage> {
   const plan = statusPlan(filters.status)
+  // Search by Request ID or Student ID only (no student-name lookup).
   const term = searchTerm(filters.search)
-  const [studentIds, approvedIds] = await Promise.all([
-    term ? studentIdsNamed(term) : Promise.resolve([]),
-    needsApprovalIds(plan) ? fetchApprovedRequestIds() : Promise.resolve([]),
-  ])
+  const approvedIds = needsApprovalIds(plan) ? await fetchApprovedRequestIds() : []
 
   const groups: string[] = []
-  if (term) groups.push(studentSearchGroup(term, studentIds))
+  if (term) groups.push(idSearchGroup(term))
   if (plan.kind === 'approved') groups.push(approvedGroup(approvedIds))
   const orFilter = combineOrGroups(groups)
   const excluded = plan.kind === 'unconfirmed' ? inList(approvedIds) : null

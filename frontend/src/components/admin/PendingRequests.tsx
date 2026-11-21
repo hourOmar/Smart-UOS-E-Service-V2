@@ -9,7 +9,7 @@ import PriorityCell, { PriorityNotice } from './PriorityCell'
 import ReviewAction from './ReviewAction'
 
 // The 10 most recently submitted In Progress requests of every type, newest
-// first (no filter, no pages); "View All Requests" opens the full list.
+// first (no filter, no pages); "View all requests" opens the full list.
 function PendingRequests() {
   const { status, rows, total, retry } = usePendingRequests()
   // Priorities for the visible Raise Capacity rows only (staff-only backend).
@@ -29,8 +29,10 @@ function PendingRequests() {
               The {PENDING_LIMIT} most recent submissions awaiting a decision, across all request types.
             </p>
           </div>
-          <Link to={ALL_REQUESTS_PATH} className="req-view adm-pending__all">
-            View All Requests
+          {/* Same text link as the student dashboard's Recent Requests. */}
+          <Link to={ALL_REQUESTS_PATH} className="student-recent__all">
+            View all requests
+            <span aria-hidden="true">→</span>
           </Link>
         </div>
 
