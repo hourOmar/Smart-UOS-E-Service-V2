@@ -158,9 +158,12 @@ function CourseEquivalencyForm() {
                   Try again
                 </button>
               )}
-              <Link to="/student" state={{ scrollTo: CATALOG_ANCHOR_ID }} className="rc-button">
-                Academic requests
-              </Link>
+              {/* Without an approved Program Change, only the way back to the dashboard is offered. */}
+              {options.status !== 'no_approved_program_change' && (
+                <Link to="/student" state={{ scrollTo: CATALOG_ANCHOR_ID }} className="rc-button">
+                  Academic requests
+                </Link>
+              )}
               <Link to="/student" className="rc-submit">
                 Back to dashboard
               </Link>

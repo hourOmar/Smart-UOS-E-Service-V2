@@ -80,7 +80,8 @@ test('every blocked status shows an explanation instead of the form', () => {
   assert.match(PAGE, /status === 'ready' && options\?\.status === 'ok' && program &&/)
   // Direct ways back from a blocked state.
   assert.match(PAGE, /<Link to="\/student" className="rc-submit">\s+Back to dashboard/)
-  assert.match(PAGE, /state=\{\{ scrollTo: CATALOG_ANCHOR_ID \}\} className="rc-button">\s+Academic requests/)
+  // "Academic requests" is offered for the other blocked statuses, not without an approved Program Change.
+  assert.match(PAGE, /\{options\.status !== 'no_approved_program_change' && \(\s+<Link to="\/student" state=\{\{ scrollTo: CATALOG_ANCHOR_ID \}\} className="rc-button">\s+Academic requests\s+<\/Link>\s+\)\}/)
 })
 
 test('the form shows the applicable program (no study-plan version line), the best grade and the requirement type', () => {
